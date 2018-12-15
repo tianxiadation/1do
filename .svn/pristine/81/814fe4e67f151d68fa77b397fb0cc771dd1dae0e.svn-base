@@ -1,0 +1,40 @@
+ package com.demo.controller;
+
+
+
+import java.util.List;
+
+import com.demo.common.model.T1doFeedback;
+import com.jfinal.core.Controller;
+
+/*
+ 2018年11月2日 coco 注解：处理各种数据库数据
+*/
+
+public class DataController extends Controller {
+	
+	/**
+     *   处理回复反馈特殊格式字符串。
+     */
+    public void action() {
+    	//Db.update("update t_1do_feedback set FBCONTENT=REPLACE(FBCONTENT,"</span>：</div>","") where FB_TYPE=2");
+    	List<T1doFeedback> list=T1doFeedback.dao.find("select * from t_1do_feedback where fb_type=2");
+    	for(T1doFeedback t:list){
+    		try {
+				if(t.getFBCONTENT().indexOf(t.getFbUserName())==0){
+					t.setFBCONTENT(t.getFBCONTENT().substring(t.getFbUserName().length())).update();
+					System.out.println(1);
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				System.out.println(2);
+			}
+    	}
+    	renderJson(1);
+    }
+	public static void main(String[] args) {
+		System.out.println("方升群</span>：</div>测试".indexOf("方升群"));
+		System.out.println("方升群</span>：</div>测试".substring("方升群".length()));
+	}
+
+}
