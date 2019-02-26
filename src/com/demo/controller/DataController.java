@@ -3,23 +3,57 @@
 
 
 import java.io.UnsupportedEncodingException;
-import java.util.Date;
 import java.util.List;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.demo.common.model.T1doBase;
 import com.demo.common.model.T1doFeedback;
+import com.demo.common.model.T1doLog;
 import com.demo.common.model.T1doUser;
+import com.demo.common.model.Temp;
 import com.demo.util.HttpUtil;
 import com.demo.util.TimeUtil;
 import com.jfinal.core.Controller;
+import com.jfinal.plugin.activerecord.Db;
 
 /*
  2018年11月2日 coco 注解：处理各种数据库数据
 */
 
 public class DataController extends Controller {
+	/*
+	 2019年2月19日 coco 注解：
+	*/
+	public void deleteRelation() {
+		List<T1doBase> list=T1doBase.dao.find("select SHOW_ID from t_1do_base");
+		list.forEach(t->{
+			list.forEach(t1->{
+			Db.update("update t_1do_relation set sort=1 where SHOW_ID=? and RELATION_SHOW_ID=?",t.getShowId(),t1.getShowId());
+		});
+		});
+		renderJson(1);
+	}
+	/*
+	 2019年2月18日 coco 注解：修改日志content（状态为14）
+	*/
+	public void changeLogContent() {
+		List<T1doBase> list=T1doBase.dao.find("select * from t_1do_base");
+		list.forEach(t->{
+			List<T1doLog> list1=T1doLog.dao.find("select * from t_1do_log where SHOW_ID=? and log_type=14",t.getShowId());
+			if(list1.size()>0){
+				String temp=list1.get(list1.size()-1).getContent();
+				list1.get(list1.size()-1).setContent(new Temp(temp,t.getODescribe()).toString()).update();		
+				for(int i=list1.size()-2;i>=0;i--){
+					String str=list1.get(i).getContent();
+					list1.get(i).setContent(new Temp(str,temp).toString()).update();
+					temp=str;
+				}
+
+			}
+		});
+		renderJson(1);
+	}
 	/*
 	 2018年11月20日 coco 注解：测试主动办接口
 	*/

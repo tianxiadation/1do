@@ -27,6 +27,33 @@ public abstract class BaseTRegUser<M extends BaseTRegUser<M>> extends Model<M> i
 		return getStr("SHOW_ID");
 	}
 
+	public M setULoginName(java.lang.String uLoginName) {
+		set("U_LOGIN_NAME", uLoginName);
+		return (M)this;
+	}
+	
+	public java.lang.String getULoginName() {
+		return getStr("U_LOGIN_NAME");
+	}
+
+	public M setUMail(java.lang.String uMail) {
+		set("U_MAIL", uMail);
+		return (M)this;
+	}
+	
+	public java.lang.String getUMail() {
+		return getStr("U_MAIL");
+	}
+
+	public M setUTrueName(java.lang.String uTrueName) {
+		set("U_TRUE_NAME", uTrueName);
+		return (M)this;
+	}
+	
+	public java.lang.String getUTrueName() {
+		return getStr("U_TRUE_NAME");
+	}
+
 	public M setLaunchrId(java.lang.Long launchrId) {
 		set("LAUNCHR_ID", launchrId);
 		return (M)this;
@@ -45,6 +72,24 @@ public abstract class BaseTRegUser<M extends BaseTRegUser<M>> extends Model<M> i
 		return getStr("U_NAME");
 	}
 
+	public M setCShowId(java.lang.String cShowId) {
+		set("C_SHOW_ID", cShowId);
+		return (M)this;
+	}
+	
+	public java.lang.String getCShowId() {
+		return getStr("C_SHOW_ID");
+	}
+
+	public M setLastLoginToken(java.lang.String lastLoginToken) {
+		set("LAST_LOGIN_TOKEN", lastLoginToken);
+		return (M)this;
+	}
+	
+	public java.lang.String getLastLoginToken() {
+		return getStr("LAST_LOGIN_TOKEN");
+	}
+
 	public M setUPasswoed(java.lang.String uPasswoed) {
 		set("U_PASSWOED", uPasswoed);
 		return (M)this;
@@ -52,15 +97,6 @@ public abstract class BaseTRegUser<M extends BaseTRegUser<M>> extends Model<M> i
 	
 	public java.lang.String getUPasswoed() {
 		return getStr("U_PASSWOED");
-	}
-
-	public M setUTrueName(java.lang.String uTrueName) {
-		set("U_TRUE_NAME", uTrueName);
-		return (M)this;
-	}
-	
-	public java.lang.String getUTrueName() {
-		return getStr("U_TRUE_NAME");
 	}
 
 	public M setUTrueNameC(java.lang.String uTrueNameC) {
@@ -79,15 +115,6 @@ public abstract class BaseTRegUser<M extends BaseTRegUser<M>> extends Model<M> i
 	
 	public java.lang.String getUHira() {
 		return getStr("U_HIRA");
-	}
-
-	public M setUMail(java.lang.String uMail) {
-		set("U_MAIL", uMail);
-		return (M)this;
-	}
-	
-	public java.lang.String getUMail() {
-		return getStr("U_MAIL");
 	}
 
 	public M setUJob(java.lang.String uJob) {
@@ -171,15 +198,6 @@ public abstract class BaseTRegUser<M extends BaseTRegUser<M>> extends Model<M> i
 		return get("LAST_LOGIN_TIME");
 	}
 
-	public M setLastLoginToken(java.lang.String lastLoginToken) {
-		set("LAST_LOGIN_TOKEN", lastLoginToken);
-		return (M)this;
-	}
-	
-	public java.lang.String getLastLoginToken() {
-		return getStr("LAST_LOGIN_TOKEN");
-	}
-
 	public M setIsAdmin(java.lang.Integer isAdmin) {
 		set("IS_ADMIN", isAdmin);
 		return (M)this;
@@ -187,15 +205,6 @@ public abstract class BaseTRegUser<M extends BaseTRegUser<M>> extends Model<M> i
 	
 	public java.lang.Integer getIsAdmin() {
 		return getInt("IS_ADMIN");
-	}
-
-	public M setCShowId(java.lang.String cShowId) {
-		set("C_SHOW_ID", cShowId);
-		return (M)this;
-	}
-	
-	public java.lang.String getCShowId() {
-		return getStr("C_SHOW_ID");
 	}
 
 	public M setCreateUser(java.lang.String createUser) {
@@ -223,15 +232,6 @@ public abstract class BaseTRegUser<M extends BaseTRegUser<M>> extends Model<M> i
 	
 	public java.lang.String getCreateUserName() {
 		return getStr("CREATE_USER_NAME");
-	}
-
-	public M setULoginName(java.lang.String uLoginName) {
-		set("U_LOGIN_NAME", uLoginName);
-		return (M)this;
-	}
-	
-	public java.lang.String getULoginName() {
-		return getStr("U_LOGIN_NAME");
 	}
 
 	public M setUTrueNameAc(java.lang.String uTrueNameAc) {

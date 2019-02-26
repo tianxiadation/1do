@@ -1,6 +1,5 @@
 package com.demo.util;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -26,7 +25,6 @@ import org.apache.http.util.EntityUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.demo.common.model.T1doBase;
-import com.jfinal.plugin.activerecord.Record;
 
 
 public class HttpUtil {
@@ -43,6 +41,29 @@ public class HttpUtil {
 
 		Response response = client.newCall(request).execute();   */                          
 	      
+	    }
+	 public  static String getlabel(String content){
+	    	//HttpClient httpClient = new DefaultHttpClient();
+		  JSONObject paramJson=new JSONObject();
+	      paramJson.put("content",content);
+	      HttpClient httpClient = HttpClients.custom().build();
+	        HttpPost httpPost=new HttpPost("http://172.16.9.102:8080/Ecallmd/ECallAnalyse");
+	       // JSONObject jsonObject=null;
+	        String result="";
+	        try {
+	        	StringEntity entity=new StringEntity(paramJson.toString(),"utf8");
+	    		entity.setContentType("application/x-www-form-urlencoded");
+	    		httpPost.setEntity(entity);
+	            HttpResponse respons=httpClient.execute(httpPost);
+	            result=EntityUtils.toString(respons.getEntity(),"UTF-8");            
+	            //jsonObject= JSON.parseObject(result);           
+	        }catch (Exception e){
+	            e.printStackTrace();
+	        }finally{
+	        	
+	        }
+	       return   (String) JSON.parseObject(result).get("关键词");                                              
+	       // return  result;
 	    }
 	public static  String doPost11(String url){
 		HttpClient httpClient = HttpClients.custom().build();
@@ -526,6 +547,33 @@ public class HttpUtil {
 		return   json2;                                              
 		
 	}
+	public static  JSONObject doPost3(String url,String outStr){
+		HttpClient httpClient = HttpClients.custom().build();
+		HttpPost httpPost=new HttpPost(url);
+		String result="";
+		try {
+			StringEntity entity=new StringEntity(outStr,"utf8");
+			entity.setContentType("application/json");
+			httpPost.setEntity(entity);
+			
+			HttpResponse response=httpClient.execute(httpPost);
+			if(response.getStatusLine().getStatusCode()==200){
+				//HttpResponseProxy{HTTP/1.1 200 OK [Content-Length: 172, Content-Type: application/json; charset=utf-8, Server: Microsoft-IIS/8.0, X-Powered-By: ASP.NET, Date: Fri, 19 Jan 2018 03:41:44 GMT] ResponseEntityProxy{[Content-Type: application/json; charset=utf-8,Content-Length: 172,Chunked: false]}}
+				result=EntityUtils.toString(response.getEntity(),"UTF-8");
+				
+			}        
+		}catch (Exception e){
+			e.printStackTrace();
+			//System.out.println(url+"--interface Exception");
+		}finally{
+			
+		}
+		return JSON.parseObject(result);
+		
+		                                        
+		
+	}
+	
 	
 	//登录获取token和username
 	public static JSONObject loginIm(String imName) {

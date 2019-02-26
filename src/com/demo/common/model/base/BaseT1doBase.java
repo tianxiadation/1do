@@ -225,15 +225,6 @@ public abstract class BaseT1doBase<M extends BaseT1doBase<M>> extends Model<M> i
 		return getStr("O_EXECUTOR_NAME");
 	}
 
-	public M setLIGHTNING(java.lang.Integer LIGHTNING) {
-		set("LIGHTNING", LIGHTNING);
-		return (M)this;
-	}
-	
-	public java.lang.Integer getLIGHTNING() {
-		return getInt("LIGHTNING");
-	}
-
 	public M setCC(java.lang.String CC) {
 		set("CC", CC);
 		return (M)this;
@@ -376,6 +367,42 @@ public abstract class BaseT1doBase<M extends BaseT1doBase<M>> extends Model<M> i
 	
 	public java.lang.Boolean getISAPPROVAL() {
 		return get("ISAPPROVAL");
+	}
+
+	public M setOStatus(java.lang.Integer oStatus) {
+		set("O_STATUS", oStatus);
+		return (M)this;
+	}
+	
+	public java.lang.Integer getOStatus() {
+		return getInt("O_STATUS");
+	}
+
+	public M setLOOKNUM(java.lang.Integer LOOKNUM) {
+		set("LOOKNUM", LOOKNUM);
+		return (M)this;
+	}
+	
+	public java.lang.Integer getLOOKNUM() {
+		return getInt("LOOKNUM");
+	}
+
+	public M setFBNUM(java.lang.Integer FBNUM) {
+		set("FBNUM", FBNUM);
+		return (M)this;
+	}
+	
+	public java.lang.Integer getFBNUM() {
+		return getInt("FBNUM");
+	}
+
+	public M setLIGHTNING(java.lang.Integer LIGHTNING) {
+		set("LIGHTNING", LIGHTNING);
+		return (M)this;
+	}
+	
+	public java.lang.Integer getLIGHTNING() {
+		return getInt("LIGHTNING");
 	}
 
 }

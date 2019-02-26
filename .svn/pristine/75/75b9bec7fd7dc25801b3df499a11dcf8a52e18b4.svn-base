@@ -1,0 +1,61 @@
+package com.demo.controller;
+
+import java.util.HashSet;
+import java.util.List;
+
+import com.demo.common.model.T1doBase;
+import com.demo.common.model.T1doLabel;
+import com.demo.common.model.T1doRelation;
+import com.demo.util.HttpUtil;
+import com.jfinal.core.Controller;
+
+public class TestController extends Controller{
+	public static void main(String[] args) {
+		System.out.println((double)2/5*100);
+	}
+	/*
+	 2019年2月12日 coco 注解：给所有1do打上标签
+	*/
+	public void addLabel() {
+		List<T1doBase> list=T1doBase.dao.find("select * from t_1do_base ");
+		list.forEach(t->{
+			//new Thread(new AddLabel(t.getODescribe(),t.getShowId())).start();
+			T1doLabel.saveList(HttpUtil.getlabel(t.getODescribe()),t.getShowId());
+		});
+		renderJson(1);
+	}
+	/*
+	 2019年2月12日 coco 注解：//计算关联1do
+	*/
+	public void relation() {
+		List<T1doBase> base=T1doBase.dao.find("select * from t_1do_base  ");
+		base.forEach(t->{
+			List<T1doLabel> list=T1doLabel.dao.find("select * from t_1do_label where SHOW_ID=?",t.getShowId());
+			List<T1doBase> base1=T1doBase.dao.find("select * from t_1do_base where ID>? ",t.getID());
+			base1.forEach(t1->{
+				List<T1doLabel> list1=T1doLabel.dao.find("select * from t_1do_label where SHOW_ID=?",t1.getShowId());
+				int result=getHashSet(list, list1);
+				int i=list.size()>list1.size()?list.size():list1.size();
+				int a=(int) ((double)(list.size()+list1.size()-result)/i*100);
+				T1doRelation.saveRelation(t.getShowId(), t1.getShowId(), a,t.getOStatus());
+				T1doRelation.saveRelation(t1.getShowId(), t.getShowId(), a,t.getOStatus());
+				
+			});
+		});
+		renderJson(1);
+	}
+	/*
+	 2019年2月12日 coco 注解：
+	*/
+	public static int getHashSet(List<T1doLabel> list,List<T1doLabel> list1) {
+		HashSet<String> hs = new HashSet<String>();
+		list.forEach(t->{
+			hs.add(t.getLABEL());
+		});
+		list1.forEach(t->{
+			hs.add(t.getLABEL());
+		});
+		return hs.size();
+		
+	}
+}

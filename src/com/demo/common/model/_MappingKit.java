@@ -24,14 +24,17 @@ public class _MappingKit {
 		arp.addMapping("t_1do_feedback", "ID", T1doFeedback.class);
 		arp.addMapping("t_1do_fw", "ID", T1doFw.class);
 		arp.addMapping("t_1do_fwpstatus", "ID", T1doFwpstatus.class);
+		arp.addMapping("t_1do_label", "ID", T1doLabel.class);
 		arp.addMapping("t_1do_log", "ID", T1doLog.class);
 		arp.addMapping("t_1do_order", "id", T1doOrder.class);
 		arp.addMapping("t_1do_pset", "ID", T1doPset.class);
 		arp.addMapping("t_1do_pstatus", "ID", T1doPstatus.class);
+		arp.addMapping("t_1do_relation", "ID", T1doRelation.class);
 		arp.addMapping("t_1do_set", "ID", T1doSet.class);
 		arp.addMapping("t_1do_status", "ID", T1doStatus.class);
 		arp.addMapping("t_1do_temp", "ID", T1doTemp.class);
 		arp.addMapping("t_1do_type", "ID", T1doType.class);
+		arp.addMapping("t_1do_urge_websocket", "id", T1doUrgeWebsocket.class);
 		arp.addMapping("t_1do_user", "ID", T1doUser.class);
 		arp.addMapping("t_reg_company", "ID", TRegCompany.class);
 		arp.addMapping("t_reg_company_dept", "ID", TRegCompanyDept.class);

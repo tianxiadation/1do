@@ -117,4 +117,22 @@ public abstract class BaseT1doPstatus<M extends BaseT1doPstatus<M>> extends Mode
 		return get("gmt_modified");
 	}
 
+	public M setUrgeIslook(java.lang.Boolean urgeIslook) {
+		set("urge_isLook", urgeIslook);
+		return (M)this;
+	}
+	
+	public java.lang.Boolean getUrgeIslook() {
+		return get("urge_isLook");
+	}
+
+	public M setSort(java.lang.Integer sort) {
+		set("sort", sort);
+		return (M)this;
+	}
+	
+	public java.lang.Integer getSort() {
+		return getInt("sort");
+	}
+
 }

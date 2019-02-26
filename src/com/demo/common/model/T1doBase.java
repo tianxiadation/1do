@@ -2,7 +2,6 @@ package com.demo.common.model;
 
 import java.util.List;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.demo.common.model.base.BaseT1doBase;
 import com.demo.util.StrUtil;
@@ -15,20 +14,29 @@ import com.jfinal.plugin.activerecord.Record;
 @SuppressWarnings("serial")
 public class T1doBase extends BaseT1doBase<T1doBase> {
 	/*
+	 传送门关键字查询1do
+	*/
+	public static List<T1doBase> selectBybase(JSONObject json) {
+		return T1doBase.dao.find("select SHOW_ID,O_DESCRIBE,O_CREATE_TIME "
+				+ "from t_1do_base where O_DESCRIBE LIKE CONCAT('%','"+json.getString("BASE")+"','%') and "
+						+ "SHOW_ID not in (select RELATION_SHOW_ID  from t_1do_relation where SHOW_ID=? and SIMILARITY>10) and SHOW_ID!=?",json.getString("SHOW_ID"),json.getString("SHOW_ID"));
+	}
+	/*
 	 2018年6月26日下午2:32:54 方升群  //根据反馈获得attr
 	*/
 	public T1doAttr newIdoAttr() {
 		return new T1doAttr().setShowId(getShowId()).setUploadUser(getCreateUser()).setUploadUserName(getCreateUserName()).setUploadTime(getOCreateTime());
 	}
 	public T1doBase getT1doBase() {
-		return T1doBase.dao.findFirst("select b.SHOW_ID,b.O_DESCRIBE,b.O_TITLE,b.O_CUSTOMER_NAME,O_EXECUTOR_NAME from t_1do_base b where SHOW_ID=?",get("SHOW_ID"));
+		return T1doBase.dao.findFirst("select b.SHOW_ID,b.O_DESCRIBE,b.O_TITLE,b.O_CUSTOMER_NAME,O_EXECUTOR_NAME from t_1do_base b where SHOW_ID=?",getShowId());
 	}
 	/*
-	 2018年6月28日上午10:09:33 方升群   //要我做
+	 2018年6月28日上午10:09:33 方升群   //要我做A
 	*/
 	public static List<T1doBase> medo(String username,int i) {
 		return T1doBase.dao.find("select b.SHOW_ID,b.O_DESCRIBE,b.O_TITLE,b.O_CUSTOMER_NAME from t_1do_base b,t_1do_status s  where b.SHOW_ID=s.SHOW_ID and O_EXECUTOR like ? and b.PARENT_ID='0' and s.o_status=?","%"+username+"%",i);
 	}
+	//A
 	public static List<T1doBase> medo1(String username,int i) {
 		
 		return T1doBase.dao.find("select a.SHOW_ID,a.O_DESCRIBE,a.O_TITLE,a.O_CUSTOMER_NAME,b.type"
@@ -37,6 +45,7 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 				+ "and s.o_status=? ORDER BY SHOW_ID desc)a LEFT JOIN (select * from t_1do_order where useraccount=? and type=1"
 				+ " )b on a.show_id=b.show_id ORDER BY modifyTime desc","%"+username+"%",i,username);
 	}
+	//A
 	public static List<T1doBase> medo1(String username,int i,String sql,String temp) {//
 		return T1doBase.dao.find("select a.SHOW_ID,a.O_DESCRIBE,a.O_TITLE,a.O_CUSTOMER_NAME,b.type TYPE,a.O_START_TIME,a.O_FINISH_TIME "
 				+ "from (select b.SHOW_ID,b.O_DESCRIBE,b.O_TITLE,b.O_CUSTOMER_NAME,b.O_START_TIME,b.O_FINISH_TIME "
@@ -45,6 +54,7 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 						+ "where useraccount=? and type=1 )b on a.show_id=b.show_id ORDER BY "
 						+ "modifyTime desc","%"+username+"%",i,temp,temp,username);
 	}
+	//A
 	public static List<T1doBase> medo1(String username,int i,int num) {
 		return T1doBase.dao.find("select a.SHOW_ID,a.O_DESCRIBE,a.O_TITLE,a.O_CUSTOMER_NAME,b.type TYPE,a.O_START_TIME,a.O_FINISH_TIME,a.star,a.evaluation from "
 				+ "(select b.SHOW_ID,b.O_DESCRIBE,b.O_TITLE,b.O_CUSTOMER_NAME,b.O_START_TIME,b.O_FINISH_TIME,b.star,b.evaluation from t_1do_base b,t_1do_status s  "
@@ -52,6 +62,7 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 				+ "BY SHOW_ID desc)a LEFT JOIN (select * from t_1do_order where useraccount=? and type=1 )b on"
 				+ " a.show_id=b.show_id ORDER BY modifyTime desc LIMIT ?","%"+username+"%",i,username,num);
 	}
+	//A
 	public static List<T1doBase> medo1(String username,int i,int num,String sql,String temp) {
 		return T1doBase.dao.find("select a.SHOW_ID,a.O_DESCRIBE,a.O_TITLE,a.O_CUSTOMER_NAME,b.type TYPE,a.O_START_TIME,a.O_FINISH_TIME,a.star,a.evaluation "
 				+ "from (select b.SHOW_ID,b.O_DESCRIBE,b.O_TITLE,b.O_CUSTOMER_NAME,b.O_START_TIME,b.O_FINISH_TIME,b.star,b.evaluation "
@@ -61,12 +72,13 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 						+ "ORDER BY modifyTime desc LIMIT ?","%"+username+"%",i,temp,temp,username,num);
 	}
 	/*
-	 2018年6月28日上午10:09:33 方升群   //要他做
+	 2018年6月28日上午10:09:33 方升群   //要他做A
 	 */
 	public static List<T1doBase> hedo(String username,int i) {
 		//return T1doBase.dao.find("select b.SHOW_ID,b.O_DESCRIBE,b.O_TITLE,b.O_EXECUTOR_NAME from t_1do_base b,t_1do_status s  where b.SHOW_ID=s.SHOW_ID and O_CUSTOMER like ? and b.PARENT_ID='0' and s.o_status=?","%"+username+"%",i);
 		return T1doBase.dao.find("select b.SHOW_ID,b.O_DESCRIBE,b.O_TITLE,b.O_EXECUTOR_NAME from t_1do_base b,t_1do_status s  where b.SHOW_ID=s.SHOW_ID and O_CUSTOMER like ?  and s.o_status=?","%"+username+"%",i);
 	}
+	//A
 	public static List<T1doBase> hedo1(String username,int i) {//加抄送人
 		String sql="SELECT a.SHOW_ID,a.O_DESCRIBE,a.O_TITLE,a.O_EXECUTOR_NAME,b.type TYPE,a.O_START_TIME,a.O_FINISH_TIME from"
 				+ "(select b.SHOW_ID,b.O_DESCRIBE,b.O_TITLE,b.O_EXECUTOR_NAME,b.O_START_TIME,b.O_FINISH_TIME from t_1do_base b,t_1do_status s "
@@ -75,6 +87,7 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 				+ "ORDER BY modifyTime desc";
 		return T1doBase.dao.find(sql,"%"+username+"%","%"+username+"%",i,username);
 	}
+	//A
 	public static List<T1doBase> hedo1(String username,int i,String sql1,String temp) {
 		String sql="SELECT a.SHOW_ID,a.O_DESCRIBE,a.O_TITLE,a.O_EXECUTOR_NAME,b.type TYPE from"
 				+ "(select b.SHOW_ID,b.O_DESCRIBE,b.O_TITLE,b.O_EXECUTOR_NAME,b.O_START_TIME,b.O_FINISH_TIME from t_1do_base b,t_1do_status s "
@@ -84,6 +97,7 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 		System.out.println(sql);
 		return T1doBase.dao.find(sql,"%"+username+"%",i,temp,temp,username);
 	}
+	//A
 	public static List<T1doBase> hedo1(String username,int i,int num) {//加抄送人
 		String sql="SELECT a.SHOW_ID,a.O_DESCRIBE,a.O_TITLE,a.O_EXECUTOR_NAME,b.type TYPE,a.O_START_TIME,a.O_FINISH_TIME,a.star,a.evaluation from"
 				+ "(select b.SHOW_ID,b.O_DESCRIBE,b.O_TITLE,b.O_EXECUTOR_NAME,b.O_START_TIME,b.O_FINISH_TIME,b.star,b.evaluation from t_1do_base b,t_1do_status s "
@@ -92,6 +106,7 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 				+ "ORDER BY modifyTime desc limit ?";
 		return T1doBase.dao.find(sql,"%"+username+"%","%"+username+"%",i,username,num);
 	}
+	//A
 	public static List<T1doBase> hedo1(String username,int i,int num,String sql1,String temp) {
 		String sql="SELECT a.SHOW_ID,a.O_DESCRIBE,a.O_TITLE,a.O_EXECUTOR_NAME,b.type TYPE,a.O_START_TIME,a.O_FINISH_TIME,a.star,a.evaluation from"
 				+ "(select b.SHOW_ID,b.O_DESCRIBE,b.O_TITLE,b.O_EXECUTOR_NAME,b.O_START_TIME,b.O_FINISH_TIME,b.star,b.evaluation from t_1do_base b,t_1do_status s "
@@ -103,9 +118,13 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 	/*
 	 2018年6月28日上午10:09:33 方升群   //整理层看板
 	 */
-	public static List<T1doBase> fwdo(int i) {
+	/*public static List<T1doBase> fwdo(int i) {
 		return T1doBase.dao.find("select b.SHOW_ID,b.O_DESCRIBE,b.O_TITLE,b.O_EXECUTOR_NAME from t_1do_base b,t_1do_status s  where b.SHOW_ID=s.SHOW_ID  and s.o_status=?",i);
+	}*/
+	public static List<T1doBase> fwdo(int i) {
+		return T1doBase.dao.find("select SHOW_ID,O_DESCRIBE,O_TITLE,O_EXECUTOR_NAME from t_1do_base  where o_status=?",i);
 	}
+	//A
 	public static List<T1doBase> fwdo1(int i,String username) {
 		return T1doBase.dao.find("SELECT a.SHOW_ID,a.O_DESCRIBE,a.O_TITLE,a.O_CUSTOMER_NAME,a.O_EXECUTOR_NAME,b.type TYPE,a.O_START_TIME,a.O_FINISH_TIME "
 				+ "from(select b.SHOW_ID,b.O_DESCRIBE,b.O_TITLE,b.O_CUSTOMER_NAME,b.O_EXECUTOR_NAME,b.O_START_TIME,b.O_FINISH_TIME from t_1do_base b,t_1do_status "
@@ -113,6 +132,7 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 				+ "LEFT JOIN (select * from t_1do_order where useraccount=? and type=3)b on a.show_id=b.show_id "
 				+ "ORDER BY modifyTime desc ",i,username);
 	}
+	//A
 	public static List<T1doBase> fwdo1(int i,String username,String sql,String temp) {
 		return T1doBase.dao.find("SELECT a.SHOW_ID,a.O_DESCRIBE,a.O_TITLE,a.O_CUSTOMER_NAME,a.O_EXECUTOR_NAME,b.type TYPE,a.O_START_TIME,a.O_FINISH_TIME "
 				+ "from(select b.SHOW_ID,b.O_DESCRIBE,b.O_TITLE,b.O_CUSTOMER_NAME,b.O_EXECUTOR_NAME,b.O_START_TIME,b.O_FINISH_TIME from t_1do_base b,t_1do_status s  "
@@ -120,6 +140,7 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 						+ "LEFT JOIN (select * from t_1do_order where useraccount=? and type=3)b on a.show_id=b.show_"
 						+ "id ORDER BY modifyTime desc ",i,temp,temp,username);
 	}
+	//A
 	public static List<T1doBase> fwdo1(int i,String username,int num) {
 		return T1doBase.dao.find("SELECT a.SHOW_ID,a.O_DESCRIBE,a.O_TITLE,a.O_CUSTOMER_NAME,a.O_EXECUTOR_NAME,b.type TYPE ,a.O_START_TIME,a.O_FINISH_TIME,a.star,a.evaluation "
 				+ "from(select b.SHOW_ID,b.O_DESCRIBE,b.O_TITLE,b.O_CUSTOMER_NAME,b.O_EXECUTOR_NAME,b.O_START_TIME,b.O_FINISH_TIME,b.star,b.evaluation from t_1do_base b,t_1do_status"
@@ -127,7 +148,7 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 				+ " LEFT JOIN (select * from t_1do_order where useraccount=? and type=3)b on a.show_id=b.show_id "
 				+ "ORDER BY modifyTime desc limit ?",i,username,num);
 	}
-	//整理层看板已删除数据
+	//整理层看板已删除数据A
 	public static List<T1doBase> fwdo2(int i,String username,int num) {
 		return T1doBase.dao.find("SELECT a.SHOW_ID,a.O_DESCRIBE,a.O_TITLE,a.O_CUSTOMER_NAME,a.O_EXECUTOR_NAME,b.type TYPE ,a.O_START_TIME,a.O_FINISH_TIME,a.star,a.evaluation "
 				+ "from(select b.SHOW_ID,b.O_DESCRIBE,b.O_TITLE,b.O_CUSTOMER_NAME,b.O_EXECUTOR_NAME,b.O_START_TIME,b.O_FINISH_TIME,b.star,b.evaluation from t_1do_base b,t_1do_status"
@@ -135,6 +156,7 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 				+ " LEFT JOIN (select * from t_1do_order where useraccount=? and type=3)b on a.show_id=b.show_id "
 				+ "ORDER BY modifyTime desc limit ?",i,username,num);
 	}
+	//A
 	public static List<T1doBase> fwdo1(int i,String username,int num,String sql,String temp) {
 		return T1doBase.dao.find("SELECT a.SHOW_ID,a.O_DESCRIBE,a.O_TITLE,a.O_CUSTOMER_NAME,a.O_EXECUTOR_NAME,b.type TYPE,a.O_START_TIME,a.O_FINISH_TIME,a.star,a.evaluation "
 				+ "from(select b.SHOW_ID,b.O_DESCRIBE,b.O_TITLE,b.O_CUSTOMER_NAME,b.O_EXECUTOR_NAME,b.O_START_TIME,b.O_FINISH_TIME,b.star,b.evaluation from t_1do_base b,t_1do_status"
@@ -142,6 +164,7 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 						+ "LEFT JOIN (select * from t_1do_order where useraccount=? and type=3)b on a.show_id=b.show_id "
 						+ "ORDER BY modifyTime desc limit ?",i,temp,temp,username,num);
 	}
+	//A
 	public static List<T1doBase> fwdo2(int i,String username,int num,String sql,String temp) {
 		return T1doBase.dao.find("SELECT a.SHOW_ID,a.O_DESCRIBE,a.O_TITLE,a.O_CUSTOMER_NAME,a.O_EXECUTOR_NAME,b.type TYPE,a.O_START_TIME,a.O_FINISH_TIME,a.star,a.evaluation "
 				+ "from(select b.SHOW_ID,b.O_DESCRIBE,b.O_TITLE,b.O_CUSTOMER_NAME,b.O_EXECUTOR_NAME,b.O_START_TIME,b.O_FINISH_TIME,b.star,b.evaluation from t_1do_base b,t_1do_status"
@@ -168,78 +191,78 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 	 2018年6月26日下午10:54:30 方升群  //获得操作日志
 	*/
 	public List<T1doLog> getIdoLogs() {
-		return T1doLog.dao.find("select * from t_1do_log where SHOW_ID=?",get("SHOW_ID"));
+		return T1doLog.dao.find("select * from t_1do_log where SHOW_ID=?",getShowId());
 	}
 	public List<T1doLog> getIdoLogs1() {
-		return T1doLog.dao.find("select log_type,O_USER_NAME,op_time,log,content from t_1do_log where SHOW_ID=?",get("SHOW_ID"));
+		return T1doLog.dao.find("select log_type,O_USER_NAME,op_time,log,content from t_1do_log where SHOW_ID=?",getShowId());
 	}
 	public boolean getIdoLogs2(String useraccount) {
-		return T1doLog.dao.findFirst("select * from t_1do_log where SHOW_ID=? and log_type=2 and O_USER=?",get("SHOW_ID"),useraccount) != null;
+		return T1doLog.dao.findFirst("select * from t_1do_log where SHOW_ID=? and log_type=2 and O_USER=?",getShowId(),useraccount) != null;
 	}
 	/*
 	 2018年6月26日下午10:54:30 方升群  //获得反馈消息
 	*/
 	public List<T1doFeedback> getIdoFeedbacks() {
-		return T1doFeedback.dao.find("select * from t_1do_feedback where SHOW_ID=?",get("SHOW_ID"));
+		return T1doFeedback.dao.find("select * from t_1do_feedback where SHOW_ID=?",getShowId());
 	}
 	public List<T1doFeedback> getIdoFeedbacks1(int id,int num) {
-		return T1doFeedback.dao.find("select * from (select ID,O_USER_NAME,FB_TIME,TIME_STAMP,O_USER,FBCONTENT,FB_TYPE,FB_USER_NAME,FB_USER,ATTR_PATH,star,AT from t_1do_feedback where SHOW_ID=? and FB_TYPE!=4 and Fb_TYPE!=8 and isoverdue=1 ORDER BY ID DESC LIMIT ?,?)a ORDER BY ID",get("SHOW_ID"),id,num);
+		return T1doFeedback.dao.find("select * from (select ID,O_USER_NAME,FB_TIME,TIME_STAMP,O_USER,FBCONTENT,FB_TYPE,FB_USER_NAME,FB_USER,ATTR_PATH,star,AT from t_1do_feedback where SHOW_ID=? and FB_TYPE!=4 and Fb_TYPE!=8 and isoverdue=1 ORDER BY ID DESC LIMIT ?,?)a ORDER BY ID",getShowId(),id,num);
 	}
 	public List<T1doFeedback> getIdoFeedbacks2() {
-		return T1doFeedback.dao.find("select distinct O_USER_NAME from t_1do_feedback where SHOW_ID=? and FB_TYPE !=4 and FB_TYPE !=5",get("SHOW_ID"));
+		return T1doFeedback.dao.find("select distinct O_USER_NAME from t_1do_feedback where SHOW_ID=? and FB_TYPE !=4 and FB_TYPE !=5",getShowId());
 	}
 	public List<T1doFeedback> getIdoFeedbacks11() {
-		return T1doFeedback.dao.find("select distinct O_USER_NAME from t_1do_feedback where SHOW_ID=? and FB_TYPE in(1,2)",get("SHOW_ID"));
+		return T1doFeedback.dao.find("select distinct O_USER_NAME from t_1do_feedback where SHOW_ID=? and FB_TYPE in(1,2)",getShowId());
 	}
 	//催办反馈
 	public List<T1doFeedback> getIdoFeedbacks4() {
-		return T1doFeedback.dao.find("select distinct O_USER_NAME from t_1do_feedback where SHOW_ID=? and FB_TYPE=4",get("SHOW_ID"));
+		return T1doFeedback.dao.find("select distinct O_USER_NAME from t_1do_feedback where SHOW_ID=? and FB_TYPE=4",getShowId());
 	}
 	public List<T1doFeedback> getIdoFeedbacks44() {
-		return T1doFeedback.dao.find("select  O_USER_NAME from t_1do_feedback where SHOW_ID=? and FB_TYPE=4",get("SHOW_ID"));
+		return T1doFeedback.dao.find("select  O_USER_NAME from t_1do_feedback where SHOW_ID=? and FB_TYPE=4",getShowId());
 	}
 	//办结反馈
 	public T1doFeedback getIdoFeedbacks5() {
-		return T1doFeedback.dao.findFirst("select * from t_1do_feedback where SHOW_ID=? and FB_TYPE=5",get("SHOW_ID"));
+		return T1doFeedback.dao.findFirst("select * from t_1do_feedback where SHOW_ID=? and FB_TYPE=5",getShowId());
 	}
 	//评价反馈
 	public List<T1doFeedback> getIdoFeedbacks6() {
-		return T1doFeedback.dao.find("select distinct O_USER_NAME from t_1do_feedback where SHOW_ID=? and FB_TYPE=6",get("SHOW_ID"));
+		return T1doFeedback.dao.find("select distinct O_USER_NAME from t_1do_feedback where SHOW_ID=? and FB_TYPE=6",getShowId());
 	}
 	public static final T1doBase dao = new T1doBase().dao();
 	/*
 	 2018年6月21日下午10:42:17 方升群    //得到子项
 	*/
 	public List<T1doBase> getSonIdoBase() {		
-		return T1doBase.dao.find("select * from t_1do_base where PARENT_ID=?",get("SHOW_ID"));		
+		return T1doBase.dao.find("select * from t_1do_base where PARENT_ID=?",getShowId());		
 	}
 	public List<T1doBase> getSonIdoBase1() {		
-		return T1doBase.dao.find("select SHOW_ID,O_TITLE from t_1do_base where PARENT_ID=?",get("SHOW_ID"));		
+		return T1doBase.dao.find("select SHOW_ID,O_TITLE from t_1do_base where PARENT_ID=?",getShowId());		
 	}
 	public T1doBase getSonIdoBase23() {		
-		return T1doBase.dao.findFirst("select CREATE_USER_NAME,O_CREATE_TIME from t_1do_base where PARENT_ID=?",get("SHOW_ID"));		
+		return T1doBase.dao.findFirst("select CREATE_USER_NAME,O_CREATE_TIME from t_1do_base where PARENT_ID=?",getShowId());		
 	}
 	public T1doBase getSonIdoBase2() {		
-		return T1doBase.dao.findFirst("select SHOW_ID,O_TITLE from t_1do_base where PARENT_ID=?",get("SHOW_ID"));		
+		return T1doBase.dao.findFirst("select SHOW_ID,O_TITLE from t_1do_base where PARENT_ID=?",getShowId());		
 	}
 	public T1doBase getSonIdoBase3() {		
-		return T1doBase.dao.findFirst("select O_CREATE_TIME from t_1do_base where PARENT_ID=?",get("SHOW_ID"));		
+		return T1doBase.dao.findFirst("select O_CREATE_TIME from t_1do_base where PARENT_ID=?",getShowId());		
 	}
 	/*
 	 2018年6月21日下午11:50:42 方升群  //得到附件(全部)
 	*/
 	public  List<T1doAttr> getIdoAttr() {
-		return T1doAttr.dao.find("select * from t_1do_attr where SHOW_ID=?",get("SHOW_ID"));
+		return T1doAttr.dao.find("select * from t_1do_attr where SHOW_ID=?",getShowId());
 	}
 	//得到附件(部分)
 	public  List<T1doAttr> getIdoAttr1() {
-		return T1doAttr.dao.find("select ID,ATTR_NAME,ATTR_PATH from t_1do_attr where SHOW_ID=?",get("SHOW_ID"));
+		return T1doAttr.dao.find("select ID,ATTR_NAME,ATTR_PATH from t_1do_attr where SHOW_ID=?",getShowId());
 	}
-	public T1doStatus getIdoStatus(){
-		return T1doStatus.dao.findFirst("select * from t_1do_status where SHOW_ID=?", get("SHOW_ID"));
-	}
+	/*public T1doStatus getIdoStatus(){
+		return T1doStatus.dao.findFirst("select * from t_1do_status where SHOW_ID=?", getShowId());
+	}*/
 	public T1doSet getIdoSet(){
-		return T1doSet.dao.findFirst("select * from t_1do_set where SHOW_ID=?", get("SHOW_ID"));
+		return T1doSet.dao.findFirst("select * from t_1do_set where SHOW_ID=?", getShowId());
 	}
 	/*
 	 2018年6月24日上午1:06:43 方升群
@@ -261,14 +284,14 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 	}
 	public static T1doBase getIdoBase2(String SHOW_ID) {
 		return T1doBase.dao.findFirst("select ID,SHOW_ID,O_DESCRIBE,O_CUSTOMER,"
-				+ "O_CUSTOMER_NAME,O_START_TIME,O_FINISH_TIME,O_EXECUTOR,O_EXECUTOR_NAME,O_IS_DELETED,O_CREATE_TIME,Real_FINISH_TIME,DELETE_TIME,AT "
+				+ "O_CUSTOMER_NAME,O_START_TIME,O_FINISH_TIME,O_EXECUTOR,O_EXECUTOR_NAME,O_IS_DELETED,O_CREATE_TIME,Real_FINISH_TIME,DELETE_TIME,LOOKNUM,AT "
 				+ "from t_1do_base where SHOW_ID=?", SHOW_ID);
 	}
 	/*
 	 2018年6月25日下午9:11:15 方升群  //查询是否该工单不可以查看
 	 */
 	public T1doSet getIdoSet1() {
-		return T1doSet.dao.findFirst("select * from t_1do_set where SHOW_ID=? and EVENT_TYPE like '%2%'",get("SHOW_ID"));
+		return T1doSet.dao.findFirst("select * from t_1do_set where SHOW_ID=? and EVENT_TYPE like '%2%'",getShowId());
 	}
 	public T1doType getT1doType(){
 		return T1doType.dao.findFirst("select * from t_1do_type where O_TYPE_ID=? ",get("O_TYPE_ID"));
@@ -277,15 +300,11 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 	 2018年6月25日下午9:16:58 方升群   //查询是否该用户对该工单不可以查看
 	 */
 	public T1doPset getIdoPset1() {
-		return T1doPset.dao.findFirst("select * from t_1do_pse t where SHOW_ID=? and O_USER=? and EVENT_TYPE like '%2%'",get("SHOW_ID"),get("O_RANGE"));
+		return T1doPset.dao.findFirst("select * from t_1do_pse t where SHOW_ID=? and O_USER=? and EVENT_TYPE like '%2%'",getShowId(),get("O_RANGE"));
 	}
 	public void set1doIsLook(String useraccount){
-		if(this.getIdoLogs2(useraccount)){
-			//this.set("isLook", 1);
-			this.setISLOOK(1);
-		}else{
-			this.setISLOOK(2);
-		}
+			this.setISLOOK(this.getIdoLogs2(useraccount)?1:2);
+		
 	}
     /*
 	 2018年8月8日下午5:17:45 方升群  //获得1催报数，2是否查看，3查看数量，4反馈数量
@@ -300,17 +319,17 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 */		
 		switch (i) {
 		case 1:
-			Record record1 =Db.findFirst("select count(*) num from t_1do_feedback where FB_TYPE=4 and SHOW_ID=?",get("SHOW_ID"));
+			Record record1 =Db.findFirst("select count(*) num from t_1do_feedback where FB_TYPE=4 and SHOW_ID=?",getShowId());
 			return record1.getInt("num");
 		case 2:
 			 
 			break;
 		case 3:
-			Record record3 =Db.findFirst("select count(*) num from t_1do_feedback where FB_TYPE!=4 and SHOW_ID=?",get("SHOW_ID"));
+			Record record3 =Db.findFirst("select count(*) num from t_1do_feedback where FB_TYPE!=4 and SHOW_ID=?",getShowId());
 			return record3.getInt("num");
 
 		case 4:
-			Record record4 =Db.findFirst("select count(*) num from t_1do_feedback where FB_TYPE!=4 and SHOW_ID=?",get("SHOW_ID"));
+			Record record4 =Db.findFirst("select count(*) num from t_1do_feedback where FB_TYPE!=4 and SHOW_ID=?",getShowId());
 			return record4.getInt("num");
 		default:
 			break;
@@ -323,13 +342,13 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 		
 		int[] result=new int[3];
 		//催办数
-		Record record1 =Db.findFirst("select count(*) num from t_1do_feedback where FB_TYPE=4 and SHOW_ID=?",get("SHOW_ID"));
+		Record record1 =Db.findFirst("select count(*) num from t_1do_feedback where FB_TYPE=4 and SHOW_ID=?",getShowId());
 		result[0]=record1.getInt("num");
 		//查看数
-		Record record3 =Db.findFirst("select count(*) num from t_1do_log where log_type=2 and SHOW_ID=? and isoverdue=1",get("SHOW_ID"));
+		Record record3 =Db.findFirst("select count(*) num from t_1do_log where log_type=2 and SHOW_ID=? and isoverdue=1",getShowId());
 		result[1]= record3.getInt("num");
 		//反馈数
-		Record record4 =Db.findFirst("select count(*) num from t_1do_feedback where FB_TYPE!=4 and SHOW_ID=? and isoverdue=1",get("SHOW_ID"));
+		Record record4 =Db.findFirst("select count(*) num from t_1do_feedback where FB_TYPE!=4 and SHOW_ID=? and isoverdue=1",getShowId());
 		result[2]= record4.getInt("num");
 		return result;
 	}
@@ -344,7 +363,7 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 			for(String str:arr){
 				T1doPstatus user=getUser(str);
 				user.setOtherid(1).update();
-				//i+=Db.update("update t_1do_pstatus set otherid=2 where O_USER =? and SHOW_ID=? and USER_TYPE!=2",str,get("SHOW_ID") );
+				//i+=Db.update("update t_1do_pstatus set otherid=2 where O_USER =? and SHOW_ID=? and USER_TYPE!=2",str,getShowId() );
 			}
 		}
 		String executor=json.getString("executor");
@@ -353,7 +372,7 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 			for(String str:arr){
 				T1doPstatus user=getUser(str);
 				user.setOtherid(2).update();
-				//i+=Db.update("update t_1do_pstatus set otherid=1 where O_USER =? and SHOW_ID=? and USER_TYPE!=2",str,get("SHOW_ID") );
+				//i+=Db.update("update t_1do_pstatus set otherid=1 where O_USER =? and SHOW_ID=? and USER_TYPE!=2",str,getShowId() );
 			}
 		}
 		return i;
@@ -361,11 +380,15 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 	}
 	    //查询用户角色
 		public  T1doPstatus getUser(String loginName) {
-			return T1doPstatus.dao.findFirst("select * from t_1do_pstatus where SHOW_ID=? and O_USER =? and USER_TYPE!=2",get("SHOW_ID"),loginName);
+			return T1doPstatus.dao.findFirst("select * from t_1do_pstatus where SHOW_ID=? and O_USER =? and USER_TYPE!=2",getShowId(),loginName);
 		}
 		//查询用户处理人和抄送人
 		public  List<T1doPstatus> getUser(int i) {
-			return T1doPstatus.dao.find("select O_USER,O_USER_NAME from t_1do_pstatus where SHOW_ID=? and otherid =? and isDelete=1",get("SHOW_ID"),i);
+			return T1doPstatus.dao.find("select O_USER,O_USER_NAME from t_1do_pstatus where SHOW_ID=? and otherid =? and isDelete=1",getShowId(),i);
+		}
+		//查询标签
+		public  List<T1doLabel> getLabel() {
+			return T1doLabel.dao.find("select ID,LABEL from t_1do_label where SHOW_ID=? ",getShowId());
 		}
 		/*
 		 2018年8月20日下午9:44:42 方升群

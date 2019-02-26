@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import com.sun.media.jfxmedia.track.Track.Encoding;
+//import com.sun.media.jfxmedia.track.Track.Encoding;
 
 /**
  * @Author: Zzih
@@ -142,7 +142,7 @@ public class TimeUtil {
     	//解码
     	String str1=URLDecoder.decode(str, "UTF-8");
     	System.out.println(str1);*/
-      return	URLEncoder.encode( yMdhmsSDF1.format(new Date()),"utf-8");
+      return	URLEncoder.encode( yMdhmsSDF1.format(new Date()),"GBK");
     	
     }
 

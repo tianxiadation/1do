@@ -63,7 +63,7 @@ public class ExcelExportUtil {
       //  sheet.setDefaultRowHeight((short)300);    // ---->有得时候你想设置统一单元格的高度，就用这个方法  
 		int i = 0;
 	//	Set<String> titles = titleAndValues.keySet();
-		String[] titles={"标题","创建时间","拟完成时间","完成时间","主要责任人","是否完成"};
+		String[] titles={"标题","创建时间","拟完成时间","完成时间","发起人","主要责任人","是否完成"};
 		for (String title : titles) {
 			// 每有一个数据创建一列
 			cell = row.createCell(i);
@@ -71,7 +71,6 @@ public class ExcelExportUtil {
 			cell.setCellStyle(headStyle);
 			// 设置列宽
 			sheet.setColumnWidth(i, 7000);
-			
 			// 将字段名存入表头
 			cell.setCellValue(title);
 			i++;
@@ -85,14 +84,16 @@ public class ExcelExportUtil {
 		for (int j = 0; j < length; j++) {
 			// 每有一行数据创建一行
 			row = sheet.createRow(j+1);
+			//row.setHeight((short) 2000);
 			Record model = recordList.get(j);
 			String[] modelvaule={model.getStr("O_DESCRIBE"),model.getStr("O_CREATE_TIME"),model.getStr("O_FINISH_TIME")
-					,model.getStr("Real_FINISH_TIME"),model.getStr("O_EXECUTOR_NAME"),model.getStr("FINISH")};
-			for (int k=0;k<6;k++) {
+					,model.getStr("Real_FINISH_TIME"),model.getStr("O_CUSTOMER_NAME"),model.getStr("O_EXECUTOR_NAME"),model.getStr("FINISH")};
+			for (int k=0;k<7;k++) {
 				// 每个数据创建一列
 				cell = row.createCell(k);
 				// 向列中添加样式，奇数行添加颜色
 				cell.setCellStyle(contentStyle);
+				
 				// 向列中存值
 				cell.setCellValue(modelvaule[k]);
 			}

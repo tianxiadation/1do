@@ -2,8 +2,17 @@ package com.demo.util;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.demo.common.model.T1doBase;
 import com.demo.common.model.T1doFeedback;
+import com.demo.common.model.T1doPstatus;
+import com.demo.common.model.TRegUser;
+import com.jfinal.kit.StrKit;
+import com.jfinal.plugin.activerecord.Db;
 
 public class StrUtil {
 	/**
@@ -39,7 +48,7 @@ public class StrUtil {
 	}
 	
 	/*
-	 2018年6月25日下午2:51:52 方升群  //处理状态 1.已送达2.无（创建人状态）3.待处理4.已接单5.已完成
+	 2018年6月25日下午2:51:52 方升群  //处理状态 1.已送达2.无（创建人状态）3.待接单4.已接单5.已完成
 	*/
 	public static String getStatus(String STATUS) {
 		switch (STATUS) {
@@ -48,7 +57,7 @@ public class StrUtil {
 		case "2":
 			return "无";
 		case "3":
-			return "待处理";
+			return "待接单";
 		case "4":
 			return "已接单";
 		case "5":
@@ -65,7 +74,7 @@ public class StrUtil {
 		case 2:
 			return "无";
 		case 3:
-			return "待处理";
+			return "待接单";
 		case 4:
 			return "已接单";
 		case 5:
@@ -448,13 +457,13 @@ public class StrUtil {
 				if(type==1||type==6){
 					return "已送达";
 				}else if(type==3){
-					return "待处理";
+					return "待接单";
 				}else{
 					return "";
 				}
 				
 			case 2:
-				return "待处理";
+				return "待接单";
 			case 3:
 				return "已接单";				
 			case 4:
@@ -480,10 +489,10 @@ public class StrUtil {
 			String str="select * from t_1do_pstatus where SHOW_ID=? and USER_TYPE!=2 and isDelete=1";
 			switch (i) {
 			case 1:				
-				String[] result1={"待处理","select * from t_1do_pstatus where SHOW_ID=? and USER_TYPE in(1,3) and isDelete=1"};
+				String[] result1={"待接单","select * from t_1do_pstatus where SHOW_ID=? and USER_TYPE in(1,3) and isDelete=1"};
 				return result1;
 			case 2:
-				String[] result2={"待处理","select * from t_1do_pstatus where SHOW_ID=? and (USER_TYPE=1 or O_USER='"+O_USER+"') and isDelete=1"};
+				String[] result2={"待接单","select * from t_1do_pstatus where SHOW_ID=? and (USER_TYPE=1 or O_USER='"+O_USER+"') and isDelete=1"};
 				return result2;
 			case 3:
 				String[] result3={"已接单","select * from t_1do_pstatus where SHOW_ID=? and (USER_TYPE=1 or O_USER='"+O_USER+"') and isDelete=1"};				
@@ -522,13 +531,13 @@ public class StrUtil {
 				case 3:				
 					switch (O_STATUS) {
 					case 3:				
-						return "待处理";
+						return "待接单";
 					case 4:				
 						return "已接单";
 					case 5:				
 						return "已完成";
 					default:
-						return "待处理";
+						return "待接单";
 					}
 
 				default:
@@ -544,6 +553,72 @@ public class StrUtil {
 					}
 				}
 			}
+			
+		}
+		/*
+		 2019年2月25日 coco 注解：获得字符串中的牵头人
+		*/
+		public static void getQTR(T1doBase tb) {
+			HashSet<String> list=new HashSet<String>();
+			HashSet<String> result=new HashSet<String>();
+			String reg="请[\u4e00-\u9fa5]+牵头";
+			//将正则表达式编译进指定模式
+					Pattern pat = Pattern.compile(reg);
+					//获取匹配器，通过指定模式和输入内容
+					Matcher mat = pat.matcher(tb.getODescribe());
+					//输出匹配结果
+					while(mat.find()){		//true:找到一个匹配结果
+						//int start = mat.start();   //返回起始位置
+						//int end = mat.end();		//结束位置
+						String text = mat.group();   //匹配到的内容
+						//System.out.println(text.length()-2);
+						list.add(text.substring(1, text.length()-2));
+						
+						//System.out.println(start+"-"+end+":"+text); 
+					}
+					
+					Db.update("update t_1do_pstatus set sort=3,otherid=2 where SHOW_ID=? and otherid=1 and USER_TYPE=3",tb.getShowId());
+					
+					list.forEach(t->{
+						List<TRegUser> list1=TRegUser.dao.find("select * from t_reg_user where u_true_name=?",t);
+						list1.forEach(t1->{
+							result.add(t1.getShowId());
+							if(!tb.getOExecutor().contains(t1.getShowId())){
+								new T1doPstatus().setShowId(tb.getShowId()).setOUser(t1.getShowId()).setOUserName(t1.getUTrueName()).setOStatus(3).setUserType(3).setOtherid(1).setSort(1).save();
+								tb.setOExecutor(t1.getShowId()+";"+tb.getOExecutor()).setOExecutorName(t1.getUTrueName()+";"+tb.getOExecutorName());
+							}else{
+								Db.update("update t_1do_pstatus set sort=1,otherid=1 where SHOW_ID=? and O_USER=? and USER_TYPE=3",tb.getShowId(),t1.getShowId());
+							}
+						});
+						//result
+					});		
+					JSONArray arr=JSON.parseArray(tb.getAT());
+					if(arr!=null)
+					arr.forEach(a->{
+						String[] brr=a.toString().split("@");
+						result.add(brr[0]);
+						if(!tb.getOExecutor().contains(brr[0])){
+							new T1doPstatus().setShowId(tb.getShowId()).setOUser(brr[0]).setOUserName(brr[1]).setOStatus(3).setUserType(3).setOtherid(1).setSort(2).save();
+							//tb.setOExecutor(brr[0]+";"+tb.getOExecutor()).setOExecutorName(brr[1]+";"+tb.getOExecutorName()).update();
+						}else{
+							Db.update("update t_1do_pstatus set sort=2,otherid=1 where SHOW_ID=? and O_USER=? and USER_TYPE=3",tb.getShowId(),brr[0]);
+						}
+						
+					});		
+			
+			
+			if(StrKit.notBlank(tb.getOExecutor())){
+				String[] str1=tb.getOExecutor().split(";");
+				result.add(str1[0]);
+			}
+			result.forEach(r->{
+				Db.update("update t_1do_pstatus set otherid=1 where SHOW_ID=? and O_USER=? and USER_TYPE=3",tb.getShowId(),r);
+			});
+			Db.update("update t_1do_pstatus set otherid=2 where SHOW_ID=? and USER_TYPE=3 and otherid!=1",tb.getShowId());
+			//return result;
+			T1doPstatus tps=T1doPstatus.dao.findFirst("SELECT  SHOW_ID,GROUP_CONCAT(O_USER) O_USER,GROUP_CONCAT(O_USER_NAME)O_USER_NAME FROM (select * from t_1do_pstatus where SHOW_ID=? and USER_TYPE=3 order by sort )a",tb.getShowId());
+			if(tps!=null)
+			tb.setOExecutor(tps.getOUser().replace(",", ";")).setOExecutorName(tps.getOUserName().replace(",", ";")).update();
 			
 		}
 }

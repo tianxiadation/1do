@@ -27,13 +27,13 @@ public abstract class BaseApproval<M extends BaseApproval<M>> extends Model<M> i
 		return getInt("source");
 	}
 
-	public M setType(java.lang.Boolean type) {
+	public M setType(java.lang.Integer type) {
 		set("type", type);
 		return (M)this;
 	}
 	
-	public java.lang.Boolean getType() {
-		return get("type");
+	public java.lang.Integer getType() {
+		return getInt("type");
 	}
 
 	public M setName(java.lang.String name) {

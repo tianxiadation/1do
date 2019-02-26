@@ -3,6 +3,8 @@ package com.demo.common;
 import com.demo.common.model._MappingKit;
 import com.demo.controller.DataController;
 import com.demo.controller.DoController;
+import com.demo.controller.TestController;
+import com.demo.controller.UrgeController;
 import com.demo.controller.WebSocketController;
 import com.demo.interceptor.MainInterceptor;
 import com.demo.interceptor.SimpleCROSFilter;
@@ -66,6 +68,8 @@ public class DemoConfig extends JFinalConfig {
 		me.add("/do",DoController.class);
 		me.add("/data",DataController.class);
 		me.add("/wt",WebSocketController.class);
+		me.add("/urge",UrgeController.class);
+		me.add("/test",TestController.class);
 		
 	}
 	

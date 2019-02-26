@@ -14,7 +14,7 @@ import com.jfinal.plugin.activerecord.Record;
 public class T1doPstatus extends BaseT1doPstatus<T1doPstatus> {
 	public static final T1doPstatus dao = new T1doPstatus().dao();
 	public List<T1doFeedback> getIdoFeedbacks44() {
-		return T1doFeedback.dao.find("select  O_USER_NAME from t_1do_feedback where SHOW_ID=? and FB_TYPE=4",get("SHOW_ID"));
+		return T1doFeedback.dao.find("select  O_USER_NAME from t_1do_feedback where SHOW_ID=? and FB_TYPE=4",getShowId());
 	}
 	/*
 	 2018年6月22日下午4:01:48 方升群
@@ -30,7 +30,7 @@ public class T1doPstatus extends BaseT1doPstatus<T1doPstatus> {
 			i++;
 		}
 	}
-	public static void saveIdoPstatus1(String showID,String[] users,String[] usernames) {
+	public static void saveIdoPstatus1(String showID,String[] users,String[] usernames) {//老
 			for (int j = 0; j < users.length; j++) {
 				if(StrUtil.isEmpty(users[j])){
 					break;
@@ -44,20 +44,36 @@ public class T1doPstatus extends BaseT1doPstatus<T1doPstatus> {
 			
 		}
 	}
+	public static void saveIdoPstatus2(T1doBase t1doBase) {//新
+		String[] users={t1doBase.getOCustomer(),t1doBase.getCreateUser(),t1doBase.getOExecutor()};
+		String[] usernames={t1doBase.getOCustomerName(),t1doBase.getCreateUserName(),t1doBase.getOExecutorName()};
+		for (int j = 0; j < users.length; j++) {
+			if(StrUtil.isEmpty(users[j])){
+				break;
+			}
+			String[] sonUsers=users[j].split(";");
+			String[] sonUsernames=usernames[j].split(";");
+			for (int i = 0; i < sonUsers.length; i++) {
+				new T1doPstatus().setShowId(t1doBase.getShowId()).setOUser(sonUsers[i]).setOUserName(sonUsernames[i]).setOStatus(j+1).setUserType(j+1).save();
+				//new T1doPset().setShowId(showID).setOUser(sonUsers[i]).setEventType("1;2;3;4;5;6;").setUserType(j+1).save();
+			}
+			
+		}
+	}
 	
 	/*
-	 2018年6月25日下午2:08:58 方升群    //获得发起人/受理人1do状态为1已送达2/3.待处理/4.处理中并且   1do和人员订阅事件都包含1.送达
+	 2018年6月25日下午2:08:58 方升群    //获得发起人/受理人1do状态为1已送达2/3.待接单/4.处理中并且   1do和人员订阅事件都包含1.送达
 	*/
-	public List<Record> getRecords() {
+	/*public List<Record> getRecords() {
 		return Db.find("select b.SHOW_ID,b.O_TITLE,b.O_DESCRIBE,b.O_EXECUTOR_NAME,t.O_TYPE_NAME,p.O_STATUS,p.USER_TYPE from t_1do_base b,t_1do_pstatus p,t_1do_type t where p.O_USER=? " 
 +"and p.USER_TYPE !=2 and b.SHOW_ID=p.SHOW_ID and b.O_TYPE_ID=t.O_TYPE_ID  and b.O_IS_DELETED=1 order by SHOW_ID desc",get("O_USER"));
-	}
+	}*/
 	
 	/*
 	 2018年8月9日上午11:15:06 方升群  //是否查看
 	*/
 	public int getIsLook() {
-		Record r=Db.findFirst("select * from t_1do_log where SHOW_ID=? and O_USER=?",get("SHOW_ID"),get("O_USER"));
+		Record r=Db.findFirst("select * from t_1do_log where SHOW_ID=? and O_USER=?",getShowId(),getOUser());
 		return r==null?2:1;
 	}
 	/*
@@ -69,6 +85,7 @@ public class T1doPstatus extends BaseT1doPstatus<T1doPstatus> {
 	//查询用户角色
 	public static T1doPstatus getUser(String showid,String loginName) {
 		return T1doPstatus.dao.findFirst("select * from t_1do_pstatus where SHOW_ID=? and O_USER =? and USER_TYPE!=2 and isDelete=1 ",showid,loginName);
-	}
+	}                                    
+	
 	
 }

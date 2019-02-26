@@ -1,0 +1,21 @@
+package com.demo.interceptor;
+
+import com.demo.common.model.T1doLabel;
+import com.demo.util.HttpUtil;
+
+public class AddLabel implements Runnable {
+	private String result;
+	private String showId;
+	
+	public AddLabel(String result, String showId) {
+		super();
+		this.result = result;
+		this.showId = showId;
+	}
+
+	@Override
+	public void run() {
+		T1doLabel.saveList(HttpUtil.getlabel(result), showId);		
+	}
+
+}

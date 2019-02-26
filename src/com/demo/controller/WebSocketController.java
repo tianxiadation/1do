@@ -2,10 +2,7 @@ package com.demo.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.websocket.EncodeException;
@@ -14,10 +11,8 @@ import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
-import com.demo.common.model.Msg;
-import com.alibaba.fastjson.JSONArray;
+
 import com.alibaba.fastjson.JSONObject;
-import com.demo.common.model.T1doBase;
 import com.demo.common.model.T1doFeedback;
 import com.demo.common.model.Websocket;
 import com.demo.util.JsonUtil;
@@ -105,7 +100,7 @@ public class WebSocketController extends Controller{
 		setSessionAttr(session.getId(), true);
 		// 死循环 查询有无数据变化
 		List<T1doFeedback> getIdoFeedbacks12=new ArrayList<T1doFeedback>();
-		while (getSessionAttr(session.getId())) {
+		while ((boolean) getSessionAttr(session.getId())) {
 			List<T1doFeedback> getIdoFeedbacks11= T1doFeedback.dao.find("select O_USER_NAME from t_1do_feedback where SHOW_ID=? and FB_TYPE!=4 and isoverdue=1",str);
 			int i=(int)getSessionAttr(str);
 			int n=getIdoFeedbacks11.size()-i;
@@ -158,7 +153,7 @@ public class WebSocketController extends Controller{
 		//MyThread my=new MyThread(json,i);
 		
 		//my.start();
-		 while (getSessionAttr(json.getString("sessionID"))) {
+		 while ((boolean) getSessionAttr(json.getString("sessionID"))) {
 		      List<T1doFeedback> getIdoFeedbacks11= T1doFeedback.dao.find("select O_USER_NAME from t_1do_feedback where SHOW_ID=? and FB_TYPE!=4 and isoverdue=1",json.getString("SHOW_ID"));
 
 		      int n=getIdoFeedbacks11.size()-i;
