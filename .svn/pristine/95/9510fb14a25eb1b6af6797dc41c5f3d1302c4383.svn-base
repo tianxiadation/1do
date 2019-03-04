@@ -5,6 +5,7 @@
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -15,6 +16,7 @@ import org.apache.commons.fileupload.util.Streams;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.demo.common.model.Approval;
 import com.demo.common.model.T1doAttr;
 import com.demo.common.model.T1doBase;
 import com.demo.common.model.T1doFeedback;
@@ -50,7 +52,8 @@ import com.oreilly.servlet.multipart.Part;
 
 
 public class DoController extends Controller {
-	
+	private static String url="http://172.16.8.7:6002/Base-Module/Message";//测试环境通知接口
+	//private static String url="http://xcgovapi.hzxc.gov.cn/Base-Module/Message";//正式环境通知接口
 	/*
 	 2019年2月13日 coco 注解：//批量添加关联
 	*/
@@ -466,7 +469,8 @@ public class DoController extends Controller {
 			.setOUserName(username).setOpTime(new Date()).
 			setLog(username+"查看此1do").setLogType(2).save();
            if(t2!=null&&r==null){
-        	   t1doBase.setSendTime(new Date().getTime()).update();            
+        	   t1doBase.setSendTime(new Date().getTime()).update();
+            
            	new Thread(new SendIdo(t1doBase,2,loginName,"",1)).start();
 			}else if(i>=1){
 	           	new Thread(new SendIdo(t1doBase,2,loginName,username,2)).start();
@@ -1108,10 +1112,70 @@ public class DoController extends Controller {
 				t1doFeedback.save();
 				if(t1doPstatus!=null){
 					//主动办
-					new Thread(new SendIdo(t1doBase,4,t1doFeedback.getFBCONTENT())).start();
+					new Thread(new Runnable() {
+						@Override
+						public void run() {
+							if(t1doBase.getSOURCE()==2&&t1doBase.getDPARAMETER()==2&&t1doBase.getCPARAMETER()==2&&!t1doBase.getISAPPROVAL()){
+								
+								Approval arr=Approval.dao.findFirst("select * from approval where source=2 and name=?",t1doFeedback.getFBCONTENT());
+								if(arr!=null){
+									if(arr.getType()==1){
+										String result1 = null;
+										
+										try {
+											System.out.println("http://172.16.8.18:8080/1call/getSchemeStart?id="+t1doBase.getAPARAMETER()+"&schemeStart=3&examineTime="+TimeUtil.getDateTime1());
+											result1 = HttpUtil.doPost11("http://172.16.8.18:8080/1call/getSchemeStart?id="+t1doBase.getAPARAMETER()+"&schemeStart=3&examineTime="+TimeUtil.getDateTime1());
+											
+										} catch (UnsupportedEncodingException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
+										System.out.println("------------"+result1);
+										
+										
+										JSONObject json=JSON.parseObject(result1);
+										System.out.println("json-----"+json.toString());
+										if(json.getInteger("code")==200){
+											t1doBase.setCPARAMETER(3).setISAPPROVAL(true).update();
+										}
+									}else{
+										t1doBase.setISAPPROVAL(true).update();
+									}
+								}else{
+									System.out.println("不审批");
+								}
+								
+							}
+						}
+					}).start(); 
 					//三实库
-					new Thread(new SendIdo(t1doBase,5,t1doFeedback.getFBCONTENT())).start();
+					new Thread(new Runnable() {
+						@Override
+						public void run() {
+							if(t1doBase.getSOURCE()==3&&t1doBase.getCPARAMETER()==1&&!t1doBase.getISAPPROVAL()){
+								
+								Approval arr=Approval.dao.findFirst("select * from approval where source=3 and name=?",t1doFeedback.getFBCONTENT());
+								
+								if(arr!=null){
+									JSONObject json=new JSONObject();
+									json.put("id", t1doBase.getAPARAMETER());
+									json.put("type", arr.getType());
+									JSONObject result1 = HttpUtil.doPost3("http://59.202.68.28:8080/ssk/qs/approval",json.toString());
+									
+									if(result1.getInteger("code")==200){
+										t1doBase.setCPARAMETER(arr.getType()).setISAPPROVAL(true).update();
+									}
+									
+								}else{
+									System.out.println("不审批");
+								}
+								
+							}
+						}
+					}).start(); 
 				}
+				
+			
 				if(t1doPstatus!=null&&t1doBase.getOStatus()==3){
 					//t1doBase.update();
 					t1doPstatus.setOStatus(4).update();

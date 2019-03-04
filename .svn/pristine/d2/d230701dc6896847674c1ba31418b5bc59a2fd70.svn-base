@@ -1,18 +1,14 @@
 package com.demo.service;
 
 
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.demo.common.model.Approval;
 import com.demo.common.model.T1doBase;
 import com.demo.common.model.T1doFw;
 import com.demo.common.model.T1doPstatus;
 import com.demo.util.HttpUtil;
 import com.demo.util.StrUtil;
-import com.demo.util.TimeUtil;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 
@@ -239,63 +235,5 @@ public class DoService {
 		
 		
 	}
-	/*
-	 三实库审批
-	*/
-	public static void ssk(T1doBase t1doBase,String content) {
-		if(t1doBase.getSOURCE()==3&&t1doBase.getCPARAMETER()==1&&!t1doBase.getISAPPROVAL()){
-			
-			Approval arr=Approval.dao.findFirst("select * from approval where source=3 and name=?",content);
-			
-			if(arr!=null){
-				JSONObject json=new JSONObject();
-				json.put("id", t1doBase.getAPARAMETER());
-				json.put("type", arr.getType());
-				JSONObject result1 = HttpUtil.doPost3("http://59.202.68.28:8080/ssk/qs/approval",json.toString());
-				
-				if(result1.getInteger("code")==200){
-					t1doBase.setCPARAMETER(arr.getType()).setISAPPROVAL(true).update();
-				}
-				
-			}else{
-				System.out.println("不审批");
-			}
-			
-		}
-	}
 	
-	//审批主动办
-	public static void approval(T1doBase t1doBase,String content){
-		if(t1doBase.getSOURCE()==2&&t1doBase.getDPARAMETER()==2&&t1doBase.getCPARAMETER()==2&&!t1doBase.getISAPPROVAL()){
-			
-			Approval arr=Approval.dao.findFirst("select * from approval where source=2 and name=?",content);
-			if(arr!=null){
-				if(arr.getType()==1){
-					String result1 = null;
-					
-					try {
-						System.out.println("http://172.16.8.18:8080/1call/getSchemeStart?id="+t1doBase.getAPARAMETER()+"&schemeStart=3&examineTime="+TimeUtil.getDateTime1());
-						result1 = HttpUtil.doPost11("http://172.16.8.18:8080/1call/getSchemeStart?id="+t1doBase.getAPARAMETER()+"&schemeStart=3&examineTime="+TimeUtil.getDateTime1());
-						
-					} catch (UnsupportedEncodingException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					System.out.println("------------"+result1);
-					
-					
-					JSONObject json=JSON.parseObject(result1);
-					System.out.println("json-----"+json.toString());
-					if(json.getInteger("code")==200){
-						t1doBase.setCPARAMETER(3).setISAPPROVAL(true).update();
-					}
-				}else{
-					t1doBase.setISAPPROVAL(true).update();
-				}
-			}else{
-				System.out.println("不审批");
-			}
-			
-		}
-	}
 }
