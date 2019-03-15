@@ -1,0 +1,58 @@
+package com.demo.util;
+
+import com.jfinal.plugin.activerecord.Db;
+
+public class DbUtil {
+	/*
+	 2019年3月8日 coco 注解：
+	*/
+	public void update(String showid,String showid1,int type) {
+		switch (type) {
+		case 1:			
+			/*Db.update("update t_1do_relation a,t_1do_base b set a.sort=0,a.TYPE=b.o_status "
+					+ "where ((a.SHOW_ID=? and a.RELATION_SHOW_ID=?) or (a.SHOW_ID=? and a.RELATION_SHOW_ID=?)) and b.SHOW_ID=a.RELATION_SHOW_ID and a.TYPE=0 "
+					,json.getString("SHOW_ID"),json.getString("RELATION_SHOW_ID"),json.getString("RELATION_SHOW_ID"),json.getString("SHOW_ID"))
+					));*/
+			break;
+		case 2:			
+			break;
+		case 3:			
+			break;
+		case 4:			
+			break;
+		case 5:			
+			break;
+		case 6:			
+			break;
+		case 7:			
+			break;
+		case 8:			
+			break;
+		case 9:			
+			break;
+		case 10:			
+			break;
+		case 11:			
+			break;
+		case 12:			
+			break;
+		case 13:			
+			break;
+		case 14:			
+			break;
+		case 15:			
+			break;
+		case 16:			
+			break;
+		case 17:			
+			break;
+		case 18:			
+			break;
+		case 19:			
+			break;
+		default:
+			break;
+		}
+		//renderJson();
+	}
+}

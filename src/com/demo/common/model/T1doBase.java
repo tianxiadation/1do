@@ -19,7 +19,7 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 	public static List<T1doBase> selectBybase(JSONObject json) {
 		return T1doBase.dao.find("select SHOW_ID,O_DESCRIBE,O_CREATE_TIME "
 				+ "from t_1do_base where O_DESCRIBE LIKE CONCAT('%','"+json.getString("BASE")+"','%') and "
-						+ "SHOW_ID not in (select RELATION_SHOW_ID  from t_1do_relation where SHOW_ID=? and SIMILARITY>10) and SHOW_ID!=?",json.getString("SHOW_ID"),json.getString("SHOW_ID"));
+						+ "SHOW_ID not in (select RELATION_SHOW_ID  from t_1do_relation where SHOW_ID=? and (SIMILARITY>10 or type=0)) and SHOW_ID!=?",json.getString("SHOW_ID"),json.getString("SHOW_ID"));
 	}
 	/*
 	 2018年6月26日下午2:32:54 方升群  //根据反馈获得attr

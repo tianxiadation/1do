@@ -615,7 +615,7 @@ public class StrUtil {
 			//return result;
 			T1doPstatus tps=T1doPstatus.dao.findFirst("SELECT  SHOW_ID,GROUP_CONCAT(O_USER) O_USER,GROUP_CONCAT(O_USER_NAME)O_USER_NAME FROM (select * from t_1do_pstatus where SHOW_ID=? and USER_TYPE=3 order by sort )a",tb.getShowId());
 			if(tps!=null)
-			tb.setOExecutor(tps.getOUser().replace(",", ";")).setOExecutorName(tps.getOUserName().replace(",", ";")).update();
+			tb.setOExecutor(tps.getOUser()==null?"":tps.getOUser().replace(",", ";")).setOExecutorName(tps.getOUserName()==null?"":tps.getOUserName().replace(",", ";")).update();
 			
 		}
 }

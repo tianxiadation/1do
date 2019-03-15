@@ -54,7 +54,7 @@ public class T1doPstatus extends BaseT1doPstatus<T1doPstatus> {
 			String[] sonUsers=users[j].split(";");
 			String[] sonUsernames=usernames[j].split(";");
 			for (int i = 0; i < sonUsers.length; i++) {
-				new T1doPstatus().setShowId(t1doBase.getShowId()).setOUser(sonUsers[i]).setOUserName(sonUsernames[i]).setOStatus(j+1).setUserType(j+1).save();
+				new T1doPstatus().setShowId(t1doBase.getShowId()).setOUser(sonUsers[i]).setOUserName(sonUsernames[i]).setOStatus(j+1).setUserType(j+1).setSTATUS(j+1==1?"已送达":"待接单").save();
 				//new T1doPset().setShowId(showID).setOUser(sonUsers[i]).setEventType("1;2;3;4;5;6;").setUserType(j+1).save();
 			}
 			
@@ -86,6 +86,10 @@ public class T1doPstatus extends BaseT1doPstatus<T1doPstatus> {
 	public static T1doPstatus getUser(String showid,String loginName) {
 		return T1doPstatus.dao.findFirst("select * from t_1do_pstatus where SHOW_ID=? and O_USER =? and USER_TYPE!=2 and isDelete=1 ",showid,loginName);
 	}                                    
+	/*//查询用户角色
+	public static List<T1doPstatus> getUser(String showid) {
+		return T1doPstatus.dao.find("select * from t_1do_pstatus where SHOW_ID=? USER_TYPE!=2 and isDelete=1 and ",showid,loginName);
+	}   */                                 
 	
 	
 }

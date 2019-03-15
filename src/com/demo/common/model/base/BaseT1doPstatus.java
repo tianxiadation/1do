@@ -54,6 +54,15 @@ public abstract class BaseT1doPstatus<M extends BaseT1doPstatus<M>> extends Mode
 		return getInt("O_STATUS");
 	}
 
+	public M setSTATUS(java.lang.String STATUS) {
+		set("STATUS", STATUS);
+		return (M)this;
+	}
+	
+	public java.lang.String getSTATUS() {
+		return getStr("STATUS");
+	}
+
 	public M setUserType(java.lang.Integer userType) {
 		set("USER_TYPE", userType);
 		return (M)this;
@@ -133,6 +142,15 @@ public abstract class BaseT1doPstatus<M extends BaseT1doPstatus<M>> extends Mode
 	
 	public java.lang.Integer getSort() {
 		return getInt("sort");
+	}
+
+	public M setISLOOK(java.lang.Integer ISLOOK) {
+		set("ISLOOK", ISLOOK);
+		return (M)this;
+	}
+	
+	public java.lang.Integer getISLOOK() {
+		return getInt("ISLOOK");
 	}
 
 }

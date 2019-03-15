@@ -15,7 +15,7 @@ public class ShortMessageUtil {
 		String str="http://218.108.106.128:8080/web/getsms"
 				+ "?username=xiacheng1do&password=5937FFAD5ECD5F6DD9A83B83895E480F"
 				+ "&mobile="+user.getUMobile()+"&content=您有一条1do被催单,"
-						+ "请及时登入OA网站或点击以下链接查看https://tyhy.hzxc.gov.cn:28443/1do/shortMessage/open1call?SHOW_ID="+SHOW_ID+"&extend=5159000&level=1";
+						+ "请及时登入OA网站或点击以下链接查看https://tyhy.hzxc.gov.cn:28443/1do/shortMessage/MyHtml.html?SHOW_ID="+SHOW_ID+"&extend=5159000&level=1";
 		return HttpUtil.doGet11(str);
 	}
 	public static void main(String[] args) {

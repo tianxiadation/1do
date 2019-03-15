@@ -500,7 +500,7 @@ public class HttpUtil {
 	        	StringEntity entity=new StringEntity(outStr,"utf8");
 	    		entity.setContentType("application/json");
 	    		httpPost.setEntity(entity);
-	    		
+	    		System.out.println(outStr);
 	            HttpResponse response=httpClient.execute(httpPost);
 	            if(response.getStatusLine().getStatusCode()==200){
 	            	//HttpResponseProxy{HTTP/1.1 200 OK [Content-Length: 172, Content-Type: application/json; charset=utf-8, Server: Microsoft-IIS/8.0, X-Powered-By: ASP.NET, Date: Fri, 19 Jan 2018 03:41:44 GMT] ResponseEntityProxy{[Content-Type: application/json; charset=utf-8,Content-Length: 172,Chunked: false]}}

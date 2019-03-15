@@ -34,11 +34,19 @@ public class SendIdo implements Runnable {
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
+		
 		switch (type) {
 		case 1:
 			DoService.sendIdo(t1doBase, i, O_USER);
+			if(i==4){
+				DoService.cbts(t1doBase.getShowId());//催报发催办接口
+			}else{				
+				DoService.dbts(t1doBase.getShowId());//其他通知发代办待阅
+			}
+			break;
 		case 2:
 			DoService.sendOneIdo(t1doBase, i, O_USER, username);
+			DoService.dbts(t1doBase.getShowId());
 			break;
 		case 3:
 			DoService.fwsendOneIdo(t1doBase, i, O_USER, username);

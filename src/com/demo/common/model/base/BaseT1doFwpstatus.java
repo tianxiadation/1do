@@ -63,4 +63,13 @@ public abstract class BaseT1doFwpstatus<M extends BaseT1doFwpstatus<M>> extends 
 		return get("modifyTime");
 	}
 
+	public M setGmtModified(java.util.Date gmtModified) {
+		set("gmt_modified", gmtModified);
+		return (M)this;
+	}
+	
+	public java.util.Date getGmtModified() {
+		return get("gmt_modified");
+	}
+
 }

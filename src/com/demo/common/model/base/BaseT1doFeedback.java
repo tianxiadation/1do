@@ -117,15 +117,6 @@ public abstract class BaseT1doFeedback<M extends BaseT1doFeedback<M>> extends Mo
 		return getStr("USERID");
 	}
 
-	public M setAttrName(java.lang.String attrName) {
-		set("ATTR_NAME", attrName);
-		return (M)this;
-	}
-	
-	public java.lang.String getAttrName() {
-		return getStr("ATTR_NAME");
-	}
-
 	public M setAttrPath(java.lang.String attrPath) {
 		set("ATTR_PATH", attrPath);
 		return (M)this;

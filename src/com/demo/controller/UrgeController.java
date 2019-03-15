@@ -15,6 +15,7 @@ import javax.websocket.server.ServerEndpoint;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.demo.common.model.T1doUrgeWebsocket;
+import com.demo.service.DoService;
 import com.demo.util.JsonUtil;
 import com.demo.util.MsgUtil;
 import com.jfinal.core.Controller;
@@ -61,18 +62,18 @@ public class UrgeController extends Controller{
         json.put("sessionid", session.getId());
         json.toJavaObject(T1doUrgeWebsocket.class).save();
        // T1doUrgeWebsocket u=((JSON) JSON.parseObject(requestJson).put("sessionid", session.getId())).toJavaObject(T1doUrgeWebsocket.class);        
-     List<Record> list=  Db.find("select b.SHOW_ID,b.O_DESCRIBE,b.O_CREATE_TIME,b.O_FINISH_TIME,b.LIGHTNING,b.URGENAME from t_1do_pstatus a,t_1do_base b "
-+"where a.SHOW_ID=b.SHOW_ID and a.O_USER=? and a.USER_TYPE=3 and a.isDelete=1 and a.urge_isLook=0 and b.O_STATUS<5 ORDER BY LIGHTNING desc",json.getString("user"));
+     List<Record> list=  Db.find("select b.SHOW_ID,b.O_DESCRIBE,b.O_CREATE_TIME,b.O_FINISH_TIME,b.LIGHTNING,b.URGENAME,b.URGESHOWID from t_1do_pstatus a,t_1do_base b "
++"where a.SHOW_ID=b.SHOW_ID and a.O_USER=? and a.USER_TYPE=3 and a.isDelete=1 and a.isSend=2 and b.O_STATUS<5 ORDER BY LIGHTNING desc",json.getString("user"));
 		session.getBasicRemote().sendText(JsonKit.toJson(MsgUtil.successMsg(list)));
-	
+	 
 	}	
-	public void sendMessage(String SHOW_ID) throws IOException{
+	public void sendMessage(String SHOW_ID) {
         //群发消息
         for(UrgeController item: webSocketSet){
             try {
-            	List<Record> r=Db.find("select a.sessionid,b.SHOW_ID,b.O_DESCRIBE,b.O_CREATE_TIME,b.O_FINISH_TIME,b.LIGHTNING,b.URGENAME from t_1do_urge_websocket a,t_1do_base b,t_1do_pstatus c "+
+            	List<Record> r=Db.find("select a.sessionid,b.SHOW_ID,b.O_DESCRIBE,b.O_CREATE_TIME,b.O_FINISH_TIME,b.LIGHTNING,b.URGENAME,b.URGESHOWID from t_1do_urge_websocket a,t_1do_base b,t_1do_pstatus c "+
 		"where a.user=c.O_USER and b.SHOW_ID=c.SHOW_ID and b.SHOW_ID=? "+
-				"and a.isOnline=1 and b.O_STATUS<5 and c.USER_TYPE=3 and a.sessionid=?",SHOW_ID,item.session.getId());
+				"and a.isOnline=1 and b.O_STATUS<5 and c.USER_TYPE=3 and c.isDelete=1 and a.isSend=2 and a.sessionid=? ",SHOW_ID,item.session.getId());
             	if(r.size()>0)
                 item.session.getBasicRemote().sendText(JsonKit.toJson(MsgUtil.successMsg(r)));
             } catch (IOException e) {
@@ -100,9 +101,15 @@ public class UrgeController extends Controller{
 			renderJson(MsgUtil.errorMsg("appkey error"));
 			return;
 		}
-		List<Record> list=Db.find("select * from (SELECT b.SHOW_ID showId,a.otherid isMain,a.urge_isLook urgeIsLook,b.O_DESCRIBE title,b.LIGHTNING lightning,b.O_CREATE_TIME createTime,b.O_FINISH_TIME finishTime,b.URGENAME ouserName FROM t_1do_pstatus a,t_1do_base b,t_reg_user c"
-+" where a.O_USER=c.SHOW_ID and a.SHOW_ID=b.SHOW_ID and a.isDelete=1 and (a.urge_isLook=0 or a.otherid=1) and a.USER_TYPE!=2 and b.O_STATUS<5"
-+" and b.LIGHTNING>0 and (c.U_MAIL=? or U_LOGIN_NAME=?) ORDER BY otherid desc)d  GROUP BY showId",json.getString("userName"),json.getString("userName"));
+		List<Record> list=Db.find("select * from (SELECT b.SHOW_ID showId,a.otherid isMain,a.isSend urgeIsLook,b.O_DESCRIBE title,b.LIGHTNING lightning,b.O_CREATE_TIME createTime,b.O_FINISH_TIME finishTime,b.URGENAME ouserName,cast(b.SEND_TIME as char) updateTime FROM t_1do_pstatus a,t_1do_base b,t_reg_user c"
++" where a.O_USER=c.SHOW_ID and a.SHOW_ID=b.SHOW_ID and a.isDelete=1 and (a.isSend=2 or a.otherid=1) and a.USER_TYPE!=2 and b.O_STATUS<5"
++" and  (c.U_MAIL=? or U_LOGIN_NAME=?) ORDER BY otherid desc)d  GROUP BY showId",json.getString("userName"),json.getString("userName"));
+		new Thread(new Runnable() {			
+			@Override
+			public void run() {			
+				DoService.cbts1(json.getString("userName"));//催报发催办接口
+			}
+		}).start();
 		renderJson(MsgUtil.successMsg(list));
 	}
 	/*
@@ -114,7 +121,7 @@ public class UrgeController extends Controller{
 			renderJson(MsgUtil.errorMsg("appkey error"));
 			return;
 		}
-		renderJson(MsgUtil.successMsg(Db.update("update t_1do_pstatus set urge_isLook=1 where SHOW_ID=? and O_USER=(select SHOW_ID from t_reg_user where U_LOGIN_NAME=? or U_MAIL=?)",json.getString("showId"),json.getString("userName"),json.getString("userName"))));
+		renderJson(MsgUtil.successMsg(Db.update("update t_1do_pstatus set isSend=1 where SHOW_ID=? and O_USER=(select SHOW_ID from t_reg_user where U_LOGIN_NAME=? or U_MAIL=?)",json.getString("showId"),json.getString("userName"),json.getString("userName"))));
 		
 	}
 }

@@ -4,21 +4,90 @@ package com.demo.service;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
+import org.apache.poi.ss.formula.functions.T;
+
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.demo.common.model.Approval;
 import com.demo.common.model.T1doBase;
 import com.demo.common.model.T1doFw;
 import com.demo.common.model.T1doPstatus;
+import com.demo.common.model.TRegUser;
 import com.demo.util.HttpUtil;
 import com.demo.util.StrUtil;
 import com.demo.util.TimeUtil;
+import com.jfinal.kit.JsonKit;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 
 public class DoService {
+	//private static String zhxxpt="https://zh.hzxc.gov.cn/hubsupport/";
+	private static String zhxxpt="https://zh.hzxc.gov.cn/hubsupport2/";
+	//private static String zhxxpt="http://192.168.10.84:8080/hubsupport/";
 	private static String url="http://172.16.8.7:6002/Base-Module/Message";//测试环境通知接口
 	//private static String url="http://xcgovapi.hzxc.gov.cn/Base-Module/Message";//正式环境通知接口
+	//
+	/*
+	 2019年3月5日 coco 注解：1do代办推送接口
+	*/
+	public static String dbts(String showid) {
+		List<TRegUser> tp=TRegUser.dao.find("select b.U_LOGIN_NAME,b.U_MAIL from t_1do_pstatus a,t_reg_user b where "
+				+ " a.o_user=b.show_id and a.show_id=? and a.user_type!=2 and isdelete=1 and issend=2 ",showid);
+		tp.forEach(t->{
+			List<Record> list=Db.find("select * from (SELECT b.SHOW_ID showId,a.otherid isMain,b.O_DESCRIBE title,cast(b.SEND_TIME as char) updateTime FROM t_1do_pstatus a,t_1do_base b,t_reg_user c"
+					+" where a.O_USER=c.SHOW_ID and a.SHOW_ID=b.SHOW_ID and a.isDelete=1 and (a.isSend=2 or a.otherid=1) and a.USER_TYPE!=2 and b.O_STATUS<5"
+					+" and  (c.U_MAIL=? or U_LOGIN_NAME=?) ORDER BY otherid desc)d  GROUP BY showId",t.getUMail(),t.getULoginName());							
+			
+				if(list.size()>0)
+				HttpUtil.doPost1(zhxxpt+"3th/1do/dolist?appName=1do&appKey=1do", getJson(t.getULoginName()==null?t.getUMail():t.getULoginName(), list));
+			
+		});
+		return "";
+	}
+	/*
+	 2019年3月5日 coco 注解：1do催办推送接口
+	 */
+	public static String cbts(String showid) {
+		//短信发给处理人
+		List<TRegUser> tp=TRegUser.dao.find("select b.U_LOGIN_NAME,b.U_MAIL from t_1do_pstatus a,t_reg_user b where "
+				+ " a.o_user=b.show_id and a.show_id=? and a.user_type=3 and isdelete=1 and issend=2 and a.otherid=1 ",showid);
+		tp.forEach(t->{
+			List<Record> list=Db.find("select * from (SELECT b.SHOW_ID showId,b.O_DESCRIBE title,b.LIGHTNING lightning,b.O_CREATE_TIME createTime,b.O_FINISH_TIME finishTime,b.URGENAME ouserName FROM t_1do_pstatus a,t_1do_base b,t_reg_user c"
+					+" where a.O_USER=c.SHOW_ID and a.SHOW_ID=b.SHOW_ID and a.isDelete=1 and a.isSend=2  and a.USER_TYPE!=2 and b.O_STATUS<5 AND b.LIGHTNING >0"
+					+" and  (c.U_MAIL=? or U_LOGIN_NAME=?) ORDER BY otherid desc)d  GROUP BY showId",t.getUMail(),t.getULoginName());							
+			
+				if(list.size()>0)
+				HttpUtil.doPost1(zhxxpt+"3th/1do/urgedlist?appName=1do&appKey=1do", getJson(t.getULoginName()==null?t.getUMail():t.getULoginName(), list));
+			
+		});
+		return "";
+	}
+	public static String cbts1(String username) {
+		//短信发给处理人
+		
+			List<Record> list=Db.find("select * from (SELECT b.SHOW_ID showId,b.O_DESCRIBE title,b.LIGHTNING lightning,b.O_CREATE_TIME createTime,b.O_FINISH_TIME finishTime,b.URGENAME ouserName FROM t_1do_pstatus a,t_1do_base b,t_reg_user c"
+					+" where a.O_USER=c.SHOW_ID and a.SHOW_ID=b.SHOW_ID and a.isDelete=1 and a.isSend=2  and a.USER_TYPE!=2 and b.O_STATUS<5 AND b.LIGHTNING >0"
+					+" and  (c.U_MAIL=? or U_LOGIN_NAME=?) ORDER BY otherid desc)d  GROUP BY showId",username,username);							
+			
+			if(list.size()>0)
+				HttpUtil.doPost1(zhxxpt+"3th/1do/urgedlist?appName=1do&appKey=1do", getJson(username, list));
+			
+		
+		return "";
+	}
+	/*
+	 2019年3月5日 coco 注解：
+	*/
+	public static String getJson(String userName,List<Record> list) {	
+		JSONObject json=new JSONObject();
+		json.put("userName", userName);
+		json.put("pageNo", 1);
+		json.put("listCount", list.size());
+		JSONArray array= JSONArray.parseArray(JsonKit.toJson(list));
+		json.put("data",array);	
+		return json.toString();
+	}
 	public static List<Record> exportExcel(int type){
 		String shi="否";
 		//String temp=type==6?" and a.O_IS_DELETED=2 ":"";
@@ -274,7 +343,7 @@ public class DoService {
 					String result1 = null;
 					
 					try {
-						System.out.println("http://172.16.8.18:8080/1call/getSchemeStart?id="+t1doBase.getAPARAMETER()+"&schemeStart=3&examineTime="+TimeUtil.getDateTime1());
+						//System.out.println("http://172.16.8.18:8080/1call/getSchemeStart?id="+t1doBase.getAPARAMETER()+"&schemeStart=3&examineTime="+TimeUtil.getDateTime1());
 						result1 = HttpUtil.doPost11("http://172.16.8.18:8080/1call/getSchemeStart?id="+t1doBase.getAPARAMETER()+"&schemeStart=3&examineTime="+TimeUtil.getDateTime1());
 						
 					} catch (UnsupportedEncodingException e) {
@@ -288,6 +357,8 @@ public class DoService {
 					System.out.println("json-----"+json.toString());
 					if(json.getInteger("code")==200){
 						t1doBase.setCPARAMETER(3).setISAPPROVAL(true).update();
+						result1 = HttpUtil.doPost11("http://172.16.8.18:8080/1call/combination?id="+t1doBase.getAPARAMETER());
+						System.out.println("------------"+result1);
 					}
 				}else{
 					t1doBase.setISAPPROVAL(true).update();
@@ -297,5 +368,12 @@ public class DoService {
 			}
 			
 		}
+	}
+	public static void main(String[] args) {
+		int i=-1;
+		if(i>0)
+			System.out.println(i);
+		System.out.println(i+1);
+		
 	}
 }

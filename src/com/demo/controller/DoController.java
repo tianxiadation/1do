@@ -12,7 +12,6 @@ import java.util.List;
 
 import org.apache.commons.fileupload.util.Streams;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.demo.common.model.T1doAttr;
@@ -30,6 +29,7 @@ import com.demo.common.model.Temp;
 import com.demo.interceptor.AddLabel;
 import com.demo.interceptor.SendIdo;
 import com.demo.service.DoService;
+import com.demo.util.DbUtil;
 import com.demo.util.ExcelExportUtil;
 import com.demo.util.HttpUtil;
 import com.demo.util.IDUtil;
@@ -50,7 +50,17 @@ import com.oreilly.servlet.multipart.Part;
 
 
 public class DoController extends Controller {
-	
+	/*
+	 2019年3月6日 coco 注解：
+	*/
+	public void deleteRelation() {
+		JSONObject json=JsonUtil.getJSONObject(getRequest());
+		JSONObject douser=getSessionAttr("1doUser");	
+		if(douser.getBooleanValue("isfw"))
+		renderJson(MsgUtil.successMsg(DbUtil.update(json.getString("SHOW_ID"),json.getString("RELATION_SHOW_ID"),1,0,"","")));
+		else
+		renderJson(MsgUtil.errorMsg("无权限删除"));
+	}
 	/*
 	 2019年2月13日 coco 注解：//批量添加关联
 	*/
@@ -58,8 +68,7 @@ public class DoController extends Controller {
     	JSONObject json=JsonUtil.getJSONObject(getRequest());
 		JSONArray array=json.getJSONArray("list");
 		for (int i = 0; i < array.size(); i++) {			
-			Db.update("update t_1do_relation set sort=-1,TYPE=0 "
-					+ "where SHOW_ID=? and RELATION_SHOW_ID=?",json.getString("SHOW_ID"),array.getString(i));
+			DbUtil.update(json.getString("SHOW_ID"),array.getString(i),2,0,"","");
 		}
 		renderJson(MsgUtil.successMsg("添加成功"));
 
@@ -150,11 +159,9 @@ public class DoController extends Controller {
 		JSONObject douser=getSessionAttr("1doUser");
 		if(douser.getBooleanValue("isfw")){
 		String[] users=json.getString("user").split(";");
-		Db.update("update t_1do_pstatus set otherid=0 where"
-				+ " otherid=? and SHOW_ID=? ",json.getIntValue("otherid"),json.getString("SHOW_ID"));
+		DbUtil.update(json.getString("SHOW_ID"),"",3,json.getIntValue("otherid"),"","");		
 		for(String user:users){
-			Db.update("update t_1do_pstatus set otherid=? where"
-					+ " SHOW_ID=? and O_USER=?",json.getIntValue("otherid"),json.getString("SHOW_ID"),user);
+		DbUtil.update(json.getString("SHOW_ID"),user,4,json.getIntValue("otherid"),"","");
 		}
 		      renderJson(JsonUtil.getMap(200, "修改成功"));
 		}else {
@@ -192,18 +199,20 @@ public class DoController extends Controller {
 				}
 			
 			
-			String from ="select a.*,b.type TYPE"
+			String from ="select a.*,b.type TYPE,IFNULL(c.log_type-1,2)ISLOOK"
 					+ " from (select SHOW_ID,O_DESCRIBE,O_EXECUTOR_NAME,O_CUSTOMER_NAME,O_START_TIME,O_FINISH_TIME,star,evaluation,Real_FINISH_TIME,DELETE_TIME "
-					+ "from t_1do_base where "+sql+" ORDER BY ID desc)a LEFT JOIN (select * from t_1do_order "
-					+ "where useraccount=? and type="+i+" )b on a.show_id=b.show_id ORDER BY "
-					+ "modifyTime desc LIMIT ?,10";
+					+ " from t_1do_base where "+sql+" ORDER BY ID desc)a LEFT JOIN (select * from t_1do_order "
+					+ " where useraccount=? and type="+i+" )b on a.show_id=b.show_id "
+					+ " LEFT JOIN (SELECT SHOW_ID,log_type from t_1do_log where O_USER=? "
+					+ " and log_type=2 GROUP BY SHOW_ID)c on a.SHOW_ID=c.SHOW_ID"
+					+ " ORDER BY modifyTime desc LIMIT ?,10";
 			
 			String from1="select count(*) num from t_1do_base  where "+sql;
-			List<T1doBase> t3=T1doBase.dao.find(from,douser.getString("loginName"),(json1.getIntValue("pageNumber")-1)*10);
+			List<T1doBase> t3=T1doBase.dao.find(from,douser.getString("loginName"),douser.getString("loginName"),(json1.getIntValue("pageNumber")-1)*10);
 			Record r=Db.findFirst(from1);
-			for(T1doBase t:t3){
+			/*for(T1doBase t:t3){
 				t.set1doIsLook(douser.getString("loginName"));//可以用表关联（未完成）
-			}
+			}*/
 			JSONObject json2=new JSONObject();
 			json2.put("base", t3);
 			json2.put("allPage", r.getInt("num"));
@@ -238,11 +247,11 @@ public class DoController extends Controller {
 			//sql+=type!=0?" and a.o_status="+type:"";
 			int isLook=json1.getIntValue("isLook");
 			String look=isLook!=0?" and isSend="+isLook:"";
-			
+			//优化(2019.3.5未完成)
 			String from ="select a.SHOW_ID,a.O_DESCRIBE,a.O_CUSTOMER_NAME,a.O_CUSTOMER,a.AT,a.O_EXECUTOR,a.O_EXECUTOR_NAME,a.SEND_TIME,unix_timestamp(a.O_CREATE_TIME)*1000 O_CREATE_TIME,"
 +"unix_timestamp(a.O_FINISH_TIME)*1000 O_FINISH_TIME,unix_timestamp(a.Real_FINISH_TIME)*1000 Real_FINISH_TIME,unix_timestamp(a.DELETE_TIME)*1000 DELETE_TIME,a.O_IS_DELETED ,"
 + " a.LIGHTNING,a.LOOKNUM,a.FBNUM,a.O_STATUS,f.USER_TYPE,f.isSend ISLOOK "
-					+"from t_1do_base a  "
+					+"from t_1do_base a  "  
 					+"LEFT JOIN (select * from t_1do_pstatus where USER_TYPE!=2 " +look+" and isDelete=1 and O_USER='"+loginName+"' GROUP BY SHOW_ID)f on a.SHOW_ID=f.SHOW_ID "
 					+"where "+sql+look;
 			/*String from11 ="select a.ID,a.O_CREATE_TIME,a.SEND_TIME,a.O_STATUS,f.USER_TYPE,f.isSend ISLOOK,a.O_IS_DELETED "
@@ -443,22 +452,21 @@ public class DoController extends Controller {
 			}
 			final String loginName=douser1==null?json.getString("loginName"):douser1.getString("loginName");
 			if((t1doBase.getOIsDeleted()==2&&StrUtil.isNotEmpty(json.getString("loginName")))||(t1doBase.getOIsDeleted()==2&&!douser1.getBooleanValue("isfw"))){
-				Db.update("update t_1do_pstatus set isSend=1 where SHOW_ID=? and O_USER=? and isDelete=1 and USER_TYPE!=2 and online=2",t1doBase.getShowId(),loginName);
-				Db.update("update t_1do_fwpstatus set isSend=1 where SHOW_ID=? and O_USER=? and online=2",t1doBase.getShowId(),loginName);
+			
+				DbUtil.update(t1doBase.getShowId(),loginName, 5, 0,"","");
+				DbUtil.update(t1doBase.getShowId(),loginName, 6, 0,"","");
 				renderJson(JsonUtil.getMap(200, "该1do已删除"));
 				return;
 			}
 			final String username=douser1.getString("username");
-			//t1doBase.setLIGHTNING(t1doBase.getIdoFeedbacks44().size());
 			//修改
-			int i=Db.update("update t_1do_pstatus set isSend=1 where SHOW_ID=? and O_USER=? and isDelete=1 and USER_TYPE!=2 and online=2",t1doBase.getShowId(),loginName);
-			int j=Db.update("update t_1do_fwpstatus set isSend=1 where SHOW_ID=? and O_USER=? and online=2",t1doBase.getShowId(),loginName);
+			int i=DbUtil.update(t1doBase.getShowId(),loginName, 5, 0,"","");	
+			int j=DbUtil.update(t1doBase.getShowId(),loginName, 6, 0,"","");
 			//在线已读
-			Db.update("update t_1do_pstatus set online=1,isSend=1 where SHOW_ID=? and O_USER=?",json.getString("SHOW_ID"),loginName);
-			Db.update("update t_1do_fwpstatus set online=1,isSend=1 where SHOW_ID=? and O_USER=?",json.getString("SHOW_ID"),loginName);
-			//修改创建用户
-			Db.update("update t_1do_base set CREATE_USER=?,CREATE_USER_NAME=? where CREATE_USER='1call' and SHOW_ID=?",loginName,username,t1doBase.getShowId());
+			DbUtil.update(t1doBase.getShowId(),loginName, 7, 0,"","");
 			
+			//修改创建用户
+			DbUtil.update(t1doBase.getShowId(),loginName, 8, 0,username,"");			
 			T1doPstatus t2=T1doPstatus.getCustomerOrExecutor(json.getString("SHOW_ID"),loginName,3);
 			//查询该1do参与人是否查看过
 			Record r=Db.findFirst("select * from t_1do_log a,t_1do_pstatus b where a.SHOW_ID=b.SHOW_ID and a.SHOW_ID=? and b.USER_TYPE=3 and a.O_USER=b.O_USER",json.getString("SHOW_ID"));
@@ -509,8 +517,7 @@ public class DoController extends Controller {
 			 JSONObject douser=getSessionAttr("1doUser");
 			 T1doPstatus t1=T1doPstatus.getUser(json.getString("SHOW_ID"),douser.getString("loginName"));
 			 if(douser.getBoolean("isfw")||StrUtil.getflag(t1.getUserType(), 1)){
-				int i= Db.update("UPDATE t_1do_base set "+json.getString("target")+"=? ,AT=? where SHOW_ID=?",json.getString("content"),json.getString("AT"),json.getString("SHOW_ID"));
-				if(i==1){
+				int i= DbUtil.update(json.getString("target"), json.getString("content"), 7, 0,json.getString("AT"),json.getString("SHOW_ID"));				if(i==1){
 					T1doBase t=T1doBase.getIdoBase(json.getString("SHOW_ID"));
 					 //T1doLog.saveLog(json.getString("SHOW_ID"),douser.getString("loginName"),douser.getString("username"), douser.getString("username")+"修改此1do", 14,t.getODescribe());
 					 T1doLog.saveLog(json.getString("SHOW_ID"),douser.getString("loginName"),douser.getString("username"), douser.getString("username")+"修改此1do", 14,new Temp(t.getODescribe(),json.getString("content")).toString());
@@ -590,13 +597,13 @@ public class DoController extends Controller {
 					T1doLog.saveLog(json.getString("SHOW_ID"), douser.getString("loginName"), douser.getString("username"), douser.getString("username")+"移除"+ts.get(i).getOUserName()+"出此1do", 8,ts.get(i).getOUserName());
 				
 				}
-				Db.update("update t_1do_pstatus set isDelete=2  where SHOW_ID=? and O_USER not in("+s+") and USER_TYPE=?",t1doBase.getShowId(),i1);
+				DbUtil.update(s, t1doBase.getShowId(), 10, i1, "", "");
 				for(int j = 0; j < temp.length; j++){
 					T1doPstatus t12=T1doPstatus.dao.findFirst("select * from t_1do_pstatus where isDelete=1 and SHOW_ID=? and O_USER=? and USER_TYPE=?",t1doBase.getShowId(),temp[j],i1);
 					if(t12!=null){
 						continue;
 					}				
-					int i=Db.update("update t_1do_pstatus set isDelete=1 where SHOW_ID=? and O_USER=? and USER_TYPE=?",t1doBase.getShowId(),temp[j],i1);
+					int i=DbUtil.update(t1doBase.getShowId(),temp[j],11,i1, "", "");
 					 if(i==0){
 						 
 						t.setShowId(json.getString("SHOW_ID")).setOUser(temp[j]).setOUserName(temp1[j]).save();
@@ -609,14 +616,14 @@ public class DoController extends Controller {
 
 				}
 				
-			}else if(json.getString("method").equals("remove")){	
-				Db.update("update t_1do_pstatus set isDelete=2  where SHOW_ID=? and O_USER=? and USER_TYPE=?",t1doBase.getShowId(),json.getString("useraccount"),i1);
+			}else if(json.getString("method").equals("remove")){
+				DbUtil.update(t1doBase.getShowId(),json.getString("useraccount"),12,i1, "", "");
 				T1doLog.saveLog(t1doBase.getShowId(), douser.getString("loginName"), douser.getString("username"), douser.getString("username")+"移除"+json.getString("username")+"出此1do", 8,json.getString("username"));
 			}else{
 				String[] temp =json.getString("useraccount").split(";");
 				String[] temp1 =json.getString("username").split(";");
 				for (int j = 0; j < temp.length; j++) {
-					int i=Db.update("update t_1do_pstatus set isDelete=1 where SHOW_ID=? and O_USER=? and USER_TYPE=?",t1doBase.getShowId(),temp[j],i1);
+					int i=DbUtil.update(t1doBase.getShowId(),temp[j],13,i1, "", "");
 				 if(i==0){
 					 
 					t.setShowId(json.getString("SHOW_ID")).setOUser(temp[j]).setOUserName(temp1[j]).setOtherid(i1==3?2:0).save();
@@ -725,8 +732,7 @@ public class DoController extends Controller {
 		public void closeIdo() {
 			JSONObject json=JsonUtil.getJSONObject(getRequest()); 	
 			JSONObject douser=getSessionAttr("1doUser");
-			Db.update("update t_1do_pstatus set online=2 where SHOW_ID=? and O_USER=?",json.getString("SHOW_ID"),douser.getString("loginName"));
-			Db.update("update t_1do_fwpstatus set online=2 where SHOW_ID=? and O_USER=?",json.getString("SHOW_ID"),douser.getString("loginName"));
+			DbUtil.update(json.getString("SHOW_ID"),douser.getString("loginName"), 14, 0, "", "");
 			renderJson(JsonUtil.getMap(200, "下线成功"));
 	
 		}
@@ -813,15 +819,12 @@ public class DoController extends Controller {
 					t1doBase.setOStatus(4).update();
 					t1doPstatus.setOStatus(4).update();
 					t1doBase.setSendTime(new Date().getTime()).setFBNUM(t1doBase.getFBNUM()+1).update();
-					Db.update("update t_1do_pstatus set O_STATUS=4 where SHOW_ID=? and USER_TYPE!=3",t1doFeedback.getShowId());
-					Db.update("update t_1do_pstatus set isSend=2  where  online=2 and SHOW_ID=? and (USER_TYPE=1 or O_USER=? ) and isDelete=1",t1doFeedback.getShowId(),douser.getString("loginName"));
-					Db.update("update t_1do_fwpstatus set isSend=2 where SHOW_ID=? and online=2 ",t1doFeedback.getShowId());
+					DbUtil.update(t1doFeedback.getShowId(),douser.getString("loginName"), 15, 0, "", "");
 					
 		           	new Thread(new SendIdo(t1doBase,3,douser.getString("loginName"),"",1)).start();
 				}else{
 					t1doBase.setSendTime(new Date().getTime()).setFBNUM(t1doBase.getFBNUM()+1).update();
-					Db.update("update t_1do_pstatus set isSend=2 where SHOW_ID=? and isDelete=1 and online=2",t1doFeedback.getShowId());
-					Db.update("update t_1do_fwpstatus set isSend=2 where SHOW_ID=? and online=2",t1doFeedback.getShowId());
+					DbUtil.update(t1doFeedback.getShowId(),douser.getString("loginName"), 16, 0, "", "");
 					final int temp=t1doBase.getOStatus()==3?1:t1doBase.getOStatus();									
 		           	new Thread(new SendIdo(t1doBase,temp,douser.getString("loginName"),"",1)).start();
 
@@ -865,8 +868,9 @@ public class DoController extends Controller {
 				        	   t1doBase.setSendTime(new Date().getTime()).update();
 							
 				           	new Thread(new SendIdo(t1doBase,7,"","",1)).start();
-
-							Db.update("update t_1do_relation set TYPE=6 where SHOW_ID=? or RELATION_SHOW_ID=?",showID,showID);
+				           	
+				           	Db.update("update t_1do_relation set TYPE=6 where  RELATION_SHOW_ID=?",showID);
+				           	Db.update("update t_1do_pstatus set O_STATUS=6,STATUS='已删除' where SHOW_ID=?",showID);
 							System.out.println("删除成功");
 						}else{
 							System.out.println("删除失败");
@@ -897,16 +901,16 @@ public class DoController extends Controller {
 				//T1doStatus t=T1doStatus.dao.findFirst("select * from t_1do_status where SHOW_ID=?",json.getString("SHOW_ID"));
 				if(t1doBase.getOStatus()==5){
 					//修改
-					Db.update("update t_1do_pstatus set isSend=2 where SHOW_ID=? and O_USER=? and isDelete=1 and USER_TYPE!=2 and online=2",t1doBase.getShowId(),douser.getString("loginName"));
-					Db.update("update t_1do_fwpstatus set isSend=2 where SHOW_ID=? and O_USER=? and online=2",t1doBase.getShowId(),douser.getString("loginName"));
+					Db.update("update t_1do_pstatus set isSend=2 where SHOW_ID=? and O_USER=? and isDelete=1 and USER_TYPE!=2 and (online=2 or gmt_modified<CURDATE())",t1doBase.getShowId(),douser.getString("loginName"));
+					Db.update("update t_1do_fwpstatus set isSend=2 where SHOW_ID=? and O_USER=? and (online=2 or gmt_modified<CURDATE())",t1doBase.getShowId(),douser.getString("loginName"));
 					int i=Db.update("update t_1do_base set O_IS_DELETED=2 ,DELETE_TIME=now(),O_STATUS=6 where SHOW_ID=?",json.getString("SHOW_ID"));	  
 					if(i==1){
 						T1doLog.saveLog(json.getString("SHOW_ID"), douser.getString("loginName"), douser.getString("username"), douser.getString("username")+"删除此1do", 12,"");
 			        	   t1doBase.setSendTime(new Date().getTime()).update();
 						 
 			           	new Thread(new SendIdo(t1doBase,7,"","",1)).start();
-
-						Db.update("update t_1do_relation set TYPE=6 where SHOW_ID=? or RELATION_SHOW_ID=?",json.getString("SHOW_ID"),json.getString("SHOW_ID"));
+			           	Db.update("update t_1do_pstatus set O_STATUS=6,STATUS='已删除' where SHOW_ID=?",json.getString("SHOW_ID"));
+						Db.update("update t_1do_relation set TYPE=6 where  RELATION_SHOW_ID=?",json.getString("SHOW_ID"));
 						renderJson(JsonUtil.getMap(200, "删除成功"));
 					  }else{
 						renderJson(JsonUtil.getMap(201, "删除失败"));
@@ -926,8 +930,8 @@ public class DoController extends Controller {
 	        	   t1doBase.setSendTime(new Date().getTime()).update();
 				 
 	           	new Thread(new SendIdo(t1doBase,8,"","",1)).start();
-
-				Db.update("update t_1do_relation set TYPE=5 where SHOW_ID=? or RELATION_SHOW_ID=?",json.getString("SHOW_ID"),json.getString("SHOW_ID"));
+	           	Db.update("update t_1do_pstatus set O_STATUS=5,STATUS='已完成' where SHOW_ID=?",json.getString("SHOW_ID"));
+				Db.update("update t_1do_relation set TYPE=5 where  RELATION_SHOW_ID=?",json.getString("SHOW_ID"));
 				renderJson(JsonUtil.getMap(200, "恢复成功"));
 			  }else{
 				renderJson(JsonUtil.getMap(201, "恢复失败"));
@@ -946,8 +950,9 @@ public class DoController extends Controller {
 			T1doLog.saveLog(json.getString("SHOW_ID"), douser.getString("loginName"), douser.getString("username"), douser.getString("username")+"要求重做此1do", 15,"");
 			 
            	new Thread(new SendIdo(t1doBase,1,"","",1)).start();
-
-			Db.update("update t_1do_relation set TYPE=3 where SHOW_ID=? or RELATION_SHOW_ID=?",json.getString("SHOW_ID"),json.getString("SHOW_ID"));
+           	Db.update("update t_1do_pstatus set O_STATUS=1,STATUS='已送达' where SHOW_ID=? and USER_TYPE=1",json.getString("SHOW_ID"));
+           	Db.update("update t_1do_pstatus set O_STATUS=3,STATUS='待接单' where SHOW_ID=? and USER_TYPE=3",json.getString("SHOW_ID"));
+			Db.update("update t_1do_relation set TYPE=3 where  RELATION_SHOW_ID=?",json.getString("SHOW_ID"));
 			renderJson(JsonUtil.getMap(200, "该1do已进入重做流程"));
 			}else{
 				renderJson(JsonUtil.getMap(202, "权限不足"));
@@ -955,8 +960,7 @@ public class DoController extends Controller {
 		}
 			
 		}
-		//附件单独上传
-		
+		//附件单独上传		
 		@Before(Tx.class)
 		public void upload() throws IOException {
 			MultipartParser mp = new MultipartParser(this.getRequest(), 52428800, false, false,"UTF-8");//52428800=50*1024*1024
@@ -1057,7 +1061,6 @@ public class DoController extends Controller {
 			.setCreateUserName(douser.getString("username")).setShowId(showId).setSendTime(new Date().getTime()).setOStatus(3)
 			.setFBNUM(uploadFiles.size()).save(); //.setORange(StrUtil.getOnly(t1doBase.getOCustomer(),t1doBase.getCreateUser(),t1doBase.getOExecutor())).setORangeName(StrUtil.getOnly(t1doBase.getOCustomerName(),t1doBase.getCreateUserName(),t1doBase.getOExecutorName()))
 			t1doBase.savefw();//保存整理层为查看通知做准备。
-			new Thread(new AddLabel(t1doBase.getODescribe(), showId,2)).start();//批量添加标签
 			/*String[] users={t1doBase.getOCustomer(),t1doBase.getCreateUser(),t1doBase.getOExecutor()};
 			String[] usernames={t1doBase.getOCustomerName(),t1doBase.getCreateUserName(),t1doBase.getOExecutorName()};
 			T1doPstatus.saveIdoPstatus1(t1doBase.getShowId(),users,usernames);*/
@@ -1078,7 +1081,9 @@ public class DoController extends Controller {
 			}
 			
 			
+			
 	        new Thread(new SendIdo(t1doBase,1,"","",1)).start();
+	        new Thread(new AddLabel(t1doBase.getODescribe(), showId,2)).start();//批量添加标签
 
 			renderJson(JsonUtil.getMap(200, "创建1do成功！"));
 		}
@@ -1112,22 +1117,20 @@ public class DoController extends Controller {
 					//三实库
 					new Thread(new SendIdo(t1doBase,5,t1doFeedback.getFBCONTENT())).start();
 				}
+				
 				if(t1doPstatus!=null&&t1doBase.getOStatus()==3){
+					//第一个参与人反馈修改工单状态
 					//t1doBase.update();
-					t1doPstatus.setOStatus(4).update();
-					t1doBase.setOStatus(4).setSendTime(new Date().getTime()).setFBNUM(t1doBase.getFBNUM()+1).update();
-					Db.update("update t_1do_pstatus set O_STATUS=4 where SHOW_ID=? and USER_TYPE!=3",t1doFeedback.getShowId());
-					Db.update("update t_1do_pstatus set isSend=2  where  online=2 and SHOW_ID=? and (USER_TYPE=1 or O_USER=? ) and isDelete=1",t1doFeedback.getShowId(),douser.getString("loginName"));
-					Db.update("update t_1do_fwpstatus set isSend=2 where SHOW_ID=? and online=2 ",t1doFeedback.getShowId());
-					 
+					t1doPstatus.setOStatus(4).setSTATUS("已接单").update();
+					t1doBase.setOStatus(4).setSendTime(new Date().getTime()).setFBNUM(t1doBase.getFBNUM()+1).update();	
+					DbUtil.update(t1doFeedback.getShowId(),douser.getString("loginName"), 15, 0, "", ""); 
 		           	new Thread(new SendIdo(t1doBase,3,douser.getString("loginName"),"",1)).start();
-
+		           	
 				}else{
 					t1doBase.setSendTime(new Date().getTime()).setFBNUM(t1doBase.getFBNUM()+1).update();
-					Db.update("update t_1do_pstatus set isSend=2 where SHOW_ID=? and isDelete=1 and online=2",t1doFeedback.getShowId());
-					Db.update("update t_1do_fwpstatus set isSend=2 where SHOW_ID=? and online=2",t1doFeedback.getShowId());
-					//final int temp=t1doBase.getOStatus()==3?1:t1doBase.getOStatus();									
-					 
+					//final int temp=t1doBase.getOStatus()==3?1:t1doBase.getOStatus();
+					//反馈设置用户未读
+					DbUtil.update(t1doFeedback.getShowId(),douser.getString("loginName"), 16, 0, "", ""); 
 		           	new Thread(new SendIdo(t1doBase,9,douser.getString("loginName"),"",1)).start();
 
 				}
@@ -1149,16 +1152,12 @@ public class DoController extends Controller {
 						t1doBase.setSendTime(new Date().getTime()).setLIGHTNING(t1doBase.getLIGHTNING()+1).update();
 						str+="催办此1do";						
 						t1doFeedback.setFBCONTENT(str).save();
-						Db.update("update t_1do_pstatus set urge_isLook=0 where SHOW_ID=?",t1doBase.getShowId());
-						Db.update("update t_1do_base b,(select SHOW_ID,GROUP_CONCAT(O_USER_NAME) O_USER_NAME from(select SHOW_ID,O_USER_NAME from t_1do_feedback where fb_type=4 group by SHOW_ID,O_USER_NAME)a group by SHOW_ID) c" 
-                        +" set b.URGENAME=c.O_USER_NAME where b.SHOW_ID=c.SHOW_ID and b.SHOW_ID=?",t1doBase.getShowId());
-						try {
-							new UrgeController().sendMessage(t1doBase.getShowId());
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						 
+						Db.update("update t_1do_pstatus set isSend=2,urge_isLook=0 where SHOW_ID=? and isDelete=1 and (online=2 or gmt_modified<CURDATE())",t1doBase.getShowId());
+						//Db.update("update t_1do_pstatus set urge_isLook=0 where SHOW_ID=?",t1doBase.getShowId());
+						Db.update("update t_1do_base b,(select SHOW_ID,GROUP_CONCAT(O_USER_NAME) O_USER_NAME,GROUP_CONCAT(O_USER) O_USER from(select SHOW_ID,O_USER_NAME,O_USER from t_1do_feedback where fb_type=4 group by SHOW_ID,O_USER_NAME)a group by SHOW_ID) c" 
+                        +" set b.URGENAME=c.O_USER_NAME,b.URGESHOWID=c.O_USER where b.SHOW_ID=c.SHOW_ID and b.SHOW_ID=?",t1doBase.getShowId());
+						
+						new UrgeController().sendMessage(t1doBase.getShowId());//发送催报给连接websoct的客户端						 
 			           	new Thread(new SendIdo(t1doBase,4,"","",1)).start();
 
 					}else{
@@ -1171,12 +1170,13 @@ public class DoController extends Controller {
 					if(douser.getBoolean("isfw")||StrUtil.getflag(t1.getUserType(), 7)){
 						
 						//int i=Db.update("update t_1do_status set O_STATUS=5 where SHOW_ID=?",t1doFeedback.getShowId());
-						if(t1doBase.getOStatus()==5||t1doBase.getOStatus()==6){
+						if(t1doBase.getOStatus()>=5){
 							renderJson(JsonUtil.getMap(200, "该1do已经办结"));
 							return;
 						}
-						Db.update("update t_1do_pstatus set O_STATUS=5 and isSend=2 where SHOW_ID=? and online=2",t1doFeedback.getShowId());
-						Db.update("update t_1do_fwpstatus set isSend=2 where SHOW_ID=? and online=2",t1doBase.getShowId());
+						Db.update("update t_1do_pstatus set O_STATUS=5,STATUS='已完成'  where SHOW_ID=? ",t1doFeedback.getShowId());
+						Db.update("update t_1do_pstatus set isSend=2 where SHOW_ID=? and (online=2 or gmt_modified<CURDATE())",t1doFeedback.getShowId());
+						Db.update("update t_1do_fwpstatus set isSend=2 where SHOW_ID=? and (online=2 or gmt_modified<CURDATE())",t1doBase.getShowId());
 						str+="确认办结";
 						t1doFeedback.setFBCONTENT("确认办结").save();
 						t1doBase.setRealFinishTime(new Date()).setSendTime(new Date().getTime()).setFBNUM(t1doBase.getFBNUM()+1).setOStatus(5).update();						
@@ -1281,17 +1281,7 @@ public class DoController extends Controller {
 		}
 	   
 	   
-		/*
-		 2018年6月21日下午2:36:27 coco  //新增1do分类（T1doType）
-		*/
-		public void test() {
-			Record t=Db.findFirst("select * from t_1do_base");
-			new Thread(new Runnable() {
-				@Override
-				public void run() {}
-			}).start();
-			renderJson(t);
-		}
+		
 		public void saveIdoType() {
 			JSONObject json=JsonUtil.getJSONObject(getRequest());
 			T1doType t1doType=json.toJavaObject(T1doType.class);
@@ -1324,62 +1314,8 @@ public class DoController extends Controller {
 	         renderJson(map);
 	    	  
 	}
-	      /*
-		 2018年8月6日下午3:38:11 coco
-		*/
-		public void getsessionName() {
-			JSONObject json1=JsonUtil.getJSONObject(getRequest());
-			JSONObject json= new JSONObject();
-			JSONObject json2= new JSONObject();
-			JSONObject json3= new JSONObject();
-			JSONObject json4= new JSONObject();
-			json.put("appName", "launchr");
-			json.put("appToken", "verify-code");
-			json.put("userName", "NO6lZyJjYRCAKd9R");
-			/*json.put("userToken", json1.getString("LoginToken"));
-			json.put("userName", json1.getString("loginName"));*/
-			json.put("sessionName", json1.getString("GROUPID"));
-			json2.put("param", json);
-			json3.put("body", json2);
-			json4.put("async",false);
-			json4.put("authToken","NhHCGqeKtkK0dFnznZxP9FxeTF8=");
-			json4.put("companyCode","xcgov");
-			json4.put("companyShowID","b5WJZ1bRLDCb7x2B");
-			json4.put("language","zh-cn");
-			json4.put("loginName","NO6lZyJjYRCAKd9R");
-			json4.put("resourceUri","/Chat-Module/chat/session");
-			json4.put("type","POST");
-			json4.put("userName","boyd");
-			json3.put("header",json4);
-		   String str=HttpUtil.doPost1("http://xcgovapi.hzxc.gov.cn/Chat-Module/chat/session", json3.toString());
-		   JSONObject json33 = JSON.parseObject(str);
-			String Data1=json33.getString("Body");
-			JSONObject json22 = JSON.parseObject(Data1);
-			String Data2=json22.getString("response");
-			JSONObject json11 = JSON.parseObject(Data2);
-			String Data=json11.getString("Data");
-			JSONObject json333 = JSON.parseObject(Data);
-			String Data22=json333.getString("data");
-			renderJson(Data22);
-		}
-	      public static void main(String[] args) {
-	  		int i=10;
-	  		if (i>1) {
-				System.out.println(1);
-			} else if(i>2) {
-				System.out.println(2);
-
-			}else{
-				System.out.println(3);
-
-			}
-	  		
-	  		/*HashMap<String,String> uploadFiles=new HashMap<String,String>();
-	  		uploadFiles.put("1", "sssss");
-	  		System.out.println(uploadFiles);
-
-	  		System.out.println("1234.jsp".substring("1234.jsp".lastIndexOf(".")));*/
-	  	}	
+	     
+	      
 		
 
 }

@@ -414,4 +414,13 @@ public abstract class BaseT1doBase<M extends BaseT1doBase<M>> extends Model<M> i
 		return getStr("URGENAME");
 	}
 
+	public M setURGESHOWID(java.lang.String URGESHOWID) {
+		set("URGESHOWID", URGESHOWID);
+		return (M)this;
+	}
+	
+	public java.lang.String getURGESHOWID() {
+		return getStr("URGESHOWID");
+	}
+
 }

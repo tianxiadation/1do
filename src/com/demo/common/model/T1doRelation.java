@@ -31,7 +31,9 @@ public class T1doRelation extends BaseT1doRelation<T1doRelation> {
 	 2019年2月12日 coco 注解：//查询关联1do
 	 */
 	public static List<Record> selectRelation(String showId,String sql) {
-		return Db.find("select  a.ID,a.SIMILARITY,b.SHOW_ID,a.TYPE,b.O_DESCRIBE from t_1do_relation a,t_1do_base b "
+		return Db.find("select  a.ID,a.SIMILARITY,b.SHOW_ID,a.TYPE,b.O_DESCRIBE,unix_timestamp(b.O_CREATE_TIME)*1000 O_CREATE_TIME,unix_timestamp(b.O_FINISH_TIME)*1000 O_FINISH_TIME,b.FBNUM,b.LOOKNUM,"
+				+ "(case b.O_STATUS when 3 then '待接单' when 4 then '已接单' when 5 then '已完成' else '已删除' end) O_STATUS"
+				+ ",b.O_CUSTOMER_NAME,b.O_EXECUTOR_NAME,b.O_CUSTOMER,b.O_EXECUTOR from t_1do_relation a,t_1do_base b "
 				+ "where (a.SIMILARITY>10 or a.TYPE=0) and a.RELATION_SHOW_ID=b.SHOW_ID and a.SHOW_ID=? "+sql+" ORDER BY a.SORT,a.SIMILARITY desc",showId);
 	}
 	/*

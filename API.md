@@ -3466,13 +3466,22 @@ Content-Disposition: form-data; name="FB_TYPE"
 
 #### 48.4 Output
 
-| 字段       | 类型   | 描述及要求                    |
-| ---------- | ------ | ----------------------------- |
-| SHOW_ID    | String | 关联的1do工单编号             |
-| SIMILARITY | int    | 相似度                        |
-| TYEP       | String | 0手动添加的关联。6已删除的1do |
-| ID         | int    | ID（排序时用）                |
-| O_DESCRIBE | date   | 内容                          |
+| 字段            | 类型   | 描述及要求                    |
+| --------------- | ------ | ----------------------------- |
+| SHOW_ID         | String | 关联的1do工单编号             |
+| SIMILARITY      | int    | 相似度                        |
+| TYEP            | String | 0手动添加的关联。6已删除的1do |
+| ID              | int    | ID（排序时用）                |
+| O_DESCRIBE      | date   | 内容                          |
+| O_FINISH_TIME   | long   | 拟完成时间                    |
+| O_CUSTOMER      | String | 发起人showid                  |
+| O_CUSTOMER_NAME | String | 发起人                        |
+| O_EXECUTOR      | String | 参与人showid                  |
+| O_EXECUTOR_NAME | String | 参与人                        |
+| FBNUM           | int    | 反馈数                        |
+| LOOKNUM         | int    | 查看数                        |
+| O_CREATE_TIME   | long   | 创建时间                      |
+| O_STATUS        | String | 工单状态                      |
 
 **Success**
 
@@ -3481,19 +3490,33 @@ Content-Disposition: form-data; name="FB_TYPE"
     "code": 200,
     "data": [
         {
-            "SHOW_ID": "49285162323673088",
-            "ID": 2785,
-            "SIMILARITY": 80,
+             "O_FINISH_TIME": 1530374400000,
+            "O_CUSTOMER_NAME": "刘韬",
+            "O_EXECUTOR_NAME": "方升群",
+            "FBNUM": 0,
+            "LOOKNUM": 0,
+            "O_CREATE_TIME": 1552271527000,
+            "SHOW_ID": "134734151214432256",
+            "ID": 1182976,
+            "SIMILARITY": 100,
             "TYPE": 3,
-            "O_DESCRIBE": "1.bug: 1do事项的评论呢？\n"
+            "O_DESCRIBE": "对接主动办接口1",
+            "O_STATUS": "待接单"
         },
         。。。。。
         {
-            "SHOW_ID": "53541237973581824",
-            "ID": 2835,
+             "O_FINISH_TIME": null,
+            "O_CUSTOMER_NAME": "沈力伟",
+            "O_EXECUTOR_NAME": "雷卿;于璟明",
+            "FBNUM": 5,
+            "LOOKNUM": 11,
+            "O_CREATE_TIME": 1539223972000,
+            "SHOW_ID": "80008740501192704",
+            "ID": 1179017,
             "SIMILARITY": 11,
-            "TYPE": 3,
-            "O_DESCRIBE": "1.1do任务：陈区长对武林灯光秀、武林夜景、音乐喷泉的展示有要求，请江锋负责，在8月中旬完成\n"
+            "TYPE": 4,
+            "O_DESCRIBE": "数据公示板里的6大模块页面内容，除了实时对接的那些内容外，其他都改为整理层设计的页面。",
+            "O_STATUS": "已接单"
         }
     ],
     "message": "Success"
@@ -3600,15 +3623,42 @@ Content-Disposition: form-data; name="FB_TYPE"
 }
 ```
 
-### 52.1 功能 ：催办弹窗websocket连接
+### 52.1 功能 ：删除关联（传送门）
 
-#### 52.2 连接地址：
+#### 52.2 请求方法：/1do/do/deleteRelation
+
+#### 52.3 参数说明：
+
+| 字段             | 类型   | 是否必填 | 描述及要求        |
+| ---------------- | ------ | -------- | ----------------- |
+| SHOW_ID          | String | 必填     | 1do工单编号       |
+| RELATION_SHOW_ID | String | 必填     | 关联的1do工单编号 |
+
+```
+{"RELATION_SHOW_ID":"49201126158893056","SHOW_ID":"49050403815292928"}
+```
+
+**Success**
+
+```
+{
+    "code": 200,
+    "data": 1,
+    "message": "Success"
+}
+```
+
+### 53.1 功能 ：催办弹窗websocket连接
+
+### 53.1 功能 ：催办弹窗websocket连接
+
+#### 53.2 连接地址：
 
 #### 测试：wss://tyhy.hzxc.gov.cn:28443/1do/websocketForUrge
 
 #### 正式：wss://tyhy.hzxc.gov.cn:8443/1do/websocketForUrge
 
-#### 52.3 连接成功返回
+#### 53.3 连接成功返回
 
 | 字段 | 类型   | 描述及要求 |
 | ---- | ------ | ---------- |
@@ -3620,7 +3670,7 @@ Content-Disposition: form-data; name="FB_TYPE"
 {"code":200,"data":0,"message":"Success"}
 ```
 
-#### 52.4 连接成功后发身份信息到后台
+#### 53.4 连接成功后发身份信息到后台
 
 | 字段 | 类型   | 是否必填 | 描述及要求                                            |
 | ---- | ------ | -------- | ----------------------------------------------------- |
@@ -3641,24 +3691,25 @@ Content-Disposition: form-data; name="FB_TYPE"
 | SHOW_ID       | String | 工单编号                 |
 | sessionid     | String | websocket连接的sessionid |
 | URGENAME      | String | 催办人                   |
+| URGESHOWID    | String | 催办人showid             |
 | O_DESCRIBE    | String | 内容                     |
 
 ```
 {"code":200,"data":[{"O_FINISH_TIME":"2018-07-01 00:00:00","O_CREATE_TIME":"2019-02-27 14:50:26","LIGHTNING":3,"SHOW_ID":"130450506320445440","sessionid":"0","URGENAME":"方升群,王帅帅","O_DESCRIBE":"打标签新建一个1do。1.1do任务：请雷卿负责三维地图的一幢楼宇信息全面精确展示，如环球中心、坤和等，可根据实际情况自行选择决定，要求在8月中旬完成。1.@蒋娅楠 1do任务：，@老徐 配合，务必在本周之内关闭老的统一用户系统，制订新的统一用户管理规范，特别是密码等安全管理规范并形成制度通知下发。一起完成。\n \n"}],"message":"Success"}
 ```
 
-### 53.1 功能 ：加载催报信息（综合信息平台对接用）
+### 54.1 功能 ：加载催报信息（综合信息平台对接用）
 
-#### 1.2 请求方法：post  1do/urge/getUrge
+#### 54.2 请求方法：post  1do/urge/getUrge
 
-#### 1.3 参数说明：
+#### 54.3 参数说明：
 
 | 字段    | 类型   | 是否必填 | 描述及要求             |
 | ------- | ------ | -------- | ---------------------- |
 | appName | String | 必填     | 账号名如：fangshengqun |
-| appKey  | String | 必填     | appkey：fgeih68gqwgqg7 |
+| appkey  | String | 必填     | appkey：zhxxpt         |
 
-#### 1.4 Output
+#### 54.4 Output
 
 | 字段          | 类型    | 描述及要求                                            |
 | ------------- | ------- | ----------------------------------------------------- |
@@ -3707,19 +3758,19 @@ Content-Disposition: form-data; name="FB_TYPE"
 
 
 
-### 54.1 功能 ：催办已读
+### 55.1 功能 ：催办已读
 
-#### 2.2 请求方法：post  1do/urge/Look
+#### 55.2 请求方法：post  1do/urge/look
 
-#### 2.3 参数说明：
+#### 55.3 参数说明：
 
 | 字段    | 类型   | 是否必填 | 描述及要求             |
 | ------- | ------ | -------- | ---------------------- |
 | appName | String | 必填     | 账号名如：fangshengqun |
-| appKey  | String | 必填     | appkey：fgeih68gqwgqg7 |
+| appkey  | String | 必填     | appkey：zhxxpt         |
 | SHOW_ID | String | 必填     | 工单编号               |
 
-#### 2.4 Output
+#### 55.4 Output
 
 ```
 {

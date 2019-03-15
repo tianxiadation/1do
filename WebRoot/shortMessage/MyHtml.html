@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>测试重定向</title>
+  </head>
+  <body>
+    <script>
+      var app = ''
+      var url = location.href
+      app = url.replace('https://tyhy.hzxc.gov.cn:28443/1do/shortMessage'+
+      '/MyHtml.html?SHOW_ID=', '1call://open/1do/')
+		
+      location.href = app
+    </script>
+   
+    <!-- 1call://open/1do/131187122634752000
+		https://tyhy.hzxc.gov.cn:28443/1do/shortMessage/MyHtml.html?SHOW_ID=131187122634752000
+      	http://10.18.28.2:8080/1do/shortMessage/MyHtml.html?SHOW_ID=131187122634752000 -->
+      	
+  </body>
+</html>
