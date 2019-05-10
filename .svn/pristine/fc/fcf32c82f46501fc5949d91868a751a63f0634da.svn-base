@@ -199,7 +199,7 @@ public class DemoConfig extends JFinalConfig {
 				
 			}
 		}).start();
-		new Timer().schedule(new MyTask(), 600000, 3600000);
+		new Timer().schedule(new MyTask(), 1000, 3600000);
 	}
 
 	
