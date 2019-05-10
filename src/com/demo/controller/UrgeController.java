@@ -15,11 +15,13 @@ import javax.websocket.server.ServerEndpoint;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.demo.common.model.T1doUrgeWebsocket;
+import com.demo.common.model.TRegUser;
 import com.demo.service.DoService;
 import com.demo.util.JsonUtil;
 import com.demo.util.MsgUtil;
 import com.jfinal.core.Controller;
 import com.jfinal.kit.JsonKit;
+import com.jfinal.kit.StrKit;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 
@@ -34,16 +36,16 @@ public class UrgeController extends Controller{
 	public void onOpen(Session session) {
 		
 		System.out.println("Session " + session.getId() + " has opened a connection");
-        try {
+       // try {
             this.session=session;
            // webSocketSet.add(this);     //加入set中
             webSocketSet.add(this);
             System.out.println(JsonKit.toJson(MsgUtil.successMsg(session.getId())));
-            session.getBasicRemote().sendText(JsonKit.toJson(MsgUtil.successMsg(session.getId())));
+            //session.getBasicRemote().sendText(JsonKit.toJson(MsgUtil.successMsg(session.getId())));
            // session.getBasicRemote().send
-        } catch (IOException ex) {
+        /*} catch (IOException ex) {
             ex.printStackTrace();
-        } 
+        } */
 	}
 
 	@OnClose
@@ -63,23 +65,26 @@ public class UrgeController extends Controller{
         json.toJavaObject(T1doUrgeWebsocket.class).save();
        // T1doUrgeWebsocket u=((JSON) JSON.parseObject(requestJson).put("sessionid", session.getId())).toJavaObject(T1doUrgeWebsocket.class);        
      List<Record> list=  Db.find("select b.SHOW_ID,b.O_DESCRIBE,b.O_CREATE_TIME,b.O_FINISH_TIME,b.LIGHTNING,b.URGENAME,b.URGESHOWID from t_1do_pstatus a,t_1do_base b "
-+"where a.SHOW_ID=b.SHOW_ID and a.O_USER=? and a.USER_TYPE=3 and a.isDelete=1 and a.isSend=2 and b.O_STATUS<5 ORDER BY LIGHTNING desc",json.getString("user"));
++"where a.SHOW_ID=b.SHOW_ID and a.O_USER=? and a.USER_TYPE=3 and a.isDelete=1 and a.urge_isLook=0 and b.O_STATUS<5 ORDER BY LIGHTNING desc",json.getString("user"));
 		session.getBasicRemote().sendText(JsonKit.toJson(MsgUtil.successMsg(list)));
 	 
 	}	
 	public void sendMessage(String SHOW_ID) {
         //群发消息
         for(UrgeController item: webSocketSet){
-            try {
+           
             	List<Record> r=Db.find("select a.sessionid,b.SHOW_ID,b.O_DESCRIBE,b.O_CREATE_TIME,b.O_FINISH_TIME,b.LIGHTNING,b.URGENAME,b.URGESHOWID from t_1do_urge_websocket a,t_1do_base b,t_1do_pstatus c "+
 		"where a.user=c.O_USER and b.SHOW_ID=c.SHOW_ID and b.SHOW_ID=? "+
-				"and a.isOnline=1 and b.O_STATUS<5 and c.USER_TYPE=3 and c.isDelete=1 and a.isSend=2 and a.sessionid=? ",SHOW_ID,item.session.getId());
+				"and a.isOnline=1 and b.O_STATUS<5 and c.USER_TYPE=3 and c.isDelete=1 and c.urge_isLook=0 and a.sessionid=? ",SHOW_ID,item.session.getId());
             	if(r.size()>0)
-                item.session.getBasicRemote().sendText(JsonKit.toJson(MsgUtil.successMsg(r)));
-            } catch (IOException e) {
-                e.printStackTrace();
-                continue;
-            }
+					try {
+						item.session.getBasicRemote().sendText(JsonKit.toJson(MsgUtil.successMsg(r)));
+					} catch (Exception e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+						onClose(item.session);
+					}
+           
         }
         //renderJson(1);
     }
@@ -121,7 +126,21 @@ public class UrgeController extends Controller{
 			renderJson(MsgUtil.errorMsg("appkey error"));
 			return;
 		}
-		renderJson(MsgUtil.successMsg(Db.update("update t_1do_pstatus set isSend=1 where SHOW_ID=? and O_USER=(select SHOW_ID from t_reg_user where U_LOGIN_NAME=? or U_MAIL=?)",json.getString("showId"),json.getString("userName"),json.getString("userName"))));
+		/*if(json.toString().contains("appName")&&StrKit.notBlank(json.getString("appName"))){
+			renderJson(MsgUtil.successMsg(Db.update("update t_1do_pstatus set isSend=1,urge_isLook=1 where SHOW_ID=? and O_USER=?",json.getString("showId"),json.getString("appName"))));
+		}else if(json.toString().contains("userName")&&StrKit.notBlank(json.getString("userName"))){
+			renderJson(MsgUtil.successMsg(Db.update("update t_1do_pstatus set isSend=1,urge_isLook=1 where SHOW_ID=? and O_USER=(select SHOW_ID from t_reg_user where U_LOGIN_NAME=? or U_MAIL=?)",json.getString("showId"),json.getString("userName"),json.getString("userName"))));
+		}*/
+		
+		if(StrKit.notBlank(json.getString("appName"))){//1call传appName
+			renderJson(MsgUtil.successMsg(Db.update("update t_1do_pstatus set urge_isLook=1 where SHOW_ID=? and O_USER =(select SHOW_ID from t_reg_user where U_LOGIN_NAME=? or U_MAIL=? or SHOW_ID=?)",json.getString("showId"),json.getString("appName"),json.getString("appName"),json.getString("appName"))));
+		}else if(StrKit.notBlank(json.getString("userName"))){//综合信息系统传userName
+			renderJson(MsgUtil.successMsg(Db.update("update t_1do_pstatus set urge_isLook=1 where SHOW_ID=? and O_USER=(select SHOW_ID from t_reg_user where U_LOGIN_NAME=? or U_MAIL=?)",json.getString("showId"),json.getString("userName"),json.getString("userName"))));
+		}else if(StrKit.notBlank(json.getString("loginName"))){//1call传appName
+			renderJson(MsgUtil.successMsg(Db.update("update t_1do_pstatus set urge_isLook=1 where SHOW_ID=? and O_USER =(select SHOW_ID from t_reg_user where U_LOGIN_NAME=? or U_MAIL=? or SHOW_ID=?)",json.getString("SHOW_ID"),json.getString("loginName"),json.getString("loginName"),json.getString("loginName"))));
+		}else{
+			renderJson(MsgUtil.errorMsg("缺少参数"));
+		}
 		
 	}
 }

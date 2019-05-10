@@ -1,11 +1,9 @@
 package com.demo.interceptor;
 
-import java.util.LinkedHashMap;
-
-import javax.servlet.http.HttpSession;
-
 import org.apache.log4j.Logger;
 
+import com.demo.util.JsonUtil;
+import com.demo.util.StrUtil;
 import com.jfinal.aop.Interceptor;
 import com.jfinal.aop.Invocation;
 
@@ -16,18 +14,15 @@ public class MainInterceptor implements Interceptor {
 	public void intercept(Invocation inv) {
 		
 		// TODO Auto-generated method stub
-		LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
-		try {
-			//HttpSession session = inv.getController().getSession();
-			//System.out.println(session.getId());
+		//LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
+		//HttpSession session = inv.getController().getSession();
+		//System.out.println(session.getId());
+		try {	
+			log.error(inv.getActionKey());
 			inv.invoke();
 		}catch(Exception e) {
-			e.printStackTrace();
-			log.error(inv.getActionKey()+":"+e.getMessage());
-			map.put("code", 400);
-			map.put("message", e.getMessage());
-			inv.getController().renderJson(map);
-			
+			log.error(StrUtil.getTrace(e));
+			inv.getController().renderJson(JsonUtil.getMap(400, StrUtil.getTrace(e)));			
 		}
 		
 

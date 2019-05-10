@@ -2,18 +2,23 @@ package com.demo.controller;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Map;
 
 import com.demo.common.model.T1doBase;
 import com.demo.common.model.T1doLabel;
+import com.demo.common.model.T1doLabelFeedback;
 import com.demo.common.model.T1doRelation;
 import com.demo.util.HttpUtil;
-import com.demo.util.StrUtil;
 import com.jfinal.core.Controller;
 
 public class TestController extends Controller{
-	
+	/*
+	 2019年3月20日 coco 注解：
+	*/
+	public void action() {
+        Map<String, String[]> requestParams = getRequest().getParameterMap();
+		renderJson();
+	}
 	/*
 	 2019年2月12日 coco 注解：给所有1do打上标签
 	*/
@@ -49,6 +54,34 @@ public class TestController extends Controller{
 	 2019年2月12日 coco 注解：
 	*/
 	public static int getHashSet(List<T1doLabel> list,List<T1doLabel> list1) {
+		HashSet<String> hs = new HashSet<String>();
+		list.forEach(t->{
+			hs.add(t.getLABEL());
+		});
+		list1.forEach(t->{
+			hs.add(t.getLABEL());
+		});
+		return hs.size();
+		
+	}
+	/*
+	 2019年2月12日 coco 注解：
+	 */
+	public static int getHashSet1(HashSet<String> hs1,List<T1doLabel> list) {
+		HashSet<String> hs = new HashSet<String>();
+		list.forEach(t->{
+			hs.add(t.getLABEL());
+		});
+		hs1.forEach(t->{
+			hs.add(t);
+		});
+		return hs.size();
+		
+	}
+	/*
+	 2019年2月12日 coco 注解：
+	 */
+	public static int getHashSet2(List<T1doLabelFeedback> list1,List<T1doLabel> list) {
 		HashSet<String> hs = new HashSet<String>();
 		list.forEach(t->{
 			hs.add(t.getLABEL());

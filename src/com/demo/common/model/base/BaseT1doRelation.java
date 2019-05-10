@@ -9,15 +9,6 @@ import com.jfinal.plugin.activerecord.IBean;
 @SuppressWarnings({"serial", "unchecked"})
 public abstract class BaseT1doRelation<M extends BaseT1doRelation<M>> extends Model<M> implements IBean {
 
-	public M setID(java.lang.Long ID) {
-		set("ID", ID);
-		return (M)this;
-	}
-	
-	public java.lang.Long getID() {
-		return getLong("ID");
-	}
-
 	public M setShowId(java.lang.String showId) {
 		set("SHOW_ID", showId);
 		return (M)this;
@@ -25,6 +16,15 @@ public abstract class BaseT1doRelation<M extends BaseT1doRelation<M>> extends Mo
 	
 	public java.lang.String getShowId() {
 		return getStr("SHOW_ID");
+	}
+
+	public M setID(java.lang.Long ID) {
+		set("ID", ID);
+		return (M)this;
+	}
+	
+	public java.lang.Long getID() {
+		return getLong("ID");
 	}
 
 	public M setRelationShowId(java.lang.String relationShowId) {
@@ -70,6 +70,15 @@ public abstract class BaseT1doRelation<M extends BaseT1doRelation<M>> extends Mo
 	
 	public java.util.Date getMODIFYTIME() {
 		return get("MODIFYTIME");
+	}
+
+	public M setWEIGHT(java.lang.Integer WEIGHT) {
+		set("WEIGHT", WEIGHT);
+		return (M)this;
+	}
+	
+	public java.lang.Integer getWEIGHT() {
+		return getInt("WEIGHT");
 	}
 
 }

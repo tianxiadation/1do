@@ -8,7 +8,7 @@ import com.jfinal.core.Controller;
 public class ShortMessageController extends Controller {
 	//短信通过url跳转打开app
 	public void open1call(){
-		redirect("//1call://open/1do/"+getPara("SHOW_ID")); 
+		redirect("1call://open/1do/"+getPara("SHOW_ID")); 
 	}
 	/*
 	 2019年3月4日 coco 注解：

@@ -20,7 +20,7 @@ public class TRegUser extends BaseTRegUser<TRegUser> {
 	*/
 	public static JSONObject getUser(JSONObject json) {
 		
-		Record r= Db.findFirst("SELECT SHOW_ID ,LAST_LOGIN_TOKEN ,C_SHOW_ID FROM t_reg_user  where "
+		Record r= Db.findFirst("SELECT SHOW_ID ,LAST_LOGIN_TOKEN ,C_SHOW_ID,U_LOGIN_NAME,U_TRUE_NAME FROM t_reg_user  where "
 				+ "U_MAIL=? or U_LOGIN_NAME=?",json.getString("useraccount"),json.getString("useraccount"));		
 		if(r!=null){
 			List<TRegCompanyDept> list =TRegCompanyDept.dao.find("select b.SHOW_ID,b.D_NAME from t_reg_user_dept a, t_reg_company_dept b where a.U_DEPT_ID=b.SHOW_ID and a.U_NAME=?",r.getStr("SHOW_ID"));
@@ -34,7 +34,32 @@ public class TRegUser extends BaseTRegUser<TRegUser> {
 			json.put("D_NAME", lists1);
 			json.put("loginName", r.getStr("SHOW_ID"));
 			json.put("LoginToken", r.getStr("LAST_LOGIN_TOKEN"));
+			json.put("cShowId", r.getStr("C_SHOW_ID"));
+			//json.put("useraccount", r.getStr("U_LOGIN_NAME"));			
+			json.put("username", r.getStr("U_TRUE_NAME"));
+			return json;
+		}
+		
+		return null;
+	}
+	public static JSONObject getUserForShowId(String showid) {
+		JSONObject json=new JSONObject();
+		Record r= Db.findFirst("SELECT SHOW_ID ,LAST_LOGIN_TOKEN ,C_SHOW_ID,U_LOGIN_NAME,U_TRUE_NAME FROM t_reg_user  where SHOW_ID=? or U_LOGIN_NAME=?",showid,showid);		
+		if(r!=null){
+			List<TRegCompanyDept> list =TRegCompanyDept.dao.find("select b.SHOW_ID,b.D_NAME from t_reg_user_dept a, t_reg_company_dept b where a.U_DEPT_ID=b.SHOW_ID and a.U_NAME=?",r.getStr("SHOW_ID"));
+			List<String> lists=new ArrayList<String>();
+			List<String> lists1=new ArrayList<String>();
+			for (TRegCompanyDept t : list) {		
+				lists.add(t.getShowId());		
+				lists1.add(t.getDName());
+			}
+			json.put("U_DEPT_ID", lists);
+			json.put("D_NAME", lists1);
+			json.put("loginName", r.getStr("SHOW_ID"));
+			json.put("LoginToken", r.getStr("LAST_LOGIN_TOKEN"));
 			json.put("cShowId", r.getStr("C_SHOW_ID"));			
+			json.put("useraccount", r.getStr("U_LOGIN_NAME"));			
+			json.put("username", r.getStr("U_TRUE_NAME"));	
 			return json;
 		}
 		

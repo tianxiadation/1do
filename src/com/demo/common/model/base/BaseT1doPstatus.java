@@ -9,15 +9,6 @@ import com.jfinal.plugin.activerecord.IBean;
 @SuppressWarnings({"serial", "unchecked"})
 public abstract class BaseT1doPstatus<M extends BaseT1doPstatus<M>> extends Model<M> implements IBean {
 
-	public M setID(java.lang.Integer ID) {
-		set("ID", ID);
-		return (M)this;
-	}
-	
-	public java.lang.Integer getID() {
-		return getInt("ID");
-	}
-
 	public M setShowId(java.lang.String showId) {
 		set("SHOW_ID", showId);
 		return (M)this;
@@ -25,6 +16,15 @@ public abstract class BaseT1doPstatus<M extends BaseT1doPstatus<M>> extends Mode
 	
 	public java.lang.String getShowId() {
 		return getStr("SHOW_ID");
+	}
+
+	public M setID(java.lang.Integer ID) {
+		set("ID", ID);
+		return (M)this;
+	}
+	
+	public java.lang.Integer getID() {
+		return getInt("ID");
 	}
 
 	public M setOUser(java.lang.String oUser) {

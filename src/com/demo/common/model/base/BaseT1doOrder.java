@@ -9,15 +9,6 @@ import com.jfinal.plugin.activerecord.IBean;
 @SuppressWarnings({"serial", "unchecked"})
 public abstract class BaseT1doOrder<M extends BaseT1doOrder<M>> extends Model<M> implements IBean {
 
-	public M setId(java.lang.Long id) {
-		set("id", id);
-		return (M)this;
-	}
-	
-	public java.lang.Long getId() {
-		return getLong("id");
-	}
-
 	public M setShowId(java.lang.String showId) {
 		set("SHOW_ID", showId);
 		return (M)this;
@@ -25,6 +16,15 @@ public abstract class BaseT1doOrder<M extends BaseT1doOrder<M>> extends Model<M>
 	
 	public java.lang.String getShowId() {
 		return getStr("SHOW_ID");
+	}
+
+	public M setId(java.lang.Long id) {
+		set("id", id);
+		return (M)this;
+	}
+	
+	public java.lang.Long getId() {
+		return getLong("id");
 	}
 
 	public M setUseraccount(java.lang.String useraccount) {

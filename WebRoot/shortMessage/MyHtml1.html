@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>打开1call</title>
+  </head>
+  <body>
+    <script>
+      var app = ''
+      var appios = ''
+      var url = location.href
+      app = url.replace('https://tyhy.hzxc.gov.cn:8443/1do/shortMessage'+
+      '/MyHtml.html?SHOW_ID=', '1call://open/1do/')
+      appios = url.replace('https://tyhy.hzxc.gov.cn:8443/1do/shortMessage'+
+      '/MyHtml.html?SHOW_ID=', '1call://openOneDoDetail?showId=')
+	var u = navigator.userAgent, app = navigator.appVersion; 
+    var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1;//g 
+    var isIOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端 
+    if (isAndroid) {
+       // window.location.href = 'appDownload.html'; Android
+          location.href = app
+        } 
+    else if (isIOS) { 
+          location.href = appios } //IOS		
+     else{
+          location.href = appios
+     }     
+    </script>
+   
+    <!-- 1call://open/1do/131187122634752000
+		https://tyhy.hzxc.gov.cn:28443/1do/shortMessage/MyHtml.html?SHOW_ID=131187122634752000
+      	http://10.18.28.2:8080/1do/shortMessage/MyHtml.html?SHOW_ID=131187122634752000 -->
+      	
+  </body>
+</html>

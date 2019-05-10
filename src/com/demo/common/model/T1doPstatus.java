@@ -54,7 +54,12 @@ public class T1doPstatus extends BaseT1doPstatus<T1doPstatus> {
 			String[] sonUsers=users[j].split(";");
 			String[] sonUsernames=usernames[j].split(";");
 			for (int i = 0; i < sonUsers.length; i++) {
-				new T1doPstatus().setShowId(t1doBase.getShowId()).setOUser(sonUsers[i]).setOUserName(sonUsernames[i]).setOStatus(j+1).setUserType(j+1).setSTATUS(j+1==1?"已送达":"待接单").save();
+				int k=2;//未读
+				if(t1doBase.getCreateUser().equals(sonUsers[i])){
+					k=1;
+				}
+				new T1doPstatus().setShowId(t1doBase.getShowId()).setOUser(sonUsers[i]).setOUserName(sonUsernames[i]).setOStatus(3).setUserType(j+1).setIsSend(k).setSTATUS(j+1==1?"已送达":"待接单").save();//.setIsSend(j==0?1:2)
+				
 				//new T1doPset().setShowId(showID).setOUser(sonUsers[i]).setEventType("1;2;3;4;5;6;").setUserType(j+1).save();
 			}
 			

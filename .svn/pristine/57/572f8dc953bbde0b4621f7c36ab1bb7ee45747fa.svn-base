@@ -1,0 +1,16 @@
+package com.demo.util;
+
+public class UrlUtil {
+	//正式地址
+	/*public static String ip="https://tyhy.hzxc.gov.cn:8443";//附件地址
+	  public static String attrUrl="https://tyhy.hzxc.gov.cn:8443/1do/upload/";//附件地址
+	  public static String zhxxpt="https://zh.hzxc.gov.cn/hubsupport/";//主动办地址
+	  public static String url="http://xcgovapi.hzxc.gov.cn/Base-Module/Message";//通知接口
+  	*/
+	//测试地址
+	public static String ip="http://59.202.68.43:8080";//附件地址
+	public static String attrUrl="http://59.202.68.43:8080/1do/upload/";//附件地址
+	public static String zhxxpt="https://zh.hzxc.gov.cn/hubsupport2/";//主动办地址
+	public static String url="http://172.16.8.7:6002/Base-Module/Message";//通知接口
+	  
+}

@@ -1,0 +1,31 @@
+package com.demo.interceptor;
+
+import org.apache.log4j.Logger;
+
+import com.demo.util.JsonUtil;
+import com.demo.util.StrUtil;
+import com.jfinal.aop.Interceptor;
+import com.jfinal.aop.Invocation;
+
+public class MainInterceptor implements Interceptor {
+
+	private Logger log=Logger.getLogger(MainInterceptor.class);
+	
+	public void intercept(Invocation inv) {
+		
+		// TODO Auto-generated method stub
+		//LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
+		//HttpSession session = inv.getController().getSession();
+		//System.out.println(session.getId());
+		try {	
+			log.error(inv.getActionKey());
+			inv.invoke();
+		}catch(Exception e) {
+			log.error(StrUtil.getTrace(e));
+			inv.getController().renderJson(JsonUtil.getMap(400, StrUtil.getTrace(e)));			
+		}
+		
+
+	}
+
+}

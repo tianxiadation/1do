@@ -9,8 +9,12 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import javax.servlet.http.Cookie;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -28,6 +32,61 @@ import com.demo.common.model.T1doBase;
 
 
 public class HttpUtil {
+	public static void main(String[] args) {
+		
+		/*String data=login("18868724827");
+		String str=getLogin(data,"http://xcgov.hzxc.gov.cn/Base-Module/CompanyUserLogin/Login");
+		System.out.println(str);*/
+		JSONObject json=new JSONObject();
+		json.put("useraccount", "fangshengqun");
+		System.out.println(doPost("http://localhost:8080/1do/do/login1do",json.toString()));
+
+	}
+	/** 
+     * post请求（用于请求json格式的参数） 
+     * @param url 接口地址
+     * @param params 接口参数
+     * @return 
+     */  
+    public static String doPost(String url, String params) {      
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost(url);// 创建httpPost     
+        httpPost.setHeader("Accept", "application/json");    //接收报文类型
+        httpPost.setHeader("Content-Type", "application/json");   //发送报文类型
+        if(params != null && !"".equals(params)){
+            StringEntity entity = new StringEntity(params, "UTF-8");  
+            httpPost.setEntity(entity);    	
+        }     
+        CloseableHttpResponse response = null;     
+        try {  
+            response = httpclient.execute(httpPost);  
+            StatusLine status = response.getStatusLine();  
+            int state = status.getStatusCode();  
+            if (state == HttpStatus.SC_OK) {  
+                HttpEntity responseEntity = response.getEntity();  
+                String jsonString = EntityUtils.toString(responseEntity,"UTF-8");  
+                return jsonString;  
+            }  
+            else{  
+                System.out.println(state);
+            }  
+        } catch (ClientProtocolException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}  
+        finally { 
+                try {  
+                	if (response != null)response.close();  
+                	httpclient.close();  
+                } catch (IOException e) {  
+                    e.printStackTrace();  
+                }  
+        }  
+        return null;  
+    }  
+
+
 	public static  String doPost12(String url){
 		return url;
 		/*OkHttpClient client = new OkHttpClient();
@@ -469,16 +528,7 @@ public class HttpUtil {
 		return map3.toString();
 		
 	}
-	public static void main(String[] args) {
-		//System.out.println(getParameter());
-		String data=login("18868724827");
-		String str=getLogin(data,"http://xcgov.hzxc.gov.cn/Base-Module/CompanyUserLogin/Login");
-		System.out.println(str);
-		//JSONObject json=getToken(str);
-		//System.out.println(json.toString());
-		//String str=doPost("http://m.hzxc.gov.cn/Base-Module/CompanyUser/GetList/GetUser",data);
-
-	}
+	
 	public static String doPost(String url,JSONObject json) throws UnsupportedEncodingException, IOException {
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		HttpPost post=new HttpPost(url);

@@ -3,7 +3,7 @@ package com.demo.interfaces.implementation;
 import com.demo.interfaces.Sender;
 
 public class SenderFactory {
-	Sender s;
+	
 	public Sender produce(String type) {
 		if ("mail".equals(type)) {
 			return new MailSender();
@@ -11,9 +11,21 @@ public class SenderFactory {
 			return new QQSender();
 		} else {
 			System.out.println("请输入正确的类型!");
-			return s;
+			return null;
 		}
 	}
+	public Sender produceMail() {
+		return new MailSender();
+	}
+	public Sender produceQQ() {
+		return new QQSender();
+	}
+	public static Sender produceMail1(){
+		return new MailSender();
+	}
 	
+	public static Sender produceQQ1(){
+		return new QQSender();
+	}
 
 }

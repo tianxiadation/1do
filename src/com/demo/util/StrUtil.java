@@ -1,5 +1,7 @@
 package com.demo.util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -7,6 +9,7 @@ import java.util.regex.Pattern;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.demo.common.model.T1doBase;
 import com.demo.common.model.T1doFeedback;
 import com.demo.common.model.T1doPstatus;
@@ -15,6 +18,27 @@ import com.jfinal.kit.StrKit;
 import com.jfinal.plugin.activerecord.Db;
 
 public class StrUtil {
+	/*
+	 2019年5月5日 coco 注解：
+	*/
+	public static HashSet<String> getHashSet(String result) {
+		String[] str=result.split("\\|");
+		HashSet<String> hs = new HashSet<String>();
+		for (String string : str) {
+			if(StrKit.notBlank(string))
+			hs.add(string);
+		}
+		return hs;
+	}
+	//获得完整异常信息
+	public static String getTrace(Throwable t) {
+	    StringWriter stringWriter= new StringWriter();
+	    PrintWriter writer= new PrintWriter(stringWriter);
+	    t.printStackTrace(writer);
+	    StringBuffer buffer= stringWriter.getBuffer();
+	    return buffer.toString();
+	}
+	
 	/**
 	 * 字符串为 null 或者为  "" 时返回 true
 	 */
@@ -189,13 +213,7 @@ public class StrUtil {
 			return str;
 		}
 	
-		public static void main(String[] args) {
-		//	String[] str="方升群;谢洁;".split(";");
-			for(int i=1;i<13;i++){
-				System.out.println(getflag(4,i));
-			}
-			
-	}
+		
 		/*
 		 2018年8月10日上午11:29:43 方升群   新的权限
 		*/
@@ -486,8 +504,10 @@ public class StrUtil {
 			
 		}
 		public static String[] getSql(int i,String O_USER,int o_status) {
-			String str="select * from t_1do_pstatus where SHOW_ID=? and USER_TYPE!=2 and isDelete=1";
-			String str1="select * from t_1do_pstatus where SHOW_ID=? and (USER_TYPE=1 or O_USER='"+O_USER+"') and isDelete=1";
+			//String str="select * from t_1do_pstatus where SHOW_ID=? and USER_TYPE!=2 and isDelete=1";
+			String str="select * from t_1do_pstatus where SHOW_ID=? and USER_TYPE!=2 and isDelete=1 and isSend=2 and O_USER!='"+O_USER+"'";
+			//String str1="select * from t_1do_pstatus where SHOW_ID=? and (USER_TYPE=1 or O_USER='"+O_USER+"') and isDelete=1";
+			String str1="select * from t_1do_pstatus where SHOW_ID=? and USER_TYPE=1 and and isSend=2 O_USER!='"+O_USER+"' and isDelete=1";
 			switch (i) {
 			case 1:				
 				//return new String[]{"待接单","select * from t_1do_pstatus where SHOW_ID=? and USER_TYPE in(1,3) and isDelete=1"};				
@@ -569,7 +589,8 @@ public class StrUtil {
 						//int end = mat.end();		//结束位置
 						String text = mat.group();   //匹配到的内容
 						//System.out.println(text.length()-2);
-						list.add(text.substring(1, text.length()-2));
+						//list.add(text.substring(1, text.length()-2));
+						list.add(text);
 						
 						//System.out.println(start+"-"+end+":"+text); 
 					}
@@ -577,16 +598,24 @@ public class StrUtil {
 					Db.update("update t_1do_pstatus set sort=3,otherid=2 where SHOW_ID=? and otherid=1 and USER_TYPE=3",tb.getShowId());
 					
 					list.forEach(t->{
-						List<TRegUser> list1=TRegUser.dao.find("select * from t_reg_user where u_true_name=?",t);
-						list1.forEach(t1->{
-							result.add(t1.getShowId());
-							if(!tb.getOExecutor().contains(t1.getShowId())){
-								new T1doPstatus().setShowId(tb.getShowId()).setOUser(t1.getShowId()).setOUserName(t1.getUTrueName()).setOStatus(3).setUserType(3).setOtherid(1).setSort(1).save();
-								tb.setOExecutor(t1.getShowId()+";"+tb.getOExecutor()).setOExecutorName(t1.getUTrueName()+";"+tb.getOExecutorName());
-							}else{
-								Db.update("update t_1do_pstatus set sort=1,otherid=1 where SHOW_ID=? and O_USER=? and USER_TYPE=3",tb.getShowId(),t1.getShowId());
+						JSONObject json=getJson(t);
+						if(StrKit.notBlank(json.getString("name"))){
+							String[] strs=json.getString("name").split(";");
+							for (String string : strs) {
+								List<TRegUser> list1=TRegUser.dao.find("select * from t_reg_user where u_true_name=?",string);
+								list1.forEach(t1->{
+									result.add(t1.getShowId());
+									if(!tb.getOExecutor().contains(t1.getShowId())){
+										Db.delete("delete from t_1do_pstatus where SHOW_ID=? and O_USER=? and isDelete=2",tb.getShowId(),t1.getShowId());
+										new T1doPstatus().setShowId(tb.getShowId()).setOUser(t1.getShowId()).setOUserName(t1.getUTrueName()).setOStatus(tb.getOStatus()).setSTATUS(getStatus2(tb.getOStatus())).setUserType(3).setOtherid(1).setSort(1).save();
+										tb.setOExecutor(t1.getShowId()+";"+tb.getOExecutor()).setOExecutorName(t1.getUTrueName()+";"+tb.getOExecutorName());
+									}else{
+										Db.update("update t_1do_pstatus set sort=1,otherid=1 where SHOW_ID=? and O_USER=? and USER_TYPE=3",tb.getShowId(),t1.getShowId());
+									}
+								});
 							}
-						});
+						}
+						
 						//result
 					});		
 					JSONArray arr=JSON.parseArray(tb.getAT());
@@ -595,7 +624,8 @@ public class StrUtil {
 						String[] brr=a.toString().split("@");
 						result.add(brr[0]);
 						if(!tb.getOExecutor().contains(brr[0])){
-							new T1doPstatus().setShowId(tb.getShowId()).setOUser(brr[0]).setOUserName(brr[1]).setOStatus(3).setUserType(3).setOtherid(1).setSort(2).save();
+							Db.delete("delete from t_1do_pstatus where SHOW_ID=? and O_USER=? and isDelete=2",tb.getShowId(),brr[0]);
+							new T1doPstatus().setShowId(tb.getShowId()).setOUser(brr[0]).setOUserName(brr[1]).setOStatus(tb.getOStatus()).setSTATUS(getStatus2(tb.getOStatus())).setUserType(3).setOtherid(1).setSort(2).save();
 							//tb.setOExecutor(brr[0]+";"+tb.getOExecutor()).setOExecutorName(brr[1]+";"+tb.getOExecutorName()).update();
 						}else{
 							Db.update("update t_1do_pstatus set sort=2,otherid=1 where SHOW_ID=? and O_USER=? and USER_TYPE=3",tb.getShowId(),brr[0]);
@@ -617,5 +647,191 @@ public class StrUtil {
 			if(tps!=null)
 			tb.setOExecutor(tps.getOUser()==null?"":tps.getOUser().replace(",", ";")).setOExecutorName(tps.getOUserName()==null?"":tps.getOUserName().replace(",", ";")).update();
 			
+		}
+		/*
+		 2019年3月19日 coco 注解：
+		*/
+		public static JSONObject getJson(String content) {
+			JSONObject json=new JSONObject();
+			json.put("text", content);
+			String str=HttpUtil.doPost1("https://tyhy.hzxc.gov.cn:8443/md/leader/isApprove", json.toString());
+			if(StrKit.notBlank(str)){
+				JSONObject json1= JSON.parseObject(str);
+				if(StrKit.notBlank(json1.getString("data"))){
+					return JSON.parseObject(json1.getString("data"));
+				}
+			}
+			return json;			
+		}
+		/*
+		 2019年3月21日 coco 注解：参与人的状态
+		*/
+		public static String getStatus1(int oStatus) {
+			switch (oStatus) {
+			case 3:
+				return "已送达";
+				
+			case 4:
+				return "已接单";
+				
+			case 5:
+				return "已完成";
+			
+			case 6:
+		    	return "已删除";
+		
+			default:
+		    	return "已删除";
+
+			}
+		}
+		/*
+		 2019年3月21日 coco 注解：发起人的状态
+		 */
+		public static String getStatus2(int oStatus) {
+			switch (oStatus) {
+			case 3:
+				return "待接单";
+				
+			case 4:
+				return "已接单";
+				
+			case 5:
+				return "已完成";
+				
+			case 6:
+				return "已删除";
+				
+			default:
+				return "已删除";
+				
+			}
+		}
+		
+		public static void main(String[] args) {
+	        String str="零";
+	        System.out.println(chineseNumber2Int(str));  //===>  123
+	    }
+	    
+
+	    //截取数字  【读取字符串中第一个连续的字符串，不包含后面不连续的数字】
+	    public static String getNumbers(String content) {  
+	        Pattern pattern = Pattern.compile("\\d+");  
+	        Matcher matcher = pattern.matcher(content);  
+	        while (matcher.find()) {  
+	           return matcher.group(0);  
+	        }  
+	        return "";  
+	    }  
+		/**
+	     * 中文數字转阿拉伯数组【十万九千零六十  --> 109060】
+	     * @author 雪见烟寒
+	     * @param chineseNumber
+	     * @return
+	     */
+	    private static int chineseNumber2Int(String chineseNumber){
+	        int result = 0;
+	        int temp = 1;//存放一个单位的数字如：十万
+	        int count = 0;//判断是否有chArr
+	        char[] cnArr = new char[]{'一','二','三','四','五','六','七','八','九'};
+	        char[] chArr = new char[]{'十','百','千','万','亿'};
+	        for (int i = 0; i < chineseNumber.length(); i++) {
+	            boolean b = true;//判断是否是chArr
+	            char c = chineseNumber.charAt(i);
+	            for (int j = 0; j < cnArr.length; j++) {//非单位，即数字
+	                if (c == cnArr[j]) {
+	                    if(0 != count){//添加下一个单位之前，先把上一个单位值添加到结果中
+	                        result += temp;
+	                        temp = 1;
+	                        count = 0;
+	                    }
+	                    // 下标+1，就是对应的值
+	                    temp = j + 1;
+	                    b = false;
+	                    break;
+	                }
+	            }
+	            if(b){//单位{'十','百','千','万','亿'}
+	                for (int j = 0; j < chArr.length; j++) {
+	                    if (c == chArr[j]) {
+	                        switch (j) {
+	                        case 0:
+	                            temp *= 10;
+	                            break;
+	                        case 1:
+	                            temp *= 100;
+	                            break;
+	                        case 2:
+	                            temp *= 1000;
+	                            break;
+	                        case 3:
+	                            temp *= 10000;
+	                            break;
+	                        case 4:
+	                            temp *= 100000000;
+	                            break;
+	                        default:
+	                            break;
+	                        }
+	                        count++;
+	                    }
+	                }
+	            }
+	            if (i == chineseNumber.length() - 1) {//遍历到最后一个字符
+	                result += temp;
+	            }
+	        }
+	        return result;
+	    }
+		//调用
+		
+		/*	{
+			    "data": {
+			        "cbcs": "[催办次数]",
+			        "nr": "[内容]",
+			        "fqr": "[发起人]",
+			        "slr": "[受理人]",
+			        "cyr": "[参与人]"
+			    },
+			    "message": "Success",
+			    "status": 0
+			}*/
+		public static String appendSql(String string) {
+			String result=HttpUtil.doPost(UrlUtil.md, JsonUtil.getJsonString(string));
+			JSONObject json=JSON.parseObject(result);
+			JSONObject data=json.getJSONObject("data");
+			String sql="";
+			System.out.println("1懂调用结果"+result);
+			if(data!=null){
+				if(StrKit.notBlank(data.getString("cbcs"))){
+					if(StrKit.notBlank(getNumbers(data.getString("cbcs")))){
+						sql+=" and LIGHTNING="+getNumbers(data.getString("cbcs"));
+					}else if((chineseNumber2Int(data.getString("cbcs"))==1&&data.getString("cbcs").contains("一"))
+							||chineseNumber2Int(data.getString("cbcs"))>1){
+						sql+=" and LIGHTNING="+chineseNumber2Int(data.getString("cbcs"));
+					}else if(data.getString("cbcs").contains("零")){
+						sql+=" and LIGHTNING=0";
+					}		
+				}
+				if(StrKit.notBlank(data.getString("nr"))){				
+					sql+=" and O_DESCRIBE like CONCAT('%','"+data.getString("nr")+"','%') ";						
+				}
+				if(StrKit.notBlank(data.getString("fqr"))){				
+					sql+=" and O_CUSTOMER_NAME like CONCAT('%','"+data.getString("fqr")+"','%') ";						
+				}
+				if(StrKit.notBlank(data.getString("cyr"))){				
+					sql+=" and O_EXECUTOR_NAME like CONCAT('%','"+data.getString("cyr")+"','%') ";						
+				}
+				if(StrKit.notBlank(data.getString("slr"))){				
+					sql+=" and O_HANDLE_NAME like CONCAT('%','"+data.getString("slr")+"','%') ";						
+				}
+				if(StrKit.notBlank(data.getString("cbr"))){				
+					sql+=" and URGENAME like CONCAT('%','"+data.getString("cbr")+"','%') ";						
+				}
+			}else{
+				sql+=" and O_DESCRIBE like CONCAT('%','"+string+"','%') ";
+			}
+			
+			return sql;
 		}
 }

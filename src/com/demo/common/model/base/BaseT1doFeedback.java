@@ -9,15 +9,6 @@ import com.jfinal.plugin.activerecord.IBean;
 @SuppressWarnings({"serial", "unchecked"})
 public abstract class BaseT1doFeedback<M extends BaseT1doFeedback<M>> extends Model<M> implements IBean {
 
-	public M setID(java.lang.Integer ID) {
-		set("ID", ID);
-		return (M)this;
-	}
-	
-	public java.lang.Integer getID() {
-		return getInt("ID");
-	}
-
 	public M setShowId(java.lang.String showId) {
 		set("SHOW_ID", showId);
 		return (M)this;
@@ -25,6 +16,15 @@ public abstract class BaseT1doFeedback<M extends BaseT1doFeedback<M>> extends Mo
 	
 	public java.lang.String getShowId() {
 		return getStr("SHOW_ID");
+	}
+
+	public M setID(java.lang.Integer ID) {
+		set("ID", ID);
+		return (M)this;
+	}
+	
+	public java.lang.Integer getID() {
+		return getInt("ID");
 	}
 
 	public M setOUser(java.lang.String oUser) {
@@ -117,6 +117,15 @@ public abstract class BaseT1doFeedback<M extends BaseT1doFeedback<M>> extends Mo
 		return getStr("USERID");
 	}
 
+	public M setAttrName(java.lang.String attrName) {
+		set("ATTR_NAME", attrName);
+		return (M)this;
+	}
+	
+	public java.lang.String getAttrName() {
+		return getStr("ATTR_NAME");
+	}
+
 	public M setAttrPath(java.lang.String attrPath) {
 		set("ATTR_PATH", attrPath);
 		return (M)this;
@@ -169,6 +178,15 @@ public abstract class BaseT1doFeedback<M extends BaseT1doFeedback<M>> extends Mo
 	
 	public java.lang.String getShortMessage() {
 		return getStr("shortMessage");
+	}
+
+	public M setTemp(java.lang.Integer temp) {
+		set("temp", temp);
+		return (M)this;
+	}
+	
+	public java.lang.Integer getTemp() {
+		return getInt("temp");
 	}
 
 }

@@ -1,7 +1,6 @@
 package com.demo.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -12,14 +11,11 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
-import com.alibaba.fastjson.JSONObject;
 import com.demo.common.model.T1doFeedback;
 import com.demo.common.model.Websocket;
-import com.demo.util.JsonUtil;
 import com.demo.util.MsgUtil;
 import com.jfinal.core.Controller;
 import com.jfinal.kit.JsonKit;
-import com.jfinal.plugin.activerecord.Db;
 
 @ServerEndpoint("/websocket")
 public class WebSocketController extends Controller{
@@ -31,16 +27,13 @@ public class WebSocketController extends Controller{
 	@OnOpen
 	public void onOpen(Session session) {
 		System.out.println("Session " + session.getId() + " has opened a connection");
-        try {
+       
             this.session=session;
            // webSocketSet.add(this);     //加入set中
             webSocketSet.add(this);
             System.out.println(JsonKit.toJson(MsgUtil.successMsg(session.getId())));
-            session.getBasicRemote().sendText(JsonKit.toJson(MsgUtil.successMsg(session.getId())));
-           // session.getBasicRemote().send
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } 
+         
+    
 	}
 
 	@OnClose
@@ -50,78 +43,40 @@ public class WebSocketController extends Controller{
 	       // setSessionAttr(session.getId(), false);
 	     System.out.println("Session " +session.getId()+" has closed!");
 	}
-	/*
-	 2018年11月26日 coco 注解：
-	*/
-	public void closeWS() {
-		String sessionid=getPara("SESSIONID");
-		Websocket.saveSocket(sessionid, "",false);
-		renderJson(MsgUtil.successMsg("Session " +sessionid+" has closed!"));
-	}
+	
 	@OnMessage
 	public void onMessage(String requestJson, Session session) throws IOException, InterruptedException, EncodeException {
 				
-		Websocket.saveSocket(session.getId(), requestJson,true);
-				 boolean flag=true;
-				 int i=0;
-				 while (flag) {
-				  Websocket w=Websocket.selectSocket(session.getId());
-				 
+		       Websocket.saveSocket(session.getId(), requestJson,true);	
+		       Websocket w=Websocket.selectSocket(session.getId());
 				  List<T1doFeedback> list= T1doFeedback.dao.find("select ID,O_USER_NAME,TIME_STAMP,"
 				  		+ "FB_TIME,O_USER,FBCONTENT,FB_TYPE,FB_USER_NAME,FB_USER,ATTR_PATH,star,AT "
 				  		+ "from t_1do_feedback where SHOW_ID=? and FB_TYPE!=4  and isoverdue=1 and id>?",requestJson,w.getFbid());
-				 				 
-				   if(list.size()>0){
-			
-					  session.getBasicRemote().sendText(JsonKit.toJson(MsgUtil.successMsg(list)));;
-					  Websocket.updateScoketFbid(session.getId());
-					  i=0;
-				  }else{
-					 i++;
-					 if(i==40){
-					  session.getBasicRemote().sendText(JsonKit.toJson(MsgUtil.successMsg(list)));;
-					 }
-					Thread.sleep(1000);
-				  }
-				  flag=w.getIsOnline(); 
-				 }
-				  
-	
-				 
+					  session.getBasicRemote().sendText(JsonKit.toJson(MsgUtil.successMsg(list)));
 		
 	}
 	
-	public void onMessage1(String requestJson, Session session) throws IOException, InterruptedException, EncodeException {
+	
+	
+	
+	public void sendMessage(String showid){
 		
-		String str=requestJson;
-		int ia=	Db.findFirst("select  count(*) num from t_1do_feedback where SHOW_ID=? and FB_TYPE!=4  and isoverdue=1",str).getInt("num");
-		setSessionAttr(str, ia);
-		
-		setSessionAttr(session.getId(), true);
-		// 死循环 查询有无数据变化
-		List<T1doFeedback> getIdoFeedbacks12=new ArrayList<T1doFeedback>();
-		while ((boolean) getSessionAttr(session.getId())) {
-			List<T1doFeedback> getIdoFeedbacks11= T1doFeedback.dao.find("select O_USER_NAME from t_1do_feedback where SHOW_ID=? and FB_TYPE!=4 and isoverdue=1",str);
-			int i=(int)getSessionAttr(str);
-			int n=getIdoFeedbacks11.size()-i;
-			if(n!=0){
-				getIdoFeedbacks12=T1doFeedback.dao.find("select ID,O_USER_NAME,TIME_STAMP,FB_TIME,O_USER,FBCONTENT,FB_TYPE,FB_USER_NAME,FB_USER,ATTR_PATH,star,AT from t_1do_feedback where SHOW_ID=? and FB_TYPE!=4  and isoverdue=1 LIMIT ?,?",str,i,n);;
-				
-				renderJson(getIdoFeedbacks12); 	 
-				setSessionAttr(str, getIdoFeedbacks11.size());
-				session.getBasicRemote().sendObject(getIdoFeedbacks12);	             
-			} 
-			
-		}
-	}
-	
-	
-	
-	public void sendMessage() throws IOException{
+		//List<Websocket> list=Websocket.selectScoket(showid);
         //群发消息
         for(WebSocketController item: webSocketSet){
             try {
-                item.session.getBasicRemote().sendText("3");
+            	 Websocket w=Websocket.selectScoket1(item.session.getId(),showid);
+            	 if(w==null){
+            		 continue;
+            	 }
+            	 List<T1doFeedback> list= T1doFeedback.dao.find("select ID,O_USER_NAME,TIME_STAMP,"
+ 				  		+ " FB_TIME,O_USER,FBCONTENT,FB_TYPE,FB_USER_NAME,FB_USER,ATTR_PATH,star,AT "
+ 				  		+ " from t_1do_feedback where FB_TYPE!=4 and isoverdue=1 and SHOW_ID=? and id>? ",showid,w.getFbid());
+            	 if(list.size()>0){
+            		 Websocket.updateScoketFbid(item.session.getId());
+                item.session.getBasicRemote().sendText(JsonKit.toJson(MsgUtil.successMsg(list)));
+                
+                }
             } catch (IOException e) {
                 e.printStackTrace();
                 continue;
@@ -137,107 +92,4 @@ public class WebSocketController extends Controller{
 	
 	
 	
-	/***********************************************************************************************/
-	/*
-	 2018年7月11日下午4:38:05 方升群
-	*/
-	public void setSession(){
-		JSONObject json=JsonUtil.getJSONObject(getRequest());
-		setSessionAttr(json.getString("sessionID"), json.getBoolean("result"));
-		renderJson(JsonUtil.getMap(200, "成功"));
-	}
-	public void action() throws IOException {
-		JSONObject json=JsonUtil.getJSONObject(getRequest());
-		int i=(int)getSessionAttr(json.getString("SHOW_ID"));
-		
-		//MyThread my=new MyThread(json,i);
-		
-		//my.start();
-		 while ((boolean) getSessionAttr(json.getString("sessionID"))) {
-		      List<T1doFeedback> getIdoFeedbacks11= T1doFeedback.dao.find("select O_USER_NAME from t_1do_feedback where SHOW_ID=? and FB_TYPE!=4 and isoverdue=1",json.getString("SHOW_ID"));
-
-		      int n=getIdoFeedbacks11.size()-i;
-		     // WebSocketController wbc=new WebSocketController();
-		      if(n!=0){
-		    	  List<T1doFeedback> getIdoFeedbacks12=T1doFeedback.dao.find("select ID,O_USER_NAME,TIME_STAMP,FB_TIME,O_USER,FBCONTENT,FB_TYPE,FB_USER_NAME,FB_USER,ATTR_PATH,star,AT from t_1do_feedback where SHOW_ID=? and FB_TYPE!=4  and isoverdue=1 LIMIT ?,?",json.getString("SHOW_ID"),i,n);;
-
-		             setSessionAttr(json.getString("SHOW_ID"), getIdoFeedbacks11.size());
-		             i=getIdoFeedbacks11.size();
-		             
-		             for(WebSocketController item: webSocketSet){
-		                 try {
-		                     item.session.getBasicRemote().sendText(getIdoFeedbacks12.toString());
-		                 } catch (IOException e) {
-		                     e.printStackTrace();
-		                     continue;
-		                 }
-		             }
-		         } 
-		      
-		         try {
-	                Thread.sleep(1000);
-	            } catch (InterruptedException e) {
-	                // TODO Auto-generated catch block
-	                e.printStackTrace();
-	            }
-		     }
-		 renderJson(JsonUtil.getMap(200, "停止调用"));
-	}
-	
-	
-	class MyThread  extends Thread {		
-		//线程的执行体
-		JSONObject json;
-		int num;
-		//int num=(int)getSessionAttr(json.getString("SHOW_ID"));
-		
-
-		public void run(){	
-			// JSONObject json=JsonUtil.getJSONObject(getRequest());
-	        // Long time=new Date().getTime();
-		     // 死循环 查询有无数据变化
-		     while (true) {
-		    
-		      List<T1doFeedback> getIdoFeedbacks11= T1doFeedback.dao.find("select O_USER_NAME from t_1do_feedback where SHOW_ID=? and FB_TYPE in(1,2)",json.getString("SHOW_ID"));
-		      int n=getIdoFeedbacks11.size()-num;
-		     // WebSocketController wbc=new WebSocketController();
-		      if(n!=0){
-				     List<T1doFeedback> getIdoFeedbacks12=T1doFeedback.dao.find("select ID,O_USER_NAME,FB_TIME,O_USER,FBCONTENT,FB_TYPE,FB_USER_NAME,FB_USER from t_1do_feedback where SHOW_ID=? and FB_TYPE in(1,2)  LIMIT ?,?",json.getString("SHOW_ID"),num,n);
-				    // renderJson(getIdoFeedbacks12); 	
-				     String str=json.getString("SHOW_ID");
-				     int number=getIdoFeedbacks11.size();
-				     WebSocketController w=new WebSocketController();
-		             w.getSession().setAttribute(json.getString("SHOW_ID"), getIdoFeedbacks11.size());
-		             setSessionAttr(json.getString("SHOW_ID"), getIdoFeedbacks11.size());
-		             for(WebSocketController item: webSocketSet){
-		                 try {
-		                     item.session.getBasicRemote().sendText(getIdoFeedbacks12.toString());
-		                 } catch (IOException e) {
-		                     e.printStackTrace();
-		                     continue;
-		                 }
-		             }
-		         } 
-		      
-		         try {
-	                Thread.sleep(1000);
-	            } catch (InterruptedException e) {
-	                // TODO Auto-generated catch block
-	                e.printStackTrace();
-	            }
-		     }
-				
-		}
-
-
-		public MyThread(JSONObject json, int num) {
-			super();
-			this.json = json;
-			this.num = num;
-		}
-		
-		
-
-	
-	}
 }

@@ -1,6 +1,7 @@
 package com.demo.common.model;
 
 import java.util.Date;
+import java.util.List;
 
 import com.demo.common.model.base.BaseWebsocket;
 import com.jfinal.plugin.activerecord.Db;
@@ -31,4 +32,13 @@ public class Websocket extends BaseWebsocket<Websocket> {
 		T1doFeedback fb=T1doFeedback.dao.findFirst("select * from t_1do_feedback order by id desc");
 		Db.update("update websocket set fbid=? where sessionid=?",fb.getID(),sessionid);
 	}
+	public static List<Websocket> selectScokets(String showid) {
+		
+		return Websocket.dao.find("select * from websocket  where showid=? and isOnline=1",showid);
+	}
+	public static Websocket selectScoket1(String sessionid,String showid) {
+		
+		return Websocket.dao.findFirst("select * from websocket  where sessionid=? and isOnline=1 and showid=? order by id desc",sessionid,showid);
+	}
+	
 }

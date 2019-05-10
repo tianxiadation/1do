@@ -30,6 +30,6 @@
 
      </servlet>
      <session-config>    
-    <session-timeout>480</session-timeout>      
+    <session-timeout>30</session-timeout>      
 </session-config>
 </web-app>

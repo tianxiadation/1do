@@ -2,21 +2,39 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>测试重定向</title>
+    <title>打开1call</title>
   </head>
   <body>
     <script>
-      var app = ''
+      function getQueryString(name) {
+          var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
+          var r = window.location.search.substr(1).match(reg);
+          if (r != null) {
+              return unescape(r[2]);
+          }
+          return null;
+      }
       var url = location.href
-      app = url.replace('https://tyhy.hzxc.gov.cn:28443/1do/shortMessage'+
-      '/MyHtml.html?SHOW_ID=', '1call://open/1do/')
-		
-      location.href = app
+      console.log(url);
+	  var u = navigator.userAgent, app = navigator.appVersion;
+      var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Linux') > -1;//g
+      var isIOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+      var query = getQueryString('SHOW_ID')
+      if (isAndroid) {
+         // window.location.href = '1call://open/1do/' + query Android
+      }else if (isIOS) {
+          window.location.href = 'oneCall://openOneDoDetail?showId=' + query   //IOS
+      }else{
+          window.location.href = 'oneCall://openOneDoDetail?showId=' + query   //IOS
+          alert('请使用移动设备打开')
+     }
     </script>
-   
+
     <!-- 1call://open/1do/131187122634752000
 		https://tyhy.hzxc.gov.cn:28443/1do/shortMessage/MyHtml.html?SHOW_ID=131187122634752000
-      	http://10.18.28.2:8080/1do/shortMessage/MyHtml.html?SHOW_ID=131187122634752000 -->
-      	
+      	http://10.18.28.2:8080/1do/shortMessage/MyHtml.html?SHOW_ID=131187122634752000
+      	 return true;
+     -->
+
   </body>
 </html>

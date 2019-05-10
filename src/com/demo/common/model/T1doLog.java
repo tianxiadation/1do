@@ -29,4 +29,5 @@ public class T1doLog extends BaseT1doLog<T1doLog> {
 		return new T1doLog().setShowId(SHOW_ID).setOpTime(new Date()).setOUser(O_USER).setOUserName(O_USER_NAME).setLog(log).setLogType(log_type).save();
 
 	}
+	
 }

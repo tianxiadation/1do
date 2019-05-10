@@ -81,13 +81,4 @@ public abstract class BaseWebsocket<M extends BaseWebsocket<M>> extends Model<M>
 		return get("isDeleted");
 	}
 
-	public M setModeifyTime(java.util.Date modeifyTime) {
-		set("modeifyTime", modeifyTime);
-		return (M)this;
-	}
-	
-	public java.util.Date getModeifyTime() {
-		return get("modeifyTime");
-	}
-
 }

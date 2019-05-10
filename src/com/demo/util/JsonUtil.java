@@ -4,23 +4,29 @@ import java.util.LinkedHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.log4j.Logger;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.kit.HttpKit;
 
 public class JsonUtil {
+	private static Logger log=Logger.getLogger(JsonUtil.class);
+
 	/*
 	 2018年6月21日 方升群
 	*/
 	public static JSONObject getJSONObject(HttpServletRequest request) {
 		String meg=HttpKit.readData(request);
 		JSONObject json=JSON.parseObject(meg);
+		log.error(json);
 		return json;
 	}
 	public static LinkedHashMap<String, Object> getMap(int code,String message){
-		LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();  
+		LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
 		 map.put("code", code);
 		 map.put("message", message);
+		 log.error(map);
 		 return map;
 	}
 	public static LinkedHashMap<String, Object> getMap(int code,boolean message){
@@ -34,5 +40,13 @@ public class JsonUtil {
 		map.put("code", code);
 		map.put("message", message);
 		return map;
+	}
+	/*
+	 2019年4月28日 coco 注解：
+	*/
+	public static String getJsonString(String value) {
+		JSONObject json=new JSONObject();
+		json.put("text", value);
+		return json.toString();
 	}
 }

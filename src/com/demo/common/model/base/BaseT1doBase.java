@@ -9,15 +9,6 @@ import com.jfinal.plugin.activerecord.IBean;
 @SuppressWarnings({"serial", "unchecked"})
 public abstract class BaseT1doBase<M extends BaseT1doBase<M>> extends Model<M> implements IBean {
 
-	public M setID(java.lang.Integer ID) {
-		set("ID", ID);
-		return (M)this;
-	}
-	
-	public java.lang.Integer getID() {
-		return getInt("ID");
-	}
-
 	public M setShowId(java.lang.String showId) {
 		set("SHOW_ID", showId);
 		return (M)this;
@@ -25,6 +16,15 @@ public abstract class BaseT1doBase<M extends BaseT1doBase<M>> extends Model<M> i
 	
 	public java.lang.String getShowId() {
 		return getStr("SHOW_ID");
+	}
+
+	public M setID(java.lang.Integer ID) {
+		set("ID", ID);
+		return (M)this;
+	}
+	
+	public java.lang.Integer getID() {
+		return getInt("ID");
 	}
 
 	public M setParentId(java.lang.String parentId) {
@@ -421,6 +421,60 @@ public abstract class BaseT1doBase<M extends BaseT1doBase<M>> extends Model<M> i
 	
 	public java.lang.String getURGESHOWID() {
 		return getStr("URGESHOWID");
+	}
+
+	public M setBase(java.lang.String base) {
+		set("base", base);
+		return (M)this;
+	}
+	
+	public java.lang.String getBase() {
+		return getStr("base");
+	}
+
+	public M setSIMILARITY(java.lang.Integer SIMILARITY) {
+		set("SIMILARITY", SIMILARITY);
+		return (M)this;
+	}
+	
+	public java.lang.Integer getSIMILARITY() {
+		return getInt("SIMILARITY");
+	}
+
+	public M setLookUser(java.lang.String lookUser) {
+		set("LOOK_USER", lookUser);
+		return (M)this;
+	}
+	
+	public java.lang.String getLookUser() {
+		return getStr("LOOK_USER");
+	}
+
+	public M setOHandle(java.lang.String oHandle) {
+		set("O_HANDLE", oHandle);
+		return (M)this;
+	}
+	
+	public java.lang.String getOHandle() {
+		return getStr("O_HANDLE");
+	}
+
+	public M setOHandleName(java.lang.String oHandleName) {
+		set("O_HANDLE_NAME", oHandleName);
+		return (M)this;
+	}
+	
+	public java.lang.String getOHandleName() {
+		return getStr("O_HANDLE_NAME");
+	}
+
+	public M setFeedbackSimilarity(java.lang.Integer feedbackSimilarity) {
+		set("FEEDBACK_SIMILARITY", feedbackSimilarity);
+		return (M)this;
+	}
+	
+	public java.lang.Integer getFeedbackSimilarity() {
+		return getInt("FEEDBACK_SIMILARITY");
 	}
 
 }

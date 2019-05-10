@@ -56,7 +56,7 @@ public class DataController extends Controller {
 	 2019年2月18日 coco 注解：修改日志content（状态为14）
 	*/
 	public void changeLogContent() {
-		List<T1doBase> list=T1doBase.dao.find("select * from t_1do_base");
+		List<T1doBase> list=T1doBase.dao.find("select * from t_1do_base where  id<1427");
 		list.forEach(t->{
 			List<T1doLog> list1=T1doLog.dao.find("select * from t_1do_log where SHOW_ID=? and log_type=14",t.getShowId());
 			if(list1.size()>0){

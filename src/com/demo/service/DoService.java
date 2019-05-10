@@ -4,7 +4,7 @@ package com.demo.service;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
-import org.apache.poi.ss.formula.functions.T;
+import org.apache.log4j.Logger;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -17,17 +17,14 @@ import com.demo.common.model.TRegUser;
 import com.demo.util.HttpUtil;
 import com.demo.util.StrUtil;
 import com.demo.util.TimeUtil;
+import com.demo.util.UrlUtil;
 import com.jfinal.kit.JsonKit;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
 
 public class DoService {
-	//private static String zhxxpt="https://zh.hzxc.gov.cn/hubsupport/";
-	private static String zhxxpt="https://zh.hzxc.gov.cn/hubsupport2/";
-	//private static String zhxxpt="http://192.168.10.84:8080/hubsupport/";
-	private static String url="http://172.16.8.7:6002/Base-Module/Message";//测试环境通知接口
-	//private static String url="http://xcgovapi.hzxc.gov.cn/Base-Module/Message";//正式环境通知接口
-	//
+	private static Logger log=Logger.getLogger(DoService.class);
+	
 	/*
 	 2019年3月5日 coco 注解：1do代办推送接口
 	*/
@@ -39,40 +36,44 @@ public class DoService {
 					+" where a.O_USER=c.SHOW_ID and a.SHOW_ID=b.SHOW_ID and a.isDelete=1 and (a.isSend=2 or a.otherid=1) and a.USER_TYPE!=2 and b.O_STATUS<5"
 					+" and  (c.U_MAIL=? or U_LOGIN_NAME=?) ORDER BY otherid desc)d  GROUP BY showId",t.getUMail(),t.getULoginName());							
 			
-				if(list.size()>0)
-				HttpUtil.doPost1(zhxxpt+"3th/1do/dolist?appName=1do&appKey=1do", getJson(t.getULoginName()==null?t.getUMail():t.getULoginName(), list));
-			
+				if(list.size()>0){
+				String str1=HttpUtil.doPost1(UrlUtil.zhxxpt+"3th/1do/dolist?appName=1do&appKey=1do", getJson(t.getULoginName()==null?t.getUMail():t.getULoginName(), list));
+				log.error(str1);
+				}
 		});
 		return "";
 	}
+	
 	/*
 	 2019年3月5日 coco 注解：1do催办推送接口
 	 */
 	public static String cbts(String showid) {
-		//短信发给处理人
+		
 		List<TRegUser> tp=TRegUser.dao.find("select b.U_LOGIN_NAME,b.U_MAIL from t_1do_pstatus a,t_reg_user b where "
-				+ " a.o_user=b.show_id and a.show_id=? and a.user_type=3 and isdelete=1 and issend=2 and a.otherid=1 ",showid);
+				+ " a.o_user=b.show_id and a.show_id=? and a.user_type=3 and isdelete=1 and urge_isLook=0 and a.otherid=1 ",showid);
 		tp.forEach(t->{
 			List<Record> list=Db.find("select * from (SELECT b.SHOW_ID showId,b.O_DESCRIBE title,b.LIGHTNING lightning,b.O_CREATE_TIME createTime,b.O_FINISH_TIME finishTime,b.URGENAME ouserName FROM t_1do_pstatus a,t_1do_base b,t_reg_user c"
-					+" where a.O_USER=c.SHOW_ID and a.SHOW_ID=b.SHOW_ID and a.isDelete=1 and a.isSend=2  and a.USER_TYPE!=2 and b.O_STATUS<5 AND b.LIGHTNING >0"
+					+" where a.O_USER=c.SHOW_ID and a.SHOW_ID=b.SHOW_ID and a.isDelete=1 and a.urge_isLook=0  and a.USER_TYPE!=2 and b.O_STATUS<5 AND b.LIGHTNING >0"
 					+" and  (c.U_MAIL=? or U_LOGIN_NAME=?) ORDER BY otherid desc)d  GROUP BY showId",t.getUMail(),t.getULoginName());							
 			
-				if(list.size()>0)
-				HttpUtil.doPost1(zhxxpt+"3th/1do/urgedlist?appName=1do&appKey=1do", getJson(t.getULoginName()==null?t.getUMail():t.getULoginName(), list));
-			
+				if(list.size()>0){
+					String str1=HttpUtil.doPost1(UrlUtil.zhxxpt+"3th/1do/urgedlist?appName=1do&appKey=1do", getJson(t.getULoginName()==null?t.getUMail():t.getULoginName(), list));
+				log.error(str1);
+				}
 		});
 		return "";
 	}
 	public static String cbts1(String username) {
-		//短信发给处理人
+		
 		
 			List<Record> list=Db.find("select * from (SELECT b.SHOW_ID showId,b.O_DESCRIBE title,b.LIGHTNING lightning,b.O_CREATE_TIME createTime,b.O_FINISH_TIME finishTime,b.URGENAME ouserName FROM t_1do_pstatus a,t_1do_base b,t_reg_user c"
-					+" where a.O_USER=c.SHOW_ID and a.SHOW_ID=b.SHOW_ID and a.isDelete=1 and a.isSend=2  and a.USER_TYPE!=2 and b.O_STATUS<5 AND b.LIGHTNING >0"
+					+" where a.O_USER=c.SHOW_ID and a.SHOW_ID=b.SHOW_ID and a.isDelete=1 and a.urge_isLook=0  and a.USER_TYPE!=2 and b.O_STATUS<5 AND b.LIGHTNING >0"
 					+" and  (c.U_MAIL=? or U_LOGIN_NAME=?) ORDER BY otherid desc)d  GROUP BY showId",username,username);							
 			
-			if(list.size()>0)
-				HttpUtil.doPost1(zhxxpt+"3th/1do/urgedlist?appName=1do&appKey=1do", getJson(username, list));
-			
+			if(list.size()>0){
+				String str1=HttpUtil.doPost1(UrlUtil.zhxxpt+"3th/1do/urgedlist?appName=1do&appKey=1do", getJson(username, list));
+				log.error(str1);
+			}
 		
 		return "";
 	}
@@ -108,6 +109,7 @@ public class DoService {
 	*/
 	public static String sendIdo(T1doBase t1doBase,int i,String O_USER){
 		//T1doType t1doType=t1doBase.getT1doType();
+		//String str="select * from t_1do_pstatus where SHOW_ID=? and USER_TYPE!=2 and isDelete=1 and isSend=2 and O_USER!='"+O_USER+"'";
 		String[] str=StrUtil.getSql(i,O_USER,t1doBase.getOStatus());
 		List<T1doPstatus> t1=T1doPstatus.dao.find(str[1],t1doBase.getShowId());
 		String result = null;
@@ -122,7 +124,6 @@ public class DoService {
 		object.put("O_EXECUTOR_NAME", t1doBase.getOExecutorName());
 		object.put("AT", t1doBase.getAT());
 		object.put("SEND_TIME", t1doBase.getSendTime());
-		object.put("O_STATUS", str[0]);
 		//object.put("LOOKNUM", base[1]);//查看数量
 		//object.put("FBNUM", base[2]);//反馈数量	
 		//object.put("LIGHTNING", base[0]);
@@ -140,12 +141,14 @@ public class DoService {
 		for(T1doPstatus tt:t1){
 			String loginName=tt.getOUser();
 			String trueName=tt.getOUserName();
-			String att="select count(*) num from t_1do_base b, (select * from t_1do_pstatus where USER_TYPE!=2 and isDelete=1 and isSend=2 and O_USER='"+loginName+"' GROUP BY SHOW_ID)f where "
-					+ "b.SHOW_ID=f.SHOW_ID and (O_EXECUTOR like CONCAT('%','"+loginName+"','%') or O_CUSTOMER like CONCAT('%','"+loginName+"','%') ) ";
-			Record r2=Db.findFirst(att);
+			//String att="select count(*) num from t_1do_base b, (select * from t_1do_pstatus where USER_TYPE!=2 and isDelete=1 and isSend=2 and O_USER='"+loginName+"' GROUP BY SHOW_ID)f where "
+			//		+ "b.SHOW_ID=f.SHOW_ID and (O_EXECUTOR like CONCAT('%','"+loginName+"','%') or O_CUSTOMER like CONCAT('%','"+loginName+"','%') ) ";
+			//String att="select count(*) num from t_1do_pstatus where USER_TYPE!=2 and isDelete=1 and isSend=2 and O_USER='"+loginName+"' GROUP BY SHOW_ID ";
+			Record r2=Db.findFirst("select count(DISTINCT SHOW_ID) num from t_1do_pstatus where USER_TYPE!=2 and isDelete=1 and isSend=2 and O_USER=?",loginName);
 			object.put("UNREAD", r2.getInt("num"));//未读数
 			object.put("ISLOOK", tt.getIsSend());//1是2否
-			if(i==9){
+			object.put("O_STATUS", tt.getSTATUS());
+			/*if(i==9){
 				i=t1doBase.getOStatus()==3?1:t1doBase.getOStatus();
 			}
 			if(i==1){
@@ -154,17 +157,19 @@ public class DoService {
 			  }else{
 				object.put("O_STATUS", "已送达");
 			  }
-			}
+			}*/
 			object.put("USER_TYPE", tt.getUserType());
 			String str1=HttpUtil.getParameter2(t1doBase.getShowId(), loginName, trueName, object,t1doBase.getODescribe());	
-		    result   =   HttpUtil.doPost1(url, str1);
+		    result   =   HttpUtil.doPost1(UrlUtil.url, str1);
+		    log.error(result);
 		   // System.out.println(result);
 		    //new T1doTemp().setBASE(result).setID(IDUtil.getUid1()).save();
 		    //System.out.println(1);
 		}
-		if(i==1){
+		/*if(i==1){
 			object.put("O_STATUS", "已送达");
-		}
+		}*/
+		//object.put("O_STATUS", str[0]);
 		List<T1doFw> list=T1doFw.dao.find("SELECT a.*,b.isSend FROM t_1do_fw a LEFT JOIN t_1do_fwpstatus b on a.SHOW_ID=b.SHOW_ID and a.icallshowid=b.O_USER where a.type=1");
 		for (T1doFw t1doFw : list) {
 			String loginName=t1doFw.getIcallshowid();
@@ -178,8 +183,8 @@ public class DoService {
 			Record r2=Db.findFirst(att);
 			object.put("UNREAD", r2.getInt("num"));//未读数
 			String str2=HttpUtil.getParameter2(t1doBase.getShowId(), loginName, trueName, object,t1doBase.getODescribe());				
-		    result   =   HttpUtil.doPost1(url, str2);
-		  
+		    result   =   HttpUtil.doPost1(UrlUtil.url, str2);
+		    log.error(result);
 		}
 		return result;
 		
@@ -189,7 +194,7 @@ public class DoService {
 	public static String sendOneIdo(T1doBase t1doBase,int i,String loginName,String trueName){ //i 1加入2查看3反馈
 		//T1doType t1doType=t1doBase.getT1doType();
 		T1doPstatus user=T1doPstatus.getUser(t1doBase.getShowId(),loginName);
-		T1doFw fw=T1doFw.getfw(loginName);
+		//T1doFw fw=T1doFw.getfw(loginName);
 		//T1doStatus ts=t1doBase.getIdoStatus();			
 		//T1doFeedback tf=T1doFeedback.getT1doFeedback(6,t1doBase.getShowId());//查询是否评价
 		String result = null;
@@ -198,7 +203,7 @@ public class DoService {
 			//object.put("O_TITLE", "1do");
 			object.put("SHOW_ID", t1doBase.getShowId());
 			object.put("O_DESCRIBE", t1doBase.getODescribe());
-			if(t1doBase.getOStatus()==3){
+			/*if(t1doBase.getOStatus()==3){
 				if(i==2&&fw!=null){
 					object.put("O_STATUS", "已送达");
 				}else if(i==1&&user.getUserType()==1){
@@ -213,10 +218,11 @@ public class DoService {
 			}
 		    if(t1doBase.getOIsDeleted()==2){
 		    	object.put("O_STATUS", "已删除");
-		    }
+		    }*/
 			/*object.put("LOOKNUM", base[1]);//查看数量
 			object.put("FBNUM", base[2]);//反馈数量	
 			object.put("LIGHTNING", base[0]);*/
+			object.put("O_STATUS", user.getSTATUS());
 			object.put("LOOKNUM", t1doBase.getLOOKNUM());//查看数量
 			object.put("FBNUM", t1doBase.getFBNUM());//反馈数量	
 			object.put("LIGHTNING", t1doBase.getLIGHTNING());
@@ -226,9 +232,10 @@ public class DoService {
 				object.put("ISLOOK", 1);//1是2否
 
 			}
-			String att="select count(*) num from t_1do_base b, (select * from t_1do_pstatus where USER_TYPE!=2 and isDelete=1 and isSend=2 and O_USER='"+loginName+"' GROUP BY SHOW_ID)f where "
-					+ "b.SHOW_ID=f.SHOW_ID and (O_EXECUTOR like CONCAT('%','"+loginName+"','%') or O_CUSTOMER like CONCAT('%','"+loginName+"','%') ) ";
-			Record r2=Db.findFirst(att);
+			//String att="select count(*) num from t_1do_base b, (select * from t_1do_pstatus where USER_TYPE!=2 and isDelete=1 and isSend=2 and O_USER='"+loginName+"' GROUP BY SHOW_ID)f where "
+			//		+ "b.SHOW_ID=f.SHOW_ID and (O_EXECUTOR like CONCAT('%','"+loginName+"','%') or O_CUSTOMER like CONCAT('%','"+loginName+"','%') ) ";
+			//Record r2=Db.findFirst(att);
+			Record r2=Db.findFirst("select count(DISTINCT SHOW_ID) num from t_1do_pstatus where USER_TYPE!=2 and isDelete=1 and isSend=2 and O_USER=?",loginName);
 			object.put("UNREAD", r2.getInt("num"));//未读数
 			object.put("SEND_TIME", t1doBase.getSendTime());
 			object.put("O_CUSTOMER_NAME", t1doBase.getOCustomerName());
@@ -247,7 +254,8 @@ public class DoService {
 			object.put("Real_FINISH_TIME",t1doBase.getRealFinishTime()==null?"":t1doBase.getRealFinishTime());
 			object.put("DELETE_TIME",t1doBase.getDeleteTime()==null?"":t1doBase.getDeleteTime());
 			String str1=HttpUtil.getParameter2(t1doBase.getShowId(), loginName, trueName, object,t1doBase.getODescribe());				
-			result   =   HttpUtil.doPost1(url, str1);
+			result   =   HttpUtil.doPost1(UrlUtil.url, str1);
+			 log.error(result);
 			//new T1doTemp().setBASE(result).setID(IDUtil.getUid1()).setPid(tt.getID()).save();			   
 		    return result; 
 		 
@@ -258,12 +266,12 @@ public class DoService {
 		//T1doStatus ts=t1doBase.getIdoStatus();			
 		//T1doFeedback tf=T1doFeedback.getT1doFeedback(6,t1doBase.getShowId());//查询是否评价
 		String result = null;
-		int[] base=t1doBase.num();//0催办数1查看数2反馈数		
+	//	int[] base=t1doBase.num();//0催办数1查看数2反馈数		
 		JSONObject object = new JSONObject();
 		//object.put("O_TITLE", "1do");
 		object.put("SHOW_ID", t1doBase.getShowId());
 		object.put("O_DESCRIBE", t1doBase.getODescribe());
-		if(t1doBase.getOStatus()==3){
+		/*if(t1doBase.getOStatus()==3){
 			object.put("O_STATUS", "已送达");
 		}else if(t1doBase.getOStatus()==4){
 			object.put("O_STATUS", "已接单");
@@ -272,10 +280,30 @@ public class DoService {
 		}
 		if(t1doBase.getOIsDeleted()==2){
 	    	object.put("O_STATUS", "已删除");
-	    }
-		object.put("LOOKNUM", base[1]);//查看数量
+	    }*/
+		switch (t1doBase.getOStatus()) {
+		case 3:
+			object.put("O_STATUS", "已送达");
+			break;
+		case 4:
+			object.put("O_STATUS", "已接单");
+			break;
+		case 5:
+			object.put("O_STATUS", "已完成");
+			break;
+		case 6:
+	    	object.put("O_STATUS", "已删除");
+			break;
+		default:
+	    	object.put("O_STATUS", "已删除");
+			break;
+		}
+		/*object.put("LOOKNUM", base[1]);//查看数量
 		object.put("FBNUM", base[2]);//反馈数量	
-		object.put("LIGHTNING", base[0]);
+		object.put("LIGHTNING", base[0]);*/
+		object.put("LOOKNUM", t1doBase.getLOOKNUM());//查看数量
+		object.put("FBNUM", t1doBase.getFBNUM());//反馈数量	
+		object.put("LIGHTNING", t1doBase.getLIGHTNING());
 		if(i==1){
 			object.put("ISLOOK", 2);//1是2否
 		}else{
@@ -302,7 +330,8 @@ public class DoService {
 		object.put("Real_FINISH_TIME",t1doBase.getRealFinishTime()==null?"":t1doBase.getRealFinishTime());
 		object.put("DELETE_TIME",t1doBase.getDeleteTime()==null?"":t1doBase.getDeleteTime());
 		String str1=HttpUtil.getParameter2(t1doBase.getShowId(), loginName, trueName, object,t1doBase.getODescribe());				
-		result   =   HttpUtil.doPost1(url, str1);
+		result   =   HttpUtil.doPost1(UrlUtil.url, str1);
+		 log.error(result);
 		//new T1doTemp().setBASE(result).setID(IDUtil.getUid1()).setPid(tt.getID()).save();			   
 		return result;
 		
@@ -321,7 +350,7 @@ public class DoService {
 				json.put("id", t1doBase.getAPARAMETER());
 				json.put("type", arr.getType());
 				JSONObject result1 = HttpUtil.doPost3("http://59.202.68.28:8080/ssk/qs/approval",json.toString());
-				
+				 log.error(result1);
 				if(result1.getInteger("code")==200){
 					t1doBase.setCPARAMETER(arr.getType()).setISAPPROVAL(true).update();
 				}
@@ -356,8 +385,10 @@ public class DoService {
 					JSONObject json=JSON.parseObject(result1);
 					System.out.println("json-----"+json.toString());
 					if(json.getInteger("code")==200){
+						 log.error(result1);
 						t1doBase.setCPARAMETER(3).setISAPPROVAL(true).update();
 						result1 = HttpUtil.doPost11("http://172.16.8.18:8080/1call/combination?id="+t1doBase.getAPARAMETER());
+						 log.error(result1);
 						System.out.println("------------"+result1);
 					}
 				}else{
@@ -369,11 +400,6 @@ public class DoService {
 			
 		}
 	}
-	public static void main(String[] args) {
-		int i=-1;
-		if(i>0)
-			System.out.println(i);
-		System.out.println(i+1);
-		
-	}
+	
+	
 }

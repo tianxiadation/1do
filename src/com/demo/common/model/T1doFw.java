@@ -19,6 +19,13 @@ public class T1doFw extends BaseT1doFw<T1doFw> {
 		
 	}
 	/*
+	 2018年6月24日上午1:06:43 方升群
+	 */
+	public static T1doFw getIdoFwForLoginName(String loginName) {
+		return T1doFw.dao.findFirst("select * from t_1do_fw where icallshowid=? or o_user=?", loginName,loginName);
+		
+	}
+	/*
 	 2018年8月9日上午11:15:06 方升群  //是否查看
 	*/
 	public int getIsLook(String showid) {

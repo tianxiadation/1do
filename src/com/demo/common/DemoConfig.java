@@ -1,5 +1,10 @@
 package com.demo.common;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Timer;
+
+import com.demo.common.model.T1doLabelRecord;
 import com.demo.common.model._MappingKit;
 import com.demo.controller.DataController;
 import com.demo.controller.DoController;
@@ -10,6 +15,7 @@ import com.demo.controller.WebSocketController;
 import com.demo.interceptor.MainInterceptor;
 import com.demo.interceptor.SimpleCROSFilter;
 import com.demo.interceptor.WebSocketHandler;
+import com.demo.util.UrlUtil;
 import com.jfinal.config.Constants;
 import com.jfinal.config.Handlers;
 import com.jfinal.config.Interceptors;
@@ -19,6 +25,7 @@ import com.jfinal.config.Routes;
 import com.jfinal.core.JFinal;
 import com.jfinal.kit.PropKit;
 import com.jfinal.plugin.activerecord.ActiveRecordPlugin;
+import com.jfinal.plugin.activerecord.dialect.SqlServerDialect;
 import com.jfinal.plugin.druid.DruidPlugin;
 import com.jfinal.template.Engine;
 
@@ -31,6 +38,9 @@ import com.jfinal.template.Engine;
  */
 public class DemoConfig extends JFinalConfig {
 	
+	public static String jdbcUrl="jdbc:mysql://172.16.10.60:3306/do?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull";
+	public static String user="root";
+	public static String password="p@ssw0rd";
 	/**
 	 * 运行此 main 方法可以启动项目，此main方法可以放置在任意的Class类定义中，不一定要放于此
 	 * 
@@ -80,7 +90,19 @@ public class DemoConfig extends JFinalConfig {
 	}
 	
 	public static DruidPlugin createDruidPlugin() {
-		return new DruidPlugin(PropKit.get("jdbcUrl"), PropKit.get("user"), PropKit.get("password").trim());
+		setJDBCUrl();
+		//return new DruidPlugin(PropKit.get("jdbcUrl"), PropKit.get("user"), PropKit.get("password").trim());
+		return new DruidPlugin(jdbcUrl, user, password);
+	}
+	public static DruidPlugin createDruidPlugin1() {
+		
+		return new DruidPlugin(PropKit.get("jdbcUrl22"), PropKit.get("user22"), PropKit.get("password22").trim());
+		
+	}
+	public static DruidPlugin createDruidPlugin2() {
+		
+		return new DruidPlugin(PropKit.get("jdbcUrl22"), PropKit.get("user22"), PropKit.get("password22"),PropKit.get("driver"));
+		
 	}
 	
 	/**
@@ -97,6 +119,19 @@ public class DemoConfig extends JFinalConfig {
 		_MappingKit.mapping(arp);
 		arp.setShowSql(true);
 		me.add(arp);
+		
+		
+		// 配置C3p0数据库连接池插件
+		DruidPlugin druidPlugin1 = createDruidPlugin1();
+		druidPlugin1.setDriverClass(PropKit.get("driver"));
+		me.add(druidPlugin1);
+		
+		// 配置ActiveRecord插件
+		ActiveRecordPlugin arp1 = new ActiveRecordPlugin("record",druidPlugin1);
+		arp1.setDialect(new SqlServerDialect());
+		// 所有映射在 MappingKit 中自动化搞定
+		//_MappingKit.mapping(arp1);
+		me.add(arp1);
 	}
 	
 	/**
@@ -116,4 +151,64 @@ public class DemoConfig extends JFinalConfig {
 		//me.add(new UrlSkipHandler("^/websocket", false));
 
 	}
+	@Override
+	public void afterJFinalStart() {
+		
+		UrlUtil.initialization();
+		//DbUtil.updateOnline();
+		new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				//T1doLabelRecord.batchSaveAllLabel();
+				//T1doRecord.batchSave();
+				/*// TODO Auto-generated method stub
+				List<T1doFeedback> list=T1doFeedback.dao.find("select * from t_1do_feedback where "
+						+ "FB_TYPE=1 or FB_TYPE=2 or FB_TYPE=6");
+				list.forEach(t->{
+					T1doLabelFeedback.saveAllLabel(t);
+				});
+				
+				List<T1doBase> tb=T1doBase.dao.find("select * from t_1do_base");
+				tb.forEach(t->{
+					//T1doLabelFeedback.savelabel(t);
+					DbUtil.insertRF(t.getShowId());
+				});*/
+				
+			}
+		}).start();
+		//new Timer().schedule(new MyTask(), 1000, 3600000);
+	}
+
+	
+		
+	public static void setJDBCUrl(){
+		try {
+            //用 getLocalHost() 方法创建的InetAddress的对象
+            InetAddress address = InetAddress.getLocalHost();
+            System.out.println(address.getHostAddress());
+            
+            //测试服务器
+            if(!address.getHostAddress().equals("172.16.9.195")){
+            	jdbcUrl="jdbc:mysql://172.16.8.11:3306/do?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull";//附件地址
+            	user="root";
+            	password="p@ssw0rd";
+            //本地服务器
+            }/*else if(address.getHostAddress().equals("10.18.28.8")){
+            	jdbcUrl="jdbc:mysql://localhost:3306/do?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull";//附件地址
+            	user="root";
+            	password="123456";
+            }*/
+          System.out.println(jdbcUrl);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+		
+	}
+
+	@Override
+	public void beforeJFinalStop() {
+		//关闭服务器之前可以写一些方法处理数据。
+	}
+
 }
