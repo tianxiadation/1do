@@ -64,6 +64,15 @@ public class DoController extends Controller {
 		renderJson(MsgUtil.successMsg(UrlUtil.ip+"\n"+DemoConfig.jdbcUrl));
 	}
 	/*
+	 2019年6月10日 coco 注解：点击附件留痕
+	*/
+	public void clickOnTheAttachment() {
+		JSONObject json=JsonUtil.getJSONObject(getRequest());
+	   	JSONObject user=getSessionAttr("user");
+	   	T1doLog.saveLog(json.getString("SHOW_ID"), user.getString("loginName"), user.getString("username"),user.getString("username")+"下载一个附件", 16,json.getString("ID"));
+		renderJson(MsgUtil.successMsg("成功"));
+	}
+	/*
 	 2019年5月6日 coco 注解：显示掩藏相关反馈
 	*/
 	@Before(LoginInterceptor.class)
@@ -330,11 +339,19 @@ public class DoController extends Controller {
 						+"from t_1do_base a LEFT JOIN (select * from t_1do_pstatus where USER_TYPE!=2 " +look+" "
 						+ "and isDelete=1 and O_USER='"+loginName+"' GROUP BY SHOW_ID)f on a.SHOW_ID=f.SHOW_ID "
 						+"where "+sql+look;
+			/*String from ="select a.SHOW_ID,a.O_DESCRIBE,a.O_CUSTOMER_NAME,a.O_CUSTOMER,a.AT,a.O_EXECUTOR,"
+					+"a.O_EXECUTOR_NAME,a.SEND_TIME, O_CREATE_TIME,"
+					+" O_FINISH_TIME, Real_FINISH_TIME"
+					+", DELETE_TIME,a.O_IS_DELETED ,"
+					+" a.LIGHTNING,a.LOOKNUM,a.FBNUM,f.USER_TYPE,f.isSend ISLOOK,f.STATUS O_STATUS "
+					+"from t_1do_base a LEFT JOIN (select * from t_1do_pstatus where USER_TYPE!=2 " +look+" "
+					+ "and isDelete=1 and O_USER='"+loginName+"' GROUP BY SHOW_ID)f on a.SHOW_ID=f.SHOW_ID "
+					+"where "+sql+look;*/
 			
 			
 		    String from1=StrUtil.isNotEmpty(json1.getString("source"))? " ORDER BY O_CREATE_TIME desc LIMIT ?,? ) g ":" ORDER BY O_CREATE_TIME desc LIMIT ?,? ) g ORDER BY O_CREATE_TIME ";			
-			if(type==7||isLook==2)
-			from1=StrUtil.isNotEmpty(json1.getString("source"))?" ORDER BY SEND_TIME desc LIMIT ?,? ) g ":" ORDER BY SEND_TIME desc LIMIT ?,? ) g ORDER BY SEND_TIME ";
+			if(type==7||isLook==2||type==3||type==4)
+			 from1=StrUtil.isNotEmpty(json1.getString("source"))?" ORDER BY SEND_TIME desc LIMIT ?,? ) g ":" ORDER BY SEND_TIME desc LIMIT ?,? ) g ORDER BY SEND_TIME ";
 			
 			List<Record> r3=Db.find("select * from ("+from+from1,json1.getIntValue("pageNumber"),json1.getIntValue("onePageNumber"));
 			List<Record> r4=Db.find(from);
@@ -519,12 +536,24 @@ public class DoController extends Controller {
 			if(json1==null){
 			    json1=HttpUtil.loginIm(json.getString("useraccount"));
 				System.out.println(json1);
-				String str=HttpUtil.getParameter1(json1, "/Base-Module/CompanyUser",json1.getString("loginName"));			
-				JSONObject json3= HttpUtil.doPost2("http://xcgovapi.hzxc.gov.cn/Base-Module/CompanyUser", str);
-				System.out.println(json3);
-				json1.put("D_NAME", json3.get("D_NAME"));
-				json1.put("U_DEPT_ID", json3.get("U_DEPT_ID"));
-				TRegUser.saveUser(json1);
+				if(UrlUtil.getUser.equals("http://172.16.8.7:6002")){
+					String str=HttpUtil.getParameter1(json1, "/Base-Module/CompanyUser/GetUser",json1.getString("loginName"));			
+					JSONObject json3= HttpUtil.doPost2(UrlUtil.getUser, str);//http://172.16.8.7:6002
+					System.out.println(json3);
+					json1.put("D_NAME", json3.get("D_NAME"));
+					json1.put("U_DEPT_ID", json3.get("U_DEPT_ID"));
+					TRegUser.saveUser(json1);
+				}else{
+					//{"cShowId":"b5WJZ1bRLDCb7x2B","loginName":"PQV8oo3jeeiDkLbY","LoginToken":"Sl2rcs/fFeU9mYQIr54bK+9vDhU=","useraccount":"fangshengqun","username":"方升群"}
+					String url=UrlUtil.getUser+"?CREATE_USER="+json1.getString("loginName")+""
+							+ "&CREATE_USER_NAME="+json1.getString("username")+"&C_SHOW_ID="+json1.getString("cShowId")+""
+									+ "&C_CODE=xcgov&AuthToken="+json1.getString("LoginToken");
+					JSONObject json3= HttpUtil.doGet(url);
+					System.out.println(json3);
+					json1.put("D_NAME", json3.get("D_NAME"));
+					json1.put("U_DEPT_ID", json3.get("U_DEPT_ID"));
+					TRegUser.saveUser(json1);
+				}
 			}
 			json1.put("isfw", isfw);
 			setSessionAttr("user", json1);
@@ -616,8 +645,7 @@ public class DoController extends Controller {
 				
 			}
 			final String loginName=user1==null?json.getString("loginName"):user1.getString("loginName");
-			if((t1doBase.getOIsDeleted()==2&&StrUtil.isNotEmpty(json.getString("loginName")))||(t1doBase.getOIsDeleted()==2&&!user1.getBooleanValue("isfw"))){
-			
+			if(t1doBase.getOIsDeleted()==2&&!user1.getBooleanValue("isfw")){
 				DbUtil.update(t1doBase.getShowId(),loginName, 5, 0,"","");
 				DbUtil.update(t1doBase.getShowId(),loginName, 6, 0,"","");
 				renderJson(JsonUtil.getMap(200, "该1do已删除"));
@@ -740,7 +768,7 @@ public class DoController extends Controller {
 							i1=1;
 							t1doBase.setOCustomer(StrUtil.getUser1(t1doBase.getOCustomer(), json.getString("useraccount"), json.getString("method")))
 							.setOCustomerName(StrUtil.getUser1(t1doBase.getOCustomerName(), json.getString("username"), json.getString("method"))).update();
-						
+							t.setUserType(1).setOStatus(t1doBase.getOStatus()).setSTATUS(StrUtil.getStatus2(t1doBase.getOStatus()));
 						}else if(json.getString("object").equals("参与人")){
 							i1=3;
 							t1doBase.setOExecutor(StrUtil.getUser1(t1doBase.getOExecutor(), json.getString("useraccount"), json.getString("method")))
@@ -950,7 +978,7 @@ public class DoController extends Controller {
 				//	uploadFiles.add(filePart);
 					String fileName=IDUtil.getUid()//UUID.randomUUID().toString()
 							+ filePart.getFileName().substring(filePart.getFileName().lastIndexOf("."));
-					File t1 = new File("D:\\1do\\upload\\");//设置本地上传文件对象（并重命名）
+					File t1 = new File(UrlUtil.jdlj);//设置本地上传文件对象（并重命名）
 					File t = new File(t1,fileName);//设置本地上传文件对象（并重命名）
 					FileOutputStream out = new FileOutputStream(t);
 	        		Streams.copy(filePart.getInputStream(), out, true);
@@ -1035,17 +1063,17 @@ public class DoController extends Controller {
 			
 		}
 		//附件单独删除
-				@Before(Tx.class)
-				public void deleteAttr(){
-			    	JSONObject json=JsonUtil.getJSONObject(getRequest()); 	
-			    	int i=Db.delete("DELETE from t_1do_attr where attr_path=?",json.getString("ATTR_PATH"));
-			    	if(i==1){
-						renderJson(JsonUtil.getMap(200, "删除成功"));
-			    	}else{
-						renderJson(JsonUtil.getMap(201, "删除失败"));
-			    	}
-					
-				}
+		@Before(Tx.class)
+		public void deleteAttr(){
+	    	JSONObject json=JsonUtil.getJSONObject(getRequest()); 	
+	    	int i=Db.delete("DELETE from t_1do_attr where attr_path=?",json.getString("ATTR_PATH"));
+	    	if(i==1){
+				renderJson(JsonUtil.getMap(200, "删除成功"));
+	    	}else{
+				renderJson(JsonUtil.getMap(201, "删除失败"));
+	    	}
+			
+		}
 		//批量删除
 		@Before(Tx.class)
 		public void deleteAlldo(){
@@ -1184,7 +1212,7 @@ public class DoController extends Controller {
 					//	uploadFiles.add(filePart);
 					String fileName=IDUtil.getUid()//UUID.randomUUID().toString()
 							+ filePart.getFileName().substring(filePart.getFileName().lastIndexOf("."));
-					File t1 = new File("D:\\1do\\upload\\");//设置本地上传文件对象（并重命名）
+					File t1 = new File(UrlUtil.jdlj);//设置本地上传文件对象（并重命名）
 					File t = new File(t1,fileName);//设置本地上传文件对象（并重命名）
 					FileOutputStream out = new FileOutputStream(t);
 					Streams.copy(filePart.getInputStream(), out, true);
@@ -1242,7 +1270,7 @@ public class DoController extends Controller {
 						FilePart filePart = (FilePart) part;
 						String fileName=IDUtil.getUid()//UUID.randomUUID().toString()
 								+ filePart.getFileName().substring(filePart.getFileName().lastIndexOf("."));
-						File t1 = new File("D:\\1do\\upload\\");//设置本地上传文件对象（并重命名）
+						File t1 = new File(UrlUtil.jdlj);//设置本地上传文件对象（并重命名）
 						File t = new File(t1,fileName);//设置本地上传文件对象（并重命名）
 						FileOutputStream out = new FileOutputStream(t);
 		        		Streams.copy(filePart.getInputStream(), out, true);
@@ -1305,7 +1333,7 @@ public class DoController extends Controller {
 					FilePart filePart = (FilePart) part;
 					String fileName=IDUtil.getUid()//UUID.randomUUID().toString()
 							+ filePart.getFileName().substring(filePart.getFileName().lastIndexOf("."));
-					File t1 = new File("D:\\1do\\upload\\");//设置本地上传文件对象（并重命名）
+					File t1 = new File(UrlUtil.jdlj);//设置本地上传文件对象（并重命名）
 					File t = new File(t1,fileName);//设置本地上传文件对象（并重命名）
 					FileOutputStream out = new FileOutputStream(t);
 					Streams.copy(filePart.getInputStream(), out, true);
@@ -1511,7 +1539,7 @@ public class DoController extends Controller {
 			T1doFeedback t=T1doFeedback.dao.findById(json.getIntValue("ID"));
 			//int i=Db.update("update t_1do_feedback set FB_TYPE=7 where ID=? and O_USER=?",json.getIntValue("ID"),json1.getString("loginName"));
 		    if(t.getOUser().equals(user.getString("loginName"))){
-		    	T1doLog.saveLog(t.getShowId(), user.getString("loginName"), user.getString("username"), t.getID()+"被删除", 11,"");
+		    	T1doLog.saveLog(t.getShowId(), user.getString("loginName"), user.getString("username"),user.getString("username")+"删除一条信息", 11,"");
 			    t.setFbType(7).update();
 			    t.setFbType(8).remove("ID").save();
 		    	renderJson(JsonUtil.getMap(200, "删除反馈成功"));

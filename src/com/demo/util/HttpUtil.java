@@ -597,6 +597,42 @@ public class HttpUtil {
 		return   json2;                                              
 		
 	}
+	public static JSONObject doGet(String url){
+		HttpClientBuilder builder = HttpClients.custom();
+		CloseableHttpClient httpClient = builder.build();
+		HttpGet get=new HttpGet(url);
+		String result="";
+		try {
+			CloseableHttpResponse response = httpClient.execute(get);
+			try{
+				if(response.getStatusLine().getStatusCode()==200){
+					HttpEntity entity = response.getEntity();
+					result=EntityUtils.toString(entity,"utf8");
+				}
+			}finally{
+				response.close();
+			}			
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			try {
+				httpClient.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		JSONObject json33 = JSON.parseObject(result);
+		String Data=json33.getString("Data");
+		JSONObject json2 = JSON.parseObject(Data);
+		return   json2;        
+		
+		
+	}
 	public static  JSONObject doPost3(String url,String outStr){
 		HttpClient httpClient = HttpClients.custom().build();
 		HttpPost httpPost=new HttpPost(url);
@@ -629,7 +665,7 @@ public class HttpUtil {
 	public static JSONObject loginIm(String imName) {
 		String data = login(imName);
 		//String str = getLogin(data, "http://xcgov.hzxc.gov.cn/Base-Module/CompanyUserLogin/Login");
-		String str = getLogin(data, "http://xcgov.hzxc.gov.cn/Base-Module/CompanyUserLogin/UserValidate");
+		String str = getLogin(data, UrlUtil.loginURL+"/Base-Module/CompanyUserLogin/UserValidate");
 		System.out.println(str);
 		JSONObject json = getToken(str);
 		return json;

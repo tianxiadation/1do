@@ -43,9 +43,12 @@ import com.jfinal.template.Engine;
  */
 public class DemoConfig extends JFinalConfig {
 	
-	public static String jdbcUrl="jdbc:mysql://172.16.10.60:3306/do?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull";
+	/*public static String jdbcUrl="jdbc:mysql://172.16.10.60:3306/do?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull";
 	public static String user="root";
-	public static String password="p@ssw0rd";
+	public static String password="p@ssw0rd";*/
+	public static String jdbcUrl="jdbc:mysql://59.202.68.48:3306/do?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull";
+	public static String user="root";
+	public static String password="jiaojun";
 	/**
 	 * 运行此 main 方法可以启动项目，此main方法可以放置在任意的Class类定义中，不一定要放于此
 	 * 
@@ -165,7 +168,7 @@ public class DemoConfig extends JFinalConfig {
 			
 			@Override
 			public void run() {
-				Db.update("insert into t_1do_label(SHOW_ID,LABEL)"
+				/*Db.update("insert into t_1do_label(SHOW_ID,LABEL)"
 						+" SELECT a.SHOW_ID,a.LABEL FROM t_1do_label a,t_1do_weight b where a.LABEL=b.LABEL");
 				
 				List<T1doFeedback> list=T1doFeedback.dao.find("select * from t_1do_feedback where "
@@ -180,22 +183,8 @@ public class DemoConfig extends JFinalConfig {
 					DbUtil.insertIdo(t.getShowId());
 					DbUtil.updateType(t.getShowId());
 					DbUtil.insertlr1(t.getShowId());					
-				});
-				
-				//T1doLabelRecord.batchSaveAllLabel();
-				//T1doRecord.batchSave();
-				/*// TODO Auto-generated method stub
-				List<T1doFeedback> list=T1doFeedback.dao.find("select * from t_1do_feedback where "
-						+ "FB_TYPE=1 or FB_TYPE=2 or FB_TYPE=6");
-				list.forEach(t->{
-					T1doLabelFeedback.saveAllLabel(t);
-				});
-				
-				List<T1doBase> tb=T1doBase.dao.find("select * from t_1do_base");
-				tb.forEach(t->{
-					//T1doLabelFeedback.savelabel(t);
-					DbUtil.insertRF(t.getShowId());
 				});*/
+			
 				
 			}
 		}).start();
@@ -211,7 +200,7 @@ public class DemoConfig extends JFinalConfig {
             System.out.println(address.getHostAddress());
             
             //测试服务器
-            if(!address.getHostAddress().equals("172.16.9.195")){
+            if(!address.getHostAddress().equals("172.16.9.231")){//172.16.9.195
             	jdbcUrl="jdbc:mysql://172.16.8.11:3306/do?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull";//附件地址
             	user="root";
             	password="p@ssw0rd";
