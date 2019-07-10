@@ -9,14 +9,14 @@ public class DbUtil {
 			,SHOW_ID);
 		}
 		public static void saveWeight2(Integer FBID){	
-			Db.update("insert into t_1do_label_feedback(FBID,LABEL)"
+			/*Db.update("insert into t_1do_label_feedback(FBID,LABEL)"
 			+" SELECT a.FBID,a.LABEL FROM t_1do_label_feedback a,t_1do_weight b where a.LABEL=b.LABEL and a.FBID=?"
-			,FBID);
+			,FBID);*/
 		}
 			public static void saveWeight3(Long RECORDID){
-			Db.update("insert into t_1do_label_record(RECORDID,LABEL)"
+			/*Db.update("insert into t_1do_label_record(RECORDID,LABEL)"
 			+" SELECT a.RECORDID,a.LABEL FROM t_1do_label_record a,t_1do_weight b where a.LABEL=b.LABEL and a.RECORDID=?"
-		    ,RECORDID);
+		    ,RECORDID);*/
 	}
 	/*
 	 2019年5月9日 coco 注解：
@@ -24,16 +24,17 @@ public class DbUtil {
 	public static void insertIdo(String SHOW_ID) {
 	Db.update("insert into t_1do_relation(SHOW_ID,RELATION_SHOW_ID,SIMILARITY,TYPE) "
 		+" select a.SHOW_ID,b.SHOW_ID RELATION_SHOW_ID,(CASE WHEN count(*)/c.cnum*100>count(*)/d.dnum*100 THEN count(*)/d.dnum*100 ELSE count(*)/c.cnum*100 END )SIMILARITY,e.O_STATUS "
-		+" from t_1do_label a,t_1do_label b,(select count(*) cnum,SHOW_ID from t_1do_label GROUP BY SHOW_ID) c,"
+		+" from t_1do_label a,(select * from t_1do_label GROUP BY SHOW_ID,LABEL) b,(select count(*) cnum,SHOW_ID from t_1do_label GROUP BY SHOW_ID) c,"
 		+" (select count(*) dnum,SHOW_ID from t_1do_label  GROUP BY SHOW_ID) D,t_1do_base e"
 		+" where a.LABEL=b.LABEL and a.SHOW_ID=? and b.SHOW_ID!=? and a.SHOW_ID=c.SHOW_ID and b.SHOW_ID=d.SHOW_ID and b.SHOW_ID=e.SHOW_ID"
 		+" group by a.SHOW_ID,b.SHOW_ID ",SHOW_ID,SHOW_ID);
 	Db.update("insert into t_1do_relation(SHOW_ID,RELATION_SHOW_ID,SIMILARITY,TYPE) "
 		+" select b.SHOW_ID,a.SHOW_ID RELATION_SHOW_ID ,(CASE WHEN count(*)/c.cnum*100>count(*)/d.dnum*100 THEN count(*)/d.dnum*100 ELSE count(*)/c.cnum*100 END )SIMILARITY,e.O_STATUS"
-		+" from t_1do_label a,t_1do_label b,(select count(*) cnum,SHOW_ID from t_1do_label GROUP BY SHOW_ID) c,"
+		+" from t_1do_label a,(select * from t_1do_label GROUP BY SHOW_ID,LABEL) b,(select count(*) cnum,SHOW_ID from t_1do_label GROUP BY SHOW_ID) c,"
 		+" (select count(*) dnum,SHOW_ID from t_1do_label  GROUP BY SHOW_ID) D,t_1do_base e"
 		+" where a.LABEL=b.LABEL and a.SHOW_ID=? and b.SHOW_ID!=? and a.SHOW_ID=c.SHOW_ID and b.SHOW_ID=d.SHOW_ID and a.SHOW_ID=e.SHOW_ID"
 		+" group by a.SHOW_ID,b.SHOW_ID ",SHOW_ID,SHOW_ID);
+	//增加相似度为零的数据
 	Db.update("insert into t_1do_relation(SHOW_ID,RELATION_SHOW_ID,SIMILARITY,TYPE) "+
              " select ?,SHOW_ID,0,O_STATUS from t_1do_base where SHOW_ID "+
               "not in(select RELATION_SHOW_ID from t_1do_relation where SHOW_ID=?) "+
@@ -206,6 +207,10 @@ public class DbUtil {
 		default:
 			return 1;
 		}
+	}
+	public static void deleteLable(Long id) {
+	   Db.delete("delete a,b from t_1do_label a,t_1do_label b where a.SHOW_ID=b.SHOW_ID and a.LABEL=b.LABEL and a.ID="+id);
+		
 	}
 	
 }

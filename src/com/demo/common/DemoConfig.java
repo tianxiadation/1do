@@ -168,6 +168,7 @@ public class DemoConfig extends JFinalConfig {
 			
 			@Override
 			public void run() {
+				
 				/*Db.update("insert into t_1do_label(SHOW_ID,LABEL)"
 						+" SELECT a.SHOW_ID,a.LABEL FROM t_1do_label a,t_1do_weight b where a.LABEL=b.LABEL");
 				
@@ -182,7 +183,7 @@ public class DemoConfig extends JFinalConfig {
 				tb.forEach(t->{
 					DbUtil.insertIdo(t.getShowId());
 					DbUtil.updateType(t.getShowId());
-					DbUtil.insertlr1(t.getShowId());					
+					DbUtil.insertlr1(t.getShowId());			
 				});*/
 			
 				
@@ -199,20 +200,12 @@ public class DemoConfig extends JFinalConfig {
             InetAddress address = InetAddress.getLocalHost();
             System.out.println(address.getHostAddress());
             
-            //测试服务器
-            if(!address.getHostAddress().equals("172.16.9.231")){//172.16.9.195
+            //测试数据库
+            if(!address.getHostAddress().equals("172.16.9.195")){//
             	jdbcUrl="jdbc:mysql://172.16.8.11:3306/do?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull";//附件地址
             	user="root";
             	password="p@ssw0rd";
-            	/*jdbcUrl="jdbc:mysql://59.202.68.48:3306/do?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull";//附件地址
-            	user="root";
-            	password="jiaojun";*/
-            //本地服务器
-            }/*else if(address.getHostAddress().equals("10.18.28.8")){
-            	jdbcUrl="jdbc:mysql://localhost:3306/do?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull";//附件地址
-            	user="root";
-            	password="123456";
-            }*/
+            }
           System.out.println(jdbcUrl);
         } catch (UnknownHostException e) {
             e.printStackTrace();

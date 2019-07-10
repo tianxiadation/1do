@@ -1,8 +1,13 @@
 package com.demo.common.model;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.cxy.commonenum.TopicEnum;
+import com.cxy.service.MessageService;
 import com.demo.common.model.base.BaseT1doPstatus;
+import com.demo.interceptor.SendIdo;
 import com.demo.util.StrUtil;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
@@ -55,12 +60,28 @@ public class T1doPstatus extends BaseT1doPstatus<T1doPstatus> {
 			String[] sonUsernames=usernames[j].split(";");
 			for (int i = 0; i < sonUsers.length; i++) {
 				int k=2;//未读
-				if(t1doBase.getCreateUser().equals(sonUsers[i])){
+				String str=sonUsers[i];
+				if(t1doBase.getCreateUser().equals(str)){
 					k=1;
 				}
-				new T1doPstatus().setShowId(t1doBase.getShowId()).setOUser(sonUsers[i]).setOUserName(sonUsernames[i]).setOStatus(3).setUserType(j+1).setIsSend(k).setSTATUS(j+1==1?"已送达":"待接单").setISLOOK(k).save();//.setIsSend(j==0?1:2)
-				
-				//new T1doPset().setShowId(showID).setOUser(sonUsers[i]).setEventType("1;2;3;4;5;6;").setUserType(j+1).save();
+				new T1doPstatus().setShowId(t1doBase.getShowId()).setOUser(str).setOUserName(sonUsernames[i]).setOStatus(3).setUserType(j+1).setIsSend(k).setSTATUS(j+1==1?"已送达":"待接单").setISLOOK(k).save();//.setIsSend(j==0?1:2)
+				if(j==0&&StrUtil.isNotEmpty(t1doBase.getGROUPID())){
+					//调用kafka接口
+					new Thread(new Runnable() {
+						
+						@Override
+						public void run() {
+							
+							Map<String,Object> map=new HashMap<String,Object>();
+							map.put("groupId", t1doBase.getGROUPID());
+							map.put("userId", str);
+							map.put("showId", t1doBase.getShowId());
+							MessageService.sendMsg(TopicEnum.DO, "doInfo", map);
+							
+						}
+					}).start();
+					
+				}
 			}
 			
 		}

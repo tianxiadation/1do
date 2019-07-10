@@ -192,9 +192,8 @@ public class DoController extends Controller {
 	    			renderJson(MsgUtil.errorMsg("标签已存在"));
 	    			return;
 	    		}
-	    	}else{	
-	    		l=json.toJavaObject(T1doLabel.class);
-	    		l.delete();	    		
+	    	}else{			
+	    		DbUtil.deleteLable(json.getLongValue("id"));//加了权重所以可能删除多个相同的标签。
 	    		new Thread(new Runnable() {
 					@Override
 					public void run() {T1doRelation.updateSimilarity(json.getString("SHOW_ID"),"and SIMILARITY>0",1);}
@@ -321,9 +320,15 @@ public class DoController extends Controller {
 			}
 			int isLook=json1.getIntValue("isLook");
 			String look=isLook!=0?" and isSend="+isLook:"";
+			   String from1=StrUtil.isNotEmpty(json1.getString("source"))? " ORDER BY O_CREATE_TIME desc LIMIT ?,? ) g ":" ORDER BY O_CREATE_TIME desc LIMIT ?,? ) g ORDER BY O_CREATE_TIME ";			
+				if(type==7||isLook==2||type==3||type==4)
+				 from1=StrUtil.isNotEmpty(json1.getString("source"))?" ORDER BY SEND_TIME desc LIMIT ?,? ) g ":" ORDER BY SEND_TIME desc LIMIT ?,? ) g ORDER BY SEND_TIME ";
+			boolean flag=true;
 			if(StrUtil.isNotEmpty(json1.getString("keyword"))){
 				if(json1.getString("keyword").equals("最新回复")){					
-					sql+=" and SEND_TIME =(select MAX(SEND_TIME) from t_1do_base)";
+					//sql+=" and SEND_TIME =(select MAX(SEND_TIME) from t_1do_base)";
+					from1=" ORDER BY SEND_TIME desc LIMIT ?,? ) g limit 1";
+					flag=false;
 				}else if(json1.getString("keyword").equals("查看最近一个月的任务")){
 					sql+=" and date_sub(curdate(), interval 30 day) <= date(O_CREATE_TIME)";					
 				}else{
@@ -331,34 +336,18 @@ public class DoController extends Controller {
 					sql+=StrUtil.appendSql(json1.getString("keyword"));
 				}
 			}
-			String from ="select a.SHOW_ID,a.O_DESCRIBE,a.O_CUSTOMER_NAME,a.O_CUSTOMER,a.AT,a.O_EXECUTOR,"
+			String from2="select %s";
+			String from =" from t_1do_base a LEFT JOIN (select * from t_1do_pstatus where USER_TYPE!=2 " +look+" "
+						+ "and isDelete=1 and O_USER='"+loginName+"' GROUP BY SHOW_ID)f on a.SHOW_ID=f.SHOW_ID "
+						+"where "+sql+look;
+			String value="a.SHOW_ID,a.O_TITLE O_DESCRIBE,a.O_CUSTOMER_NAME,a.O_CUSTOMER,a.AT,a.O_EXECUTOR,"
 					    +"a.O_EXECUTOR_NAME,a.SEND_TIME,unix_timestamp(a.O_CREATE_TIME)*1000 O_CREATE_TIME,"
                         +"unix_timestamp(a.O_FINISH_TIME)*1000 O_FINISH_TIME,unix_timestamp(a.Real_FINISH_TIME)*1000 Real_FINISH_TIME"
                         +",unix_timestamp(a.DELETE_TIME)*1000 DELETE_TIME,a.O_IS_DELETED ,"
-                        +" a.LIGHTNING,a.LOOKNUM,a.FBNUM,f.USER_TYPE,f.isSend ISLOOK,f.STATUS O_STATUS "
-						+"from t_1do_base a LEFT JOIN (select * from t_1do_pstatus where USER_TYPE!=2 " +look+" "
-						+ "and isDelete=1 and O_USER='"+loginName+"' GROUP BY SHOW_ID)f on a.SHOW_ID=f.SHOW_ID "
-						+"where "+sql+look;
-			/*String from ="select a.SHOW_ID,a.O_DESCRIBE,a.O_CUSTOMER_NAME,a.O_CUSTOMER,a.AT,a.O_EXECUTOR,"
-					+"a.O_EXECUTOR_NAME,a.SEND_TIME, O_CREATE_TIME,"
-					+" O_FINISH_TIME, Real_FINISH_TIME"
-					+", DELETE_TIME,a.O_IS_DELETED ,"
-					+" a.LIGHTNING,a.LOOKNUM,a.FBNUM,f.USER_TYPE,f.isSend ISLOOK,f.STATUS O_STATUS "
-					+"from t_1do_base a LEFT JOIN (select * from t_1do_pstatus where USER_TYPE!=2 " +look+" "
-					+ "and isDelete=1 and O_USER='"+loginName+"' GROUP BY SHOW_ID)f on a.SHOW_ID=f.SHOW_ID "
-					+"where "+sql+look;*/
-			
-			
-		    String from1=StrUtil.isNotEmpty(json1.getString("source"))? " ORDER BY O_CREATE_TIME desc LIMIT ?,? ) g ":" ORDER BY O_CREATE_TIME desc LIMIT ?,? ) g ORDER BY O_CREATE_TIME ";			
-			if(type==7||isLook==2||type==3||type==4)
-			 from1=StrUtil.isNotEmpty(json1.getString("source"))?" ORDER BY SEND_TIME desc LIMIT ?,? ) g ":" ORDER BY SEND_TIME desc LIMIT ?,? ) g ORDER BY SEND_TIME ";
-			
-			List<Record> r3=Db.find("select * from ("+from+from1,json1.getIntValue("pageNumber"),json1.getIntValue("onePageNumber"));
-			List<Record> r4=Db.find(from);
-			JSONObject json2=new JSONObject();
-			json2.put("base", r3);
-			json2.put("allPage", r4.size());
-			renderJson(MsgUtil.successMsg(json2));
+                        +" a.LIGHTNING,a.LOOKNUM,a.FBNUM,f.USER_TYPE,f.isSend ISLOOK,f.STATUS O_STATUS";
+			List<Record> r3=Db.find("select * from ("+String.format(from2, value)+from+from1,json1.getIntValue("pageNumber"),json1.getIntValue("onePageNumber"));
+			Integer ret = Db.queryInt(String.format(from2, "count(*)")+from);
+			renderJson(MsgUtil.successMsg(JsonUtil.getAppSearchResult(r3, flag?ret:1)));
 			
 		}
 		
@@ -402,7 +391,7 @@ public class DoController extends Controller {
 			}
 			
 			String from ="select a.*,b.type TYPE,(case a.LOOK_USER like ? when true  then 1 else 2 end )ISLOOK"
-					+ " from (select SHOW_ID,O_DESCRIBE,O_EXECUTOR_NAME,O_CUSTOMER_NAME,O_START_TIME,O_FINISH_TIME,"
+					+ " from (select SHOW_ID,O_TITLE O_DESCRIBE,O_EXECUTOR_NAME,O_CUSTOMER_NAME,O_START_TIME,O_FINISH_TIME,"
 					+ " star,evaluation,Real_FINISH_TIME,DELETE_TIME,LOOK_USER "
 					+ " from t_1do_base where "+sql+" ORDER BY ID desc)a LEFT JOIN (select * from t_1do_order "
 					+ " where useraccount=? )b on a.show_id=b.show_id ORDER BY modifyTime desc LIMIT ?,10";
@@ -454,7 +443,7 @@ public class DoController extends Controller {
 					sql+=" and O_EXECUTOR_NAME like CONCAT('%','"+json1.getString("O_EXECUTOR_NAME")+"','%')";
 				} 
 				
-			String from ="select SHOW_ID,O_DESCRIBE,O_EXECUTOR_NAME,O_CUSTOMER_NAME,O_START_TIME,O_FINISH_TIME,star,evaluation,Real_FINISH_TIME,DELETE_TIME "
+			String from ="select SHOW_ID,O_TITLE O_DESCRIBE,O_EXECUTOR_NAME,O_CUSTOMER_NAME,O_START_TIME,O_FINISH_TIME,star,evaluation,Real_FINISH_TIME,DELETE_TIME "
 					+ "from t_1do_base  where "+sql+"  ORDER BY "
 					+ ""+json1.getString("sorting")+" LIMIT ?,10";
 			String from1="select count(*) num  "
@@ -1295,6 +1284,10 @@ public class DoController extends Controller {
 			StrUtil.getQTR(t1doBase);//设置处理人和抄送人
 			T1doAttr t1doAttr=t1doBase.newIdoAttr();	
 			T1doLog.saveLog(t1doBase.getShowId(), t1doBase.getCreateUser(), t1doBase.getCreateUserName(), t1doBase.getCreateUserName()+"创建了此1do", 1, "");
+			//新建子1do是父工单保留痕迹
+			if(json.toString().contains("PARENT_ID")&&StrUtil.isNotEmpty(t1doBase.getParentId())){
+				T1doLog.saveLog(t1doBase.getParentId(), t1doBase.getCreateUser(), t1doBase.getCreateUserName(), t1doBase.getCreateUserName()+"新建下级1do", 16, "");
+			}
 			Long time=new Date().getTime();
 			for (int i = 0; i < uploadFiles.size(); i++) {		
 			    t1doAttr.setAttrPath(UrlUtil.attrUrl+uploadFiles.get(i)).setAttrName(uploadFiles1.get(i)).save();

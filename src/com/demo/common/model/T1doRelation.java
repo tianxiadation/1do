@@ -18,7 +18,7 @@ public class T1doRelation extends BaseT1doRelation<T1doRelation> {
 	*/
 	public static List<T1doRelation> getList(String SHOW_ID) {
 		return dao.find(" select a.SHOW_ID,b.SHOW_ID RELATION_SHOW_ID,(CASE WHEN count(*)/c.cnum*100>count(*)/d.dnum*100 THEN count(*)/d.dnum*100 ELSE count(*)/c.cnum*100 END )SIMILARITY"
-				+" from t_1do_label a,t_1do_label b,(select count(*) cnum,SHOW_ID from t_1do_label GROUP BY SHOW_ID) c,"
+				+" from t_1do_label a,(select * from t_1do_label GROUP BY SHOW_ID,LABEL) b,(select count(*) cnum,SHOW_ID from t_1do_label GROUP BY SHOW_ID) c,"
 				+" (select count(*) dnum,SHOW_ID from t_1do_label  GROUP BY SHOW_ID) D"
 				+" where a.LABEL=b.LABEL and a.SHOW_ID=? and b.SHOW_ID!=? and a.SHOW_ID=c.SHOW_ID and b.SHOW_ID=d.SHOW_ID"
 				+" group by a.SHOW_ID,b.SHOW_ID ",SHOW_ID,SHOW_ID);
@@ -41,7 +41,7 @@ public class T1doRelation extends BaseT1doRelation<T1doRelation> {
 	 2019年2月12日 coco 注解：//查询关联1do
 	 */
 	public static List<Record> selectRelation(String showId,String sql) {
-		return Db.find("select  a.ID,a.SIMILARITY,b.SHOW_ID,a.TYPE,b.O_DESCRIBE,unix_timestamp(b.O_CREATE_TIME)*1000 O_CREATE_TIME,unix_timestamp(b.O_FINISH_TIME)*1000 O_FINISH_TIME,b.FBNUM,b.LOOKNUM,"
+		return Db.find("select  a.ID,a.SIMILARITY,b.SHOW_ID,a.TYPE,b.O_TITLE O_DESCRIBE,unix_timestamp(b.O_CREATE_TIME)*1000 O_CREATE_TIME,unix_timestamp(b.O_FINISH_TIME)*1000 O_FINISH_TIME,b.FBNUM,b.LOOKNUM,"
 				+ "(case b.O_STATUS when 3 then '待接单' when 4 then '已接单' when 5 then '已完成' else '已删除' end) O_STATUS"
 				+ ",b.O_CUSTOMER_NAME,b.O_EXECUTOR_NAME,b.O_CUSTOMER,b.O_EXECUTOR from t_1do_relation a,t_1do_base b "
 				+ "where (a.SIMILARITY>b.SIMILARITY or a.TYPE<=0) and a.RELATION_SHOW_ID=b.SHOW_ID and a.SHOW_ID=? "+sql+" ORDER BY a.SORT,a.SIMILARITY desc",showId);

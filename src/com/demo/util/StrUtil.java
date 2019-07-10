@@ -16,6 +16,7 @@ import com.demo.common.model.T1doPstatus;
 import com.demo.common.model.TRegUser;
 import com.jfinal.kit.StrKit;
 import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.Record;
 
 public class StrUtil {
 	/*
@@ -711,6 +712,17 @@ public class StrUtil {
 		public static void main(String[] args) {
 	        String str="零";
 	        System.out.println(chineseNumber2Int(str));  //===>  123
+	        
+	        String from ="select %s from t_1do_base a LEFT JOIN (select * from t_1do_pstatus where USER_TYPE!=2 "
+					+ "and isDelete=1 and O_USER='' GROUP BY SHOW_ID)f on a.SHOW_ID=f.SHOW_ID "
+					+"where ";
+		String value="a.SHOW_ID,a.O_TITLE O_DESCRIBE,a.O_CUSTOMER_NAME,a.O_CUSTOMER,a.AT,a.O_EXECUTOR,"
+				    +"a.O_EXECUTOR_NAME,a.SEND_TIME,unix_timestamp(a.O_CREATE_TIME)*1000 O_CREATE_TIME,"
+                    +"unix_timestamp(a.O_FINISH_TIME)*1000 O_FINISH_TIME,unix_timestamp(a.Real_FINISH_TIME)*1000 Real_FINISH_TIME"
+                    +",unix_timestamp(a.DELETE_TIME)*1000 DELETE_TIME,a.O_IS_DELETED ,"
+                    +" a.LIGHTNING,a.LOOKNUM,a.FBNUM,f.USER_TYPE,f.isSend ISLOOK,f.STATUS O_STATUS";
+		String ss=String.format(from, value);
+		System.out.println(ss);
 	    }
 	    
 

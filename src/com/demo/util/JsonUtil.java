@@ -1,6 +1,8 @@
 package com.demo.util;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -9,6 +11,7 @@ import org.apache.log4j.Logger;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.kit.HttpKit;
+import com.jfinal.plugin.activerecord.Record;
 
 public class JsonUtil {
 	private static Logger log=Logger.getLogger(JsonUtil.class);
@@ -19,7 +22,7 @@ public class JsonUtil {
 	public static JSONObject getJSONObject(HttpServletRequest request) {
 		String meg=HttpKit.readData(request);
 		JSONObject json=JSON.parseObject(meg);
-		log.error(json);
+		log.error(json);	
 		return json;
 	}
 	public static LinkedHashMap<String, Object> getMap(int code,String message){
@@ -48,5 +51,17 @@ public class JsonUtil {
 		JSONObject json=new JSONObject();
 		json.put("text", value);
 		return json.toString();
+	}
+	public  static JSONObject getAppSearchResult(List<Record> r3,int allPage){
+	
+		JSONObject json=new JSONObject();
+		json.put("base", r3);
+		json.put("allPage", allPage);
+		return json;
+	}
+	public static void main(String[] args) {
+		String[] name={"a","b","c"};
+		String[] age={"1","2","3"};
+		System.out.println(Arrays.deepToString(name));
 	}
 }

@@ -435,7 +435,7 @@ public class T1doBase extends BaseT1doBase<T1doBase> {
 		}*/
 		//查询标签
 		public  List<T1doLabel> getLabel() {
-			return T1doLabel.dao.find("select ID,LABEL from t_1do_label where SHOW_ID=? order by ID DESC",getShowId());
+			return T1doLabel.dao.find("select ID,LABEL from t_1do_label where SHOW_ID=? GROUP BY LABEL order by ID DESC",getShowId());
 		}
 		/*
 		 2018年8月20日下午9:44:42 方升群
