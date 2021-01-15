@@ -1,0 +1,61 @@
+package com.luqi.model;
+
+import java.util.List;
+
+/**
+ * @ClassName ItemModel
+ * @Description 标签模型
+ * @auther Sherry
+ * @date 2019/7/24 1:59 PM
+ */
+public class ItemModel  {
+    private Long id;
+    //名称
+    private String topic;
+    //父节点
+    private Long parentid;
+    //类型
+    private Integer type;
+
+    public ItemModel() {
+    }
+
+    public ItemModel(Long id, String topic, Long parentid, Integer type) {
+        this.id = id;
+        this.topic = topic;
+        this.parentid = parentid;
+        this.type = type;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
+
+    public Long getParentid() {
+        return parentid;
+    }
+
+    public void setParentid(Long parentid) {
+        this.parentid = parentid;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
+}

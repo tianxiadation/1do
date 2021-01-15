@@ -1,0 +1,93 @@
+package com.demo.controller;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+
+import com.alibaba.fastjson.JSONObject;
+import com.demo.common.model.T1doBase;
+import com.demo.common.model.T1doBoard;
+import com.demo.common.model.T1doProject1do;
+import com.demo.common.model.T1doProjectStakeholder;
+import com.demo.interfaces.UpdateBase;
+import com.demo.util.JsonUtil;
+import com.demo.util.MsgUtil;
+import com.demo.util.StrUtil;
+import com.demo.util.node.InfiniteLevelTreeUtil;
+import com.demo.util.node.Node;
+import com.jfinal.aop.Before;
+import com.jfinal.core.Controller;
+import com.jfinal.plugin.activerecord.Page;
+import com.jfinal.plugin.activerecord.tx.Tx;
+
+
+/**
+* @author coco 红旗班
+* @date 2020年7月31日 上午10:42:24
+* 
+*/
+public class CommonController extends Controller {
+	/**   
+	　* 描述：   
+	　* 创建人：coco   
+	　* 创建时间：2020年7月31日 上午10:42:41         
+	*/
+	public void getDataList() {
+		JSONObject json=JsonUtil.getJSONObject(getRequest());
+		JSONObject user=getSessionAttr("user");
+		String loginName=user==null?json.getString("loginName"):user.getString("loginName");
+		int type=json.getIntValue("status");
+		String sql="and o_status!=6 ";			
+		if(type!=0){
+			sql="and o_status="+type;
+		} 
+		sql+=" and (O_EXECUTOR like CONCAT('%','"+loginName+"','%') or O_CUSTOMER like CONCAT('%','"+loginName+"','%') )";
+		if(json.getIntValue("O_TYPE_ID")!=0) {
+			sql+="and O_TYPE_ID="+json.getIntValue("O_TYPE_ID");
+		}
+		if(StrUtil.isNotEmpty(json.getString("content"))){
+				sql+=" and O_DESCRIBE like CONCAT('%','"+json.getString("content")+"','%')";
+		}
+		//int pageNumber=getParaToInt("pageNumber");
+    	//Boolean isDeleted=getParaToBoolean("is_deleted",false);
+    	Page<T1doBase> page  =T1doBase.dao.paginate(json.getIntValue("pageNumber"), json.getIntValue("pageSize"), false,  "select SHOW_ID,O_DESCRIBE,O_CUSTOMER,O_CUSTOMER_NAME,O_CREATE_TIME"
+    			+ ",O_FINISH_TIME,REAL_FINISH_TIME,SOURCE,O_STATUS,O_EXECUTOR,O_EXECUTOR_NAME,O_TYPE_ID",
+    			"from t_1do_base where SOURCE=? "+sql+" ORDER BY id desc",json.getIntValue("SOURCE"));
+		renderJson(MsgUtil.successMsg(page));
+	}
+	/**
+     * @Author coco
+     * @Description 1do详情
+     * @Date 2018年6月25日下午3:37:00
+    */
+	@Before(Tx.class)
+	public void getIdoMessage() {
+  
+    	JSONObject json=JsonUtil.getJSONObject(getRequest()); 	
+		final T1doBase t1doBase=T1doBase.getIdoBase2(json.getString("SHOW_ID"));
+		JSONObject user1=getSessionAttr("user");
+		if(json.getString("loginName")==null&&user1==null){
+			renderJson(JsonUtil.getMap(500, "用户未登入"));
+			return;
+		}else if(t1doBase==null){
+			renderJson(JsonUtil.getMap(400, "工单不存在"));
+			return;
+		}else if(json.getString("loginName")!=null&&user1==null){
+			user1=new DoController().setSession(json.getString("loginName"));
+		}
+		//final JSONObject user=user1;
+		final String loginName=user1.getString("loginName");//user1==null?json.getString("loginName"):
+		final String username=user1.getString("username");
+		/**
+		 * 来源 0、全部  1、call 或者oa 2、主动办 3、三实库 4、其他 5、领导批示6.城市大脑,7综合信息系统，
+		 * 	8、1call办9、城市大脑综合指挥平台 10、督查指挥，11云上城管，12百姓爆料，13红旗班
+		 */
+		//云上城管特殊定制用不到下面的字段这里直接返回
+			new Thread(new UpdateBase(t1doBase,loginName,username)).start();
+			LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();  
+			map.put("BASE", t1doBase);
+			map.put("message", "Success");
+			map.put("code", 200);		
+			renderJson(map);
+	}
+}

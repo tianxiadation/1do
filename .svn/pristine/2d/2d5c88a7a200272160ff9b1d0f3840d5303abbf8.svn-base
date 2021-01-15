@@ -1,0 +1,37 @@
+package com.luqi.interceptor;
+
+import com.alibaba.fastjson.JSONObject;
+import com.jfinal.aop.Interceptor;
+import com.jfinal.aop.Invocation;
+import com.jfinal.kit.HttpKit;
+import com.luqi.common.model.TRegUser;
+import com.luqi.service.DoService;
+import com.luqi.util.Ip;
+import com.luqi.util.JsonUtil;
+import com.luqi.util.MsgUtil;
+
+public class LoginInterceptor implements Interceptor {
+	
+	
+	public void intercept(Invocation inv) {
+		
+		JSONObject json=JsonUtil.getJSONObject(inv.getController().getRequest());
+		JSONObject user=inv.getController().getSessionAttr("user");
+		if(json.getString("loginName")==null&&user==null){
+			inv.getController().renderJson(MsgUtil.errorMsg("用户未登入"));
+			return;
+		}else if(json.getString("loginName")!=null&&user==null){
+			user=TRegUser.getUserForShowId(json.getString("loginName"));
+		}		
+		// JSONObject user = inv.getController().getSessionAttr("user");
+		if (user != null) {
+			inv.getController().setAttr("request", json);
+			inv.getController().setAttr("user", user);
+		    inv.invoke();
+		} else {
+		   inv.getController().renderJson(MsgUtil.errorMsg("用户未登入"));
+		}		
+	
+	}
+
+}

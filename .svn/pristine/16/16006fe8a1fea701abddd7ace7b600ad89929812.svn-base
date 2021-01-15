@@ -1,0 +1,21 @@
+package com.demo.timer;
+
+import java.util.Date;
+import java.util.TimerTask;
+
+import com.demo.service.BoardTaskService;
+import com.demo.service.BoardTaskServiceA;
+
+public class BoardTask extends TimerTask {
+
+	@Override
+	public void run() {
+		try {
+			BoardTaskServiceA.TaskCalculate(new Date());
+		} catch (Exception e) {		
+			e.printStackTrace();
+		}
+		
+	}
+
+}

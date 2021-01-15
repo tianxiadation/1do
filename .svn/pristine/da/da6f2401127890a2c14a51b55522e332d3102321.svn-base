@@ -1,0 +1,117 @@
+# 1do接口文档  （POST默认请求）
+
+## 正式 https://1do.hzxc.gov.cn:8443 
+
+## 测试 http://59.202.68.43:8080
+
+[TOC]
+
+------
+
+### 1 功能 ：获得1do列表数据
+
+#### 请求方法： /1do/common/getDataList
+
+####  参数说明：支持格式 JSON
+
+| 字段       | 类型   | 是否必填 | 描述及要求                                                   |
+| ---------- | ------ | -------- | ------------------------------------------------------------ |
+| pageNumber | int    | 必填     | 当前页数                                                     |
+| pageSize   | int    | 必填     | 每页显示多少条                                               |
+| content    | String | 必填     | 默认“”，模糊搜索关键词                                       |
+| status     | int    | 必填     | 处理状态：3.待接单 4.处理中 5.已完成  0.全部                 |
+| SOURCE     | int    | 必填     | 来源 0、全部  1、call 或者oa 2、主动办 3、三实库 4、其他 5、领导批示6.城市大脑,7综合信息系统，8、1call办9、城市大脑综合指挥平台 10、督查指挥，11云上城管，12百姓爆料，13红旗班 |
+| O_TYPE_ID  | int    | 必填     | 事件类型/项目类型,默认0查询全部，事件类型/项目id：如1.aaa 2.bbb |
+| loginName  | String | 选填     | 未登入用户可以填用户的showid                                 |
+
+```json
+{
+    "pageNumber": 1,
+    "pageSize":3,
+    "status": 0,
+    "content": "",
+    "SOURCE": 1,
+    "O_TYPE_ID": 1,
+    "loginName": "WeKJDWROnaHQn6Yq"
+}
+```
+
+####  Output
+
+| 字段             | 字段名           | 类型   | 描述及要求                                                   |
+| ---------------- | ---------------- | ------ | ------------------------------------------------------------ |
+| SHOW_ID          | 1do工单编号      | String | 1do工单编号                                                  |
+| O_DESCRIBE       | 内容             | String | 内容                                                         |
+| O_EXECUTOR_NAME  | 参与人姓名       | String | 多个参与人以“;”隔开，如："方升群;谢洁"                       |
+| O_EXECUTOR       | 参与人姓名showid | String | 多个参与人以“;”隔开，如：“XzaqamVZPDtAR3WP;297NKDKkDzHZe2da" |
+| SOURCE           | 来源             | int    | 来源 0、全部  1、call 或者oa 2、主动办 3、三实库 4、其他 5、领导批示6.城市大脑,7综合信息系统，8、1call办9、城市大脑综合指挥平台 10、督查指挥，11云上城管，12百姓爆料，13红旗班 |
+| O_TYPE_ID        | 事件类型         | String | 目前默认：0；；来源为1call办时（1、城管执法，2、民政，3、环卫，4、住建，5、人社）后续增加另行通知 |
+| O_CREATE_TIME    | 创建时间         | String | 创建时间                                                     |
+| O_CUSTOMER_NAME  | 发起人姓名       | String | 多个发起人以“;”隔开，如："方升群;谢洁"                       |
+| O_CUSTOMER       | 发起人姓名showid | String | 多个发起人以“;”隔开，如："XzaqamVZPDtAR3WP;297NKDKkDzHZe2da" |
+| REAL_FINISH_TIME | 办结时间         | String | 办结时间                                                     |
+| O_FINISH_TIME    | 完成时间         | String | 拟完成时间                                                   |
+| O_STATUS         | 工单状态         | int    | 处理状态 3.待接单 4.处理中 5.已完成  0.全部                  |
+
+**Success**
+
+```json
+{
+    "code": 200,
+    "data": {
+        "totalRow": 24,
+        "pageNumber": 1,
+        "lastPage": false,
+        "firstPage": true,
+        "totalPage": 8,
+        "pageSize": 3,
+        "list": [
+            {
+                "O_CUSTOMER_NAME": "刘韬",
+                "O_FINISH_TIME": null,
+                "O_TYPE_ID": "1",
+                "O_EXECUTOR_NAME": "谢洁;刘佳民;王帅帅",
+                "REAL_FINISH_TIME": null,
+                "O_CREATE_TIME": "2019-09-27 15:34:57",
+                "O_CUSTOMER": "Np1ZK5KO3ZcXx1NJ",
+                "SOURCE": 1,
+                "O_EXECUTOR": "XzaqamVZPDtAR3WP;297NKDKkDzHZe2da;WeKJDWROnaHQn6Yq",
+                "SHOW_ID": "207287937304363008",
+                "O_DESCRIBE": "新建一个测试一下分词系统打标签的效果",
+                "O_STATUS": 3
+            },
+            {
+                "O_CUSTOMER_NAME": "刘韬",
+                "O_FINISH_TIME": null,
+                "O_TYPE_ID": "1",
+                "O_EXECUTOR_NAME": "谢洁;刘佳民;王帅帅",
+                "REAL_FINISH_TIME": null,
+                "O_CREATE_TIME": "2019-09-27 09:35:20",
+                "O_CUSTOMER": "Np1ZK5KO3ZcXx1NJ",
+                "SOURCE": 1,
+                "O_EXECUTOR": "XzaqamVZPDtAR3WP;297NKDKkDzHZe2da;WeKJDWROnaHQn6Yq",
+                "SHOW_ID": "207197436492382208",
+                "O_DESCRIBE": "测试服务器测试新建1do推送到指挥平台",
+                "O_STATUS": 3
+            },
+            {
+                "O_CUSTOMER_NAME": "刘韬",
+                "O_FINISH_TIME": null,
+                "O_TYPE_ID": "1",
+                "O_EXECUTOR_NAME": "谢洁;刘佳民;王帅帅",
+                "REAL_FINISH_TIME": null,
+                "O_CREATE_TIME": "2019-09-27 09:34:05",
+                "O_CUSTOMER": "Np1ZK5KO3ZcXx1NJ",
+                "SOURCE": 1,
+                "O_EXECUTOR": "XzaqamVZPDtAR3WP;297NKDKkDzHZe2da;WeKJDWROnaHQn6Yq",
+                "SHOW_ID": "207197121554677760",
+                "O_DESCRIBE": "测试服务器测试新建1do推送到指挥平台",
+                "O_STATUS": 3
+            }
+        ]
+    },
+    "message": "Success"
+}
+```
+
+

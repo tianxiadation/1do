@@ -1,0 +1,30 @@
+#database config
+dbType=mysql
+devMode =true
+showSql =true
+
+#下城测试1do数据库
+jdbcUrl=jdbc:mysql://172.16.8.11:3306/do?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false
+user=whfw
+password=whfw_1qxt@123
+
+#下城测试日志系统数据库
+jdbcUrl_record = jdbc:sqlserver://172.16.8.10:1433;DatabaseName=dev_XcqTask
+driver = com.microsoft.sqlserver.jdbc.SQLServerDriver
+user_record = sa
+password_record =XcqTask88888888
+logUrl=http://59.202.68.43:8080/LogManagerSystem
+
+#下城测试综合信息平台数据库，四个平台对应统一用户
+jdbcUrl_zh = jdbc:mysql://172.16.9.136:3306/apphub?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false
+user_zh =4pingtai
+password_zh =P@ssw0rd4
+
+#################################################################
+
+#短信地址
+shortMessage=http://172.16.9.128:8080
+#电话地址
+call=http://gbhy.junlongtech.com:8082/TTSSend
+
+test=sssaaaaa111

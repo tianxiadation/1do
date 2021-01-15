@@ -1,0 +1,41 @@
+package com.demo.interceptor;
+
+import org.apache.log4j.Logger;
+
+import com.demo.common.model.T1doIp;
+import com.demo.util.Ip;
+import com.demo.util.JsonUtil;
+import com.demo.util.StrUtil;
+import com.demo.util.UrlUtil;
+import com.jfinal.aop.Interceptor;
+import com.jfinal.aop.Invocation;
+import com.jfinal.kit.LogKit;
+import com.jfinal.plugin.activerecord.Db;
+
+public class MainInterceptor implements Interceptor {
+
+	private Logger log=Logger.getLogger(MainInterceptor.class);
+	
+	public void intercept(Invocation inv) {
+		
+		// TODO Auto-generated method stub
+		//LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
+		//HttpSession session = inv.getController().getSession();
+		//System.out.println(session.getId());
+		try {	
+			
+			//new T1doIp().setIp(Ip.getIp(inv.getController().getRequest())).save();	
+			new T1doIp().setIp(inv.getController().getRequest().getRemoteAddr()).save();	
+			//log.error(inv.getActionKey());
+			LogKit.info("Request:" + inv.getActionKey());
+			inv.invoke();
+		}catch(Exception e) {
+			e.printStackTrace();
+			//log.error(StrUtil.getTrace(e));
+			inv.getController().renderJson(JsonUtil.getMap(400, StrUtil.getTrace(e)));			
+		}
+		
+
+	}
+
+}

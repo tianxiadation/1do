@@ -1,0 +1,22 @@
+package com.demo.timer;
+
+import java.util.TimerTask;
+
+import com.demo.common.model.T1doRecord;
+
+public class MyTask extends TimerTask {
+
+	@Override
+	public void run() {
+		try {
+			T1doRecord.batchSaveForTime();
+		} catch (Exception e) {			
+			e.printStackTrace();
+
+		}
+		
+		
+
+	}
+
+}

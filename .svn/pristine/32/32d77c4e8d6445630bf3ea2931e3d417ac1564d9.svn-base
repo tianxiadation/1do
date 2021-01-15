@@ -1,0 +1,89 @@
+package com.demo.timer;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+
+import com.alibaba.fastjson.JSONObject;
+import com.demo.common.model.Notice;
+import com.demo.common.model.T1doBase;
+import com.demo.util.HttpUtil;
+import com.demo.util.StrUtil;
+import com.demo.util.TimeUtil;
+import com.demo.util.UrlUtil;
+/**
+ * 
+ * @author 39805
+ *	云上城管
+ */
+public class YscgTask implements Runnable {
+	private T1doBase t;
+
+	private int type;//1新建2办结
+
+	@Override
+	public void run() {
+	
+		String result = null;
+		try {
+			result = getResult(type==1?UrlUtil.yscg:UrlUtil.yscg_update,t,type);
+			//城管推送过来的工单如果办结了回调接口
+			if(type==2&&StrUtil.isNotEmpty(t.getAPARAMETER()+"")) {
+				String re=HttpUtil.doPost1(UrlUtil.cg_update+"?taskNo="+t.getAPARAMETER(), "{\"taskNo\":\""+t.getAPARAMETER()+"\"}");
+				new Notice().setTest(re).save();
+			}
+		} catch (URISyntaxException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		new Notice().setTest(result).save();
+		
+	}
+
+	public YscgTask(T1doBase t, int type) {
+		super();
+		this.t = t;
+		this.type = type;
+	}
+
+   public static String getResult(String url,T1doBase t,int type) throws URISyntaxException, ClientProtocolException, IOException {
+	   CloseableHttpClient httpclient = HttpClients.createDefault();
+	    String result = "";
+	    CloseableHttpResponse response = null;
+	    URIBuilder builder = new URIBuilder(url);
+	    builder.addParameter("eventId", t.getShowId());//工单id 必填  
+	    if(type==1) {
+	    	builder.addParameter("workOrderContent",t.getODescribe());//工单内容 必填
+	  	    builder.addParameter("createdBy",t.getCreateUserName());//创建人 必填
+	  	    builder.addParameter("createdDate", TimeUtil.getyMdhmsSDF());//创建时间
+	    }
+	  
+	    URI uri = builder.build();
+	    HttpPost httpPost = new HttpPost( uri );
+	    RequestConfig requestConfig = RequestConfig.custom()
+	            .setSocketTimeout(2000)
+	            .setConnectTimeout(5000)
+	            .build();
+	    httpPost.setConfig(requestConfig);
+	    //不是城管推送过来的数据才会进行下面的推送过来的数据
+	    if(StrUtil.isEmpty(""+t.getAPARAMETER())) {
+		    response = httpclient.execute(httpPost);
+		    result = IOUtils.toString( response.getEntity().getContent(), "UTF-8" );
+		    System.out.println("result:" + result);
+	    }
+	    return result;
+	   
+   }
+
+	
+	
+}

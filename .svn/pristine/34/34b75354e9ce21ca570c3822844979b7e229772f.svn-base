@@ -1,0 +1,670 @@
+# 1do接口文档  （POST默认请求）
+
+## 正式 https://1do.hzxc.gov.cn:8443 
+
+## 测试 http://59.202.68.43:8080
+
+[TOC]
+
+------
+
+### 1 功能 ：置顶（取消置顶是一样的方法）
+
+####  请求方法：  /1do/do/top
+
+####  参数说明：
+
+| 字段      | 字段名     | 类型     | 是否必填 | 描述及要求               |
+| ------- | ------- | ------ | ---- | ------------------- |
+| SHOW_ID | 1do工单编号 | String | 必填   | 1do工单编号             |
+| type    | 其他数据    | String | 必填   | 要我做传1，要他做传2，整理层看板传3 |
+
+```json
+{"SHOW_ID":"41960367072477184","type":"3"}
+```
+
+
+
+####  Output
+
+| 字段      | 字段名  | 类型     | 是否必要 | 描述及要求          |
+| ------- | ---- | ------ | ---- | -------------- |
+| code    | 返回状态 | int    | 必要   | 状态值200/400     |
+| message | 消息   | String | 必要   | 200置顶成功400错误消息 |
+
+**Success**
+
+```json
+{
+    "code": 200,
+    "message": "置顶成功"
+}
+```
+
+### 2 功能 ：看板（包含要我做要他做整理层看板的接口）
+
+#### 请求方法： /1do/do/search
+
+####  参数说明：
+
+| 字段                | 字段名   | 类型   | 是否必填 | 描述及要求                                                   |
+| ------------------- | -------- | ------ | -------- | ------------------------------------------------------------ |
+| pageNumber          | 页码     | int    | 必填     | 页码                                                         |
+| method              | 搜索区   | String | 必填     | 我的看板：all；我发布的：hedo；整理层看板：fwdo              |
+| base                | 关键字   | String | 必填     | 默认“”，填写关键词                                           |
+| type                | 处理状态 | int    | 必填     | 处理状态3.待接单4.处理中5.已完成6.已删除7.催办，0全部        |
+| O_CUSTOMER_NAME     | 发起人   | String | 必填     | 默认“”，填写姓名                                             |
+| O_EXECUTOR_NAME     | 参与人   | String | 必填     | 默认“”，填写姓名                                             |
+| sorting             | 排序     | String | 选填     | 排序 按什么排填什么，拟完成时间O_FINISH_TIME,办结时间Real_FINISH_TIME,删除时间DELETE_TIME,创建时间O_START_TIME（上面的是正序，如果倒序就加 desc 如：O_FINISH_TIME  desc） |
+| O_CREATE_TIME_START |          | String | 选填     | 创建时间起始值                                               |
+| O_CREATE_TIME_END   |          | String | 选填     | 创建时间结束值                                               |
+| O_FINISH_TIME_START |          | String | 选填     | 拟完成时间起始值                                             |
+| O_FINISH_TIME_END   |          | String | 选填     | 拟完成时间结束值                                             |
+| SOURCE              | 来源     | int    | 必填     | 来源来源 0、全部1、1do 2、主动办 3、三实库 4、其他 5、领导批示6.城市大脑,7综合信息系统8.1call办 |
+| O_TYPE_ID           | 事件类型 | String | 必填     | 来源为1call办时（1、城管执法，2、民政，3、环卫，4、住建，5、人社）后续增加另行通知  其他的都填0（无事件） |
+
+```json
+{
+    "method": "fwdo",
+    "type": 0,
+    "pageNumber": 1,
+    "base": "",
+    "O_CUSTOMER_NAME": "",
+    "O_EXECUTOR_NAME": "",
+    "sorting": "",
+    "O_CREATE_TIME_START": "",
+    "O_CREATE_TIME_END": "",
+    "O_FINISH_TIME_START": "",
+    "O_FINISH_TIME_END": "",
+    "SOURCE":8,
+    "O_TYPE_ID":"0"
+}
+```
+
+####  Output
+
+| 字段             | 字段名      | 类型   | 描述及要求                                                   |
+| ---------------- | ----------- | ------ | ------------------------------------------------------------ |
+| SHOW_ID          | 1do工单编号 | String | 1do工单编号                                                  |
+| O_TITLE          | 标题        | String | 标题                                                         |
+| O_DESCRIBE       | 内容        | String | 内容                                                         |
+| O_EXECUTOR_NAME  | 参与人姓名  | String | 多个参与人以“;”隔开，如："方升群;谢洁"                       |
+| TYPE             | 置顶        | int    | 1、2、3置顶null未置顶                                        |
+| ISLOOK           | 是否查看    | int    | 1是2否                                                       |
+| O_CUSTOMER_NAME  | 发起人姓名  | String | 多个发起人以“;”隔开，如："方升群;谢洁"                       |
+| O_START_TIME     | 发起时间    | String | 发起时间                                                     |
+| O_FINISH_TIME    | 完成时间    | String | 完成时间                                                     |
+| star             | 星星        | int    | 星星                                                         |
+| evaluation       | 评价        | String | 评价                                                         |
+| allPage          | 总条数      | int    | 总条数                                                       |
+| Real_FINISH_TIME | 办结时间    | String | 办结时间                                                     |
+| DELETE_TIME      | 删除时间    | String | 删除时间                                                     |
+| SOURCE           | 来源        | int    | 来源来源 1、call 或者oa 2、主动办 3、三实库 4、其他 5、领导批示6.城市大脑,7综合信息中心81call办 |
+| O_TYPE_ID        | 事件类型    | String | 目前默认：39509142708158464；；来源为1call办时（1、城管执法，2、民政，3、环卫，4、住建，5、人社）后续增加另行通知 |
+| O_CREATE_TIME    | 创建时间    | String | 创建时间                                                     |
+
+**Success**
+
+```json
+{
+    "code": 200,
+    "base": [
+        {
+            "O_CUSTOMER_NAME": "余威;朱红霞",
+            "O_FINISH_TIME": null,
+            "O_START_TIME": "2019-04-18 20:31:06",
+            "star": 0,
+            "Real_FINISH_TIME": null,
+            "ISLOOK": 2,
+            "evaluation": null,
+            "O_TYPE_ID": "39509142708158464",
+            "O_EXECUTOR_NAME": "",
+            "LOOK_USER": "KKma938N6DhVJK8x",
+            "SOURCE": 1,
+            "SHOW_ID": "148655630897381376",
+            "DELETE_TIME": null,
+            "TYPE": null,
+            "O_DESCRIBE": "4.18\n1、企服系统问题解答，办理单功能沟通；公众号申请验"
+        },
+        {
+            "O_CUSTOMER_NAME": "余威",
+            "O_FINISH_TIME": "2019-04-18 20:05:00",
+            "O_START_TIME": "2019-04-18 20:04:44",
+            "star": 0,
+            "Real_FINISH_TIME": null,
+            "ISLOOK": 1,
+            "evaluation": null,
+            "O_TYPE_ID": "39509142708158464",
+            "O_EXECUTOR_NAME": "林庆幸;余威;朱红霞",
+            "LOOK_USER": "e9Yq3j0byDIJrjax,KKma938N6DhVJK8x,PQV8oo3jeeiDkLbY",
+            "SOURCE": 1,
+            "SHOW_ID": "148648996078878720",
+            "DELETE_TIME": null,
+            "TYPE": null,
+            "O_DESCRIBE": "测试"
+        },
+        {
+            "O_CUSTOMER_NAME": "余威",
+            "O_FINISH_TIME": null,
+            "O_START_TIME": "2019-04-04 14:00:30",
+            "star": 0,
+            "Real_FINISH_TIME": "2019-04-04 14:02:30",
+            "ISLOOK": 1,
+            "evaluation": null,
+            "O_TYPE_ID": "39509142708158460",
+            "O_EXECUTOR_NAME": "余威;方升群",
+            "LOOK_USER": "KKma938N6DhVJK8x,PQV8oo3jeeiDkLbY,Np1ZK5KO3ZcXx1NJ,ZXV1lyA6boHYqR0y",
+            "SOURCE": 1,
+            "SHOW_ID": "143483905066926080",
+            "DELETE_TIME": null,
+            "TYPE": null,
+            "O_DESCRIBE": "测试1"
+        },
+        {
+            "O_CUSTOMER_NAME": "余威",
+            "O_FINISH_TIME": "2019-04-03 21:08:00",
+            "O_START_TIME": "2019-04-03 21:06:30",
+            "star": 0,
+            "Real_FINISH_TIME": "2019-04-04 11:26:07",
+            "ISLOOK": 1,
+            "evaluation": null,
+            "O_TYPE_ID": "39509142708158464",
+            "O_EXECUTOR_NAME": "方升群",
+            "LOOK_USER": "3LBYkvlD7rHmLn72,6ZYbRyY7mDivQ5e7,KKma938N6DhVJK8x,PQV8oo3jeeiDkLbY,WeKJDWROnaHQn6Yq",
+            "SOURCE": 1,
+            "SHOW_ID": "143228719941550080",
+            "DELETE_TIME": null,
+            "TYPE": null,
+            "O_DESCRIBE": "测试"
+        },
+        {
+            "O_CUSTOMER_NAME": "余威",
+            "O_FINISH_TIME": "2019-04-05 20:15:00",
+            "O_START_TIME": "2019-04-03 20:12:54",
+            "star": 0,
+            "Real_FINISH_TIME": "2019-04-04 11:26:19",
+            "ISLOOK": 2,
+            "evaluation": null,
+            "O_TYPE_ID": "39509142708158464",
+            "O_EXECUTOR_NAME": "卢兴旺",
+            "LOOK_USER": "0Zj5q7noD5s2JeWk,3LBYkvlD7rHmLn72,6ZYbRyY7mDivQ5e7,KKma938N6DhVJK8x",
+            "SOURCE": 1,
+            "SHOW_ID": "143215235153526784",
+            "DELETE_TIME": null,
+            "TYPE": null,
+            "O_DESCRIBE": "测试"
+        },
+        {
+            "O_CUSTOMER_NAME": "余威",
+            "O_FINISH_TIME": null,
+            "O_START_TIME": "2019-03-01 10:40:14",
+            "star": null,
+            "Real_FINISH_TIME": "2019-03-15 18:25:05",
+            "ISLOOK": 2,
+            "evaluation": "评价：哈哈哈哈",
+            "O_TYPE_ID": "39509142708158460",
+            "O_EXECUTOR_NAME": "余威",
+            "LOOK_USER": "6ZYbRyY7mDivQ5e7,KKma938N6DhVJK8x,pvE5pqrVjWUqdP59",
+            "SOURCE": 1,
+            "SHOW_ID": "131112315910094848",
+            "DELETE_TIME": null,
+            "TYPE": null,
+            "O_DESCRIBE": "测试"
+        }
+    ],
+    "allPage": 6
+}
+```
+
+
+
+### 3 功能 ：删除或恢复或者重做1do
+
+####  请求方法：/1do/do/deleteIdoOrRestoreIdoOrRedo
+
+####  参数说明：
+
+| 字段      | 字段名     | 类型     | 是否必填 | 描述及要求                          |
+| ------- | ------- | ------ | ---- | ------------------------------ |
+| SHOW_ID | 1do工单编号 | String | 必填   | 1do工单编号                        |
+| result  | 结果      | String | 必填   | 删除填：delete，恢复填：Restore，重做填Redo |
+
+```json
+{"SHOW_ID":"48987485040017408","result":"delete"}
+```
+
+####  Output
+
+| 字段      | 字段名  | 类型     | 是否必填 | 描述及要求                                    |
+| ------- | ---- | ------ | ---- | ---------------------------------------- |
+| code    | 返回状态 | int    | 必要   | 状态值200/400/201/203/202                   |
+| message | 消息   | String | 必要   | 200修改成功,400错误消息,201删除失败,203任务进行中不能删除,202权限不足 |
+
+**Success**
+
+```json
+{
+    "code": 200,
+    "message": "删除成功"
+}
+```
+
+###  4功能 ：1do导出
+
+#### 请求方法：/get  http://tyhy.hzxc.gov.cn:8080/1do/do/exportExcel
+
+#### 参数说明：
+
+| 字段   | 类型   | 是否必填 | 描述及要求            |
+| ---- | ---- | ---- | ---------------- |
+| type | int  | 必填   | 3待处理4已接单5已完成6已删除 |
+
+**Success**
+
+```file
+1do20180918031257.xls
+```
+
+### 5 功能 ：批量删除1do
+
+####  请求方法：/1do/do/deleteAlldo
+
+#### 参数说明：
+
+| 字段 | 字段名          | 类型   | 是否必填 | 描述及要求                 |
+| ---- | --------------- | ------ | -------- | -------------------------- |
+| list | 1do工单编号数组 | object | 必填     | 1do工单编号数组（SHOW_ID） |
+
+```json
+{"list":["72878307367976960","72544283629977600","72534111327092736"]}
+```
+
+####  Output
+
+| 字段    | 字段名   | 类型   | 是否必填 | 描述及要求                                                   |
+| ------- | -------- | ------ | -------- | ------------------------------------------------------------ |
+| code    | 返回状态 | int    | 必要     | 状态值200/400/201/203/202                                    |
+| message | 消息     | String | 必要     | 200修改成功,400错误消息,201删除失败,203任务进行中不能删除,202权限不足 |
+
+**Success**
+
+```json
+{
+    "code": 200,
+    "message": "删除成功"
+}
+```
+
+### 6 功能 ：看板各个状态数量
+
+####  请求方法： /1do/do/searchNum
+
+####  参数说明：
+
+| 字段      | 字段名     | 类型   | 是否必填 | 描述及要求                                                   |
+| --------- | ---------- | ------ | -------- | ------------------------------------------------------------ |
+| method    | 类型       | String | 必填     | 要我做：medo；要他做：hedo；整理层看板：fwdo      本人全部：all |
+| loginName | 当前用户id | String | 选填     | 未登入时填写（XzaqamVZPDtAR3WP）                             |
+
+```json
+{"method":"fwdo","loginName":"PQV8oo3jeeiDkLbY"}
+```
+
+####  Output
+
+| 字段      | 类型 | 描述及要求 |
+| --------- | ---- | ---------- |
+| 3         | int  | 待接单数量 |
+| 4         | int  | 处理中数量 |
+| 5         | int  | 已完成数量 |
+| 6         | int  | 已删除数量 |
+| Y         | int  | 已读数量   |
+| N         | int  | 未读数量   |
+| urge      | int  | 催办数量   |
+| medoTotal | int  | 要我做总数 |
+| hedoTotal | int  | 要他做总数 |
+
+**Success**
+
+```json
+{
+    "3": 833,
+    "4": 159,
+    "5": 102,
+    "6": 23,
+    "medoTotal": 62,
+    "Y": 50,
+    "hedoTotal": 110,
+    "urge": 64,
+    "N": 118
+}
+```
+
+### 7 功能 ：app通知搜索
+
+####  请求方法： /1do/do/appSearch
+
+####  参数说明：
+
+| 字段          | 字段名     | 类型   | 是否必填 | 描述及要求                                                   |
+| ------------- | ---------- | ------ | -------- | ------------------------------------------------------------ |
+| pageNumber    | 查询起始数 | int    | 必填     | 查询起始数，比如pageNumber:0,onePageNumber:10 ,//检索记录行1-10 .比如pageNumber:5,onePageNumber:10  //检索记录行6-15 |
+| onePageNumber | 查询条数   | int    | 必填     | 一页显示的条数                                               |
+| method        | 搜索区     | String | 必填     | 要我做：medo；要他做：hedo；全部：all                        |
+| relate        | 关联       | String | 必填     | 默认“”，关联人的id（XzaqamVZPDtAR3WP）                       |
+| type          | 处理状态   | int    | 必填     | 处理状态 3.待接单 4.处理中 5.已完成 6.已删除 0.全部 7.催办   |
+| isLook        | 是否查看   | int    | 必填     | 是否查看1是2否 0全部。                                       |
+| loginName     | 当前用户id | String | 选填     | 未登入时填写（如：XzaqamVZPDtAR3WP）                         |
+| source        | 来源       | String | 选填     | 移动端填：app，排序用                                        |
+| keyword       | 搜索语句   | String | 选填     | 搜索语句如：催办人是余念， 默认“”  最新回复传：“最新回复”    |
+
+```json
+{
+    "pageNumber": 0,
+    "onePageNumber": 10,
+    "method": "all",
+    "relate": "",
+    "type": 4,
+    "isLook": 0,
+    "loginName": "8BmEYpm9kQUlNN7m",
+    "keyword":""
+}
+```
+
+#### Output
+
+| 字段             | 字段名         | 类型   | 是否必要 | 描述及要求                                                   |
+| ---------------- | -------------- | ------ | -------- | ------------------------------------------------------------ |
+| SHOW_ID          | 1do工单编号    | String | 必填     | 1do工单编号                                                  |
+| O_DESCRIBE       | 内容           | String | 必填     | 内容                                                         |
+| O_CUSTOMER_NAME  | 发起人姓名     | String | 必填     | 多个发起人以“;”隔开，如："方升群;谢洁"                       |
+| O_EXECUTOR_NAME  | 参与人姓名     | String | 必填     | 多个参与人以“;”隔开，如：“张城;刘佳民”                       |
+| USER_TYPE        | 通知设置       | String | 必填     | 这条工单该用户的角色（1发起人2创建人3参与人6整理层）         |
+| O_STATUS         | 状态           | String | 必填     | 状态有：待接单，待处理，已接单，已完成，已删除，已恢复       |
+| LIGHTNING        | 催办数         | int    | 必填     | 催办数                                                       |
+| LOOKNUM          | 查看数量       | int    | 必填     | 查看数量                                                     |
+| FBNUM            | 反馈数量       | int    | 必填     | 反馈数量                                                     |
+| ISLOOK           | 是否查看1是2否 | int    | 必填     | 是否查看1是2否                                               |
+| O_CREATE_TIME    | 创建时间       | date   | 必填     | 创建时间                                                     |
+| O_FINISH_TIME    | 拟完成时间     | date   | 必填     | 拟完成时间                                                   |
+| Real_FINISH_TIME | 办结时间       | date   | 必填     | 办结时间                                                     |
+| O_CUSTOMER       | 发起人show_id  | String | 必填     | 多个发起人以“;”隔开，如： “PQV8oo3jeeiDkLbY;XzaqamVZPDtAR3WP” |
+| O_EXECUTOR       | 参与人show_id  | String | 选填     | 多个参与人以“;”隔开，如：                                                                                                  “8BmEYpm9kQUlNN7m; 297NKDKkDzHZe2da” |
+| DELETE_TIME      | 删除时间       | date   | 必填     | 删除时间                                                     |
+| SEND_TIME        | 通知时间       | long   | 必填     | 通知时间                                                     |
+| SOURCE           | 来源           | int    | 必填     | 来源来源 1、call 或者oa 2、主动办 3、三实库 4、其他 5、领导批示6.城市大脑,7综合信息中心81call办 |
+| O_TYPE_ID        | 事件类型       | String | 必填     | 目前默认：39509142708158464；；来源为1call办时（1、城管执法，2、民政，3、环卫，4、住建，5、人社）后续增加另行通知 |
+
+**Success**
+
+```json
+{
+    "code": 200,
+    "data": {
+        "base": [
+            {
+                "O_CUSTOMER_NAME": "方升群;谢洁",
+                "O_FINISH_TIME": 1530374400000,
+                "O_IS_DELETED": 1,
+                "LOOKNUM": 18,
+                "O_CREATE_TIME": 1559625566000,
+                "LIGHTNING": 2,
+                "Real_FINISH_TIME": null,
+                "ISLOOK": 1,
+                "O_STATUS": "已接单",
+                "O_TYPE_ID": "39509142708158464",
+                "O_EXECUTOR_NAME": "刘佳民;张城",
+                "AT": null,
+                "FBNUM": 3,
+                "SEND_TIME": 1560153985239,
+                "USER_TYPE": 1,
+                "SOURCE": 1,
+                "O_CUSTOMER": "PQV8oo3jeeiDkLbY;XzaqamVZPDtAR3WP",
+                "O_EXECUTOR": "297NKDKkDzHZe2da;8BmEYpm9kQUlNN7m",
+                "SHOW_ID": "165579229646290944",
+                "DELETE_TIME": null,
+                "O_DESCRIBE": "1.请张城参与关于1call头脑风暴2.请刘佳民整理文件、邮"
+            },
+            {
+                "O_CUSTOMER_NAME": "方升群",
+                "O_FINISH_TIME": null,
+                "O_IS_DELETED": 1,
+                "LOOKNUM": 6,
+                "O_CREATE_TIME": 1560154079000,
+                "LIGHTNING": 1,
+                "Real_FINISH_TIME": null,
+                "ISLOOK": 1,
+                "O_STATUS": "已接单",
+                "O_TYPE_ID": "39509142708158460",
+                "O_EXECUTOR_NAME": "刘韬",
+                "AT": "[]",
+                "FBNUM": 2,
+                "SEND_TIME": 1560154237801,
+                "USER_TYPE": 1,
+                "SOURCE": 1,
+                "O_CUSTOMER": "PQV8oo3jeeiDkLbY",
+                "O_EXECUTOR": "Np1ZK5KO3ZcXx1NJ",
+                "SHOW_ID": "167795971802005504",
+                "DELETE_TIME": null,
+                "O_DESCRIBE": "0216"
+            },
+            {
+                "O_CUSTOMER_NAME": "余念",
+                "O_FINISH_TIME": null,
+                "O_IS_DELETED": 1,
+                "LOOKNUM": 10,
+                "O_CREATE_TIME": 1562556693000,
+                "LIGHTNING": 0,
+                "Real_FINISH_TIME": null,
+                "ISLOOK": 1,
+                "O_STATUS": "已接单",
+                "O_TYPE_ID": "39509142708158464",
+                "O_EXECUTOR_NAME": "方升群;阎秋霞;徐杰;方升群",
+                "AT": "[]",
+                "FBNUM": 2,
+                "SEND_TIME": 1562809791845,
+                "USER_TYPE": 3,
+                "SOURCE": 1,
+                "O_CUSTOMER": "ZXV1lyA6boHYqR0y",
+                "O_EXECUTOR": "PQV8oo3jeeiDkLbY;ZD1ybAYvAou36nzJ;avE8bm0K1LFDYnVl;PQV8oo3jeeiDkLbY",
+                "SHOW_ID": "177873267594362880",
+                "DELETE_TIME": null,
+                "O_DESCRIBE": "hhhhhh\n"
+            },
+            {
+                "O_CUSTOMER_NAME": "方升群",
+                "O_FINISH_TIME": null,
+                "O_IS_DELETED": 1,
+                "LOOKNUM": 91,
+                "O_CREATE_TIME": 1560760839000,
+                "LIGHTNING": 5,
+                "Real_FINISH_TIME": null,
+                "ISLOOK": 2,
+                "O_STATUS": "已接单",
+                "O_TYPE_ID": "39509142708158460",
+                "O_EXECUTOR_NAME": "卢兴旺刘韬刘亚伟金锡军罗宇强杨吉宇郑祥友方升群",
+                "AT": "[]",
+                "FBNUM": 12,
+                "SEND_TIME": 1562821775626,
+                "USER_TYPE": 1,
+                "SOURCE": 1,
+                "O_CUSTOMER": "PQV8oo3jeeiDkLbY",
+                "O_EXECUTOR": "Np1ZK5KO3ZcXx1NJ;nRDLE2DWYXuaEnlx;AdE0zZ6nqQTdN9am;x98Wx1Nrk7FYKVD9;8pdplJ3NaycaOQKq;3PJNNOYyObCX8yvW",
+                "SHOW_ID": "170340908091310080",
+                "DELETE_TIME": null,
+                "O_DESCRIBE": "dddddddddddd"
+            },
+            {
+                "O_CUSTOMER_NAME": "余念",
+                "O_FINISH_TIME": null,
+                "O_IS_DELETED": 1,
+                "LOOKNUM": 12,
+                "O_CREATE_TIME": 1562555924000,
+                "LIGHTNING": 0,
+                "Real_FINISH_TIME": null,
+                "ISLOOK": 2,
+                "O_STATUS": "已接单",
+                "O_TYPE_ID": "39509142708158464",
+                "O_EXECUTOR_NAME": "余念;余念;徐杰;方升群;方升群;阎秋霞",
+                "AT": "[]",
+                "FBNUM": 1,
+                "SEND_TIME": 1563248042487,
+                "USER_TYPE": 3,
+                "SOURCE": 1,
+                "O_CUSTOMER": "ZXV1lyA6boHYqR0y",
+                "O_EXECUTOR": "ZXV1lyA6boHYqR0y;ZXV1lyA6boHYqR0y;avE8bm0K1LFDYnVl;PQV8oo3jeeiDkLbY;PQV8oo3jeeiDkLbY;ZD1ybAYvAou36nzJ",
+                "SHOW_ID": "177870038831726592",
+                "DELETE_TIME": null,
+                "O_DESCRIBE": "ghhjj"
+            },
+            {
+                "O_CUSTOMER_NAME": "刘韬",
+                "O_FINISH_TIME": null,
+                "O_IS_DELETED": 1,
+                "LOOKNUM": 5,
+                "O_CREATE_TIME": 1562577713000,
+                "LIGHTNING": 0,
+                "Real_FINISH_TIME": null,
+                "ISLOOK": 2,
+                "O_STATUS": "已接单",
+                "O_TYPE_ID": "39509142708158460",
+                "O_EXECUTOR_NAME": "方升群;卢兴旺;余威;郑祥友;刘韬;1Call综合客服;刘亚伟",
+                "AT": "[]",
+                "FBNUM": 4,
+                "SEND_TIME": 1563270271158,
+                "USER_TYPE": 3,
+                "SOURCE": 1,
+                "O_CUSTOMER": "Np1ZK5KO3ZcXx1NJ",
+                "O_EXECUTOR": "PQV8oo3jeeiDkLbY;0Zj5q7noD5s2JeWk;KKma938N6DhVJK8x;3PJNNOYyObCX8yvW;Np1ZK5KO3ZcXx1NJ;Jj8z6v7rBjTQQqYk;nRDLE2DWYXuaEnlx",
+                "SHOW_ID": "177961429310111744",
+                "DELETE_TIME": null,
+                "O_DESCRIBE": "dasasad"
+            }
+        ],
+        "allPage": 6
+    },
+    "message": "Success"
+}
+```
+
+### 8 功能 ：获得1do看板理来源数据用于前端搜索
+
+#### 请求方法：/1do/do/getSourceData
+
+#### 参数说明：无
+
+| 字段       | 类型   | 描述及要求        |
+| :--------- | :----- | :---------------- |
+| systemName | String | 来源名称          |
+| key        | int    | 来源编号/事件类型 |
+| typeName   | Sting  | 事件名称          |
+
+**Success**
+
+```
+{
+    "code": 200,
+    "data": [
+        {
+            "systemName": "全部",
+            "eventType": [
+                {
+                    "typeName": "全部",
+                    "key": 0
+                }
+            ],
+            "key": 0
+        },
+        {
+            "systemName": "1do",
+            "eventType": [
+                {
+                    "typeName": "全部",
+                    "key": 0
+                }
+            ],
+            "key": 1
+        },
+        {
+            "systemName": "主动办",
+            "eventType": [
+                {
+                    "typeName": "全部",
+                    "key": 0
+                }
+            ],
+            "key": 2
+        },
+        {
+            "systemName": "三实数据平台",
+            "eventType": [
+                {
+                    "typeName": "全部",
+                    "key": 0
+                }
+            ],
+            "key": 3
+        },
+        {
+            "systemName": "领导批示",
+            "eventType": [
+                {
+                    "typeName": "全部",
+                    "key": 0
+                }
+            ],
+            "key": 5
+        },
+        {
+            "systemName": "城市大脑",
+            "eventType": [
+                {
+                    "typeName": "全部",
+                    "key": 0
+                }
+            ],
+            "key": 6
+        },
+        {
+            "systemName": "综合信息系统",
+            "eventType": [
+                {
+                    "typeName": "全部",
+                    "key": 0
+                }
+            ],
+            "key": 7
+        },
+        {
+            "systemName": "1call办",
+            "eventType": [
+                {
+                    "typeName": "全部",
+                    "key": 0
+                },
+                {
+                    "typeName": "城管执法",
+                    "key": 1
+                },
+                {
+                    "typeName": "民政",
+                    "key": 2
+                },
+                {
+                    "typeName": "环卫",
+                    "key": 3
+                },
+                {
+                    "typeName": "住建",
+                    "key": 4
+                },
+                {
+                    "typeName": "人社",
+                    "key": 5
+                }
+            ],
+            "key": 8
+        }
+    ],
+    "message": "Success"
+```

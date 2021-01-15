@@ -1,0 +1,81 @@
+package com.luqi.model;
+
+import java.util.List;
+
+/**
+ * @ClassName ProjectProgressModel
+ * @Description 项目进展
+ * @auther Sherry
+ * @date 2019/8/26 5:25 PM
+ */
+public class ProjectProgressModel {
+    //任务id
+    private Long taskId;
+    //开发任务
+    private String task;
+    //日期
+    private String plannedDate;
+    //日志列表
+    private List<String> logs;
+    //评估
+    private String evaluate;
+    //进度
+    private String completion;
+
+    public ProjectProgressModel(Long taskId, String task, String plannedDate, List<String> logs, String evaluate, String completion) {
+        this.taskId = taskId;
+        this.task = task;
+        this.plannedDate = plannedDate;
+        this.logs = logs;
+        this.evaluate = evaluate;
+        this.completion = completion;
+    }
+
+    public String getCompletion() {
+        return completion;
+    }
+
+    public void setCompletion(String completion) {
+        this.completion = completion;
+    }
+
+    public Long getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(Long taskId) {
+        this.taskId = taskId;
+    }
+
+    public String getTask() {
+        return task;
+    }
+
+    public void setTask(String task) {
+        this.task = task;
+    }
+
+    public String getPlannedDate() {
+        return plannedDate;
+    }
+
+    public void setPlannedDate(String plannedDate) {
+        this.plannedDate = plannedDate;
+    }
+
+    public List<String> getLogs() {
+        return logs;
+    }
+
+    public void setLogs(List<String> logs) {
+        this.logs = logs;
+    }
+
+    public String getEvaluate() {
+        return evaluate;
+    }
+
+    public void setEvaluate(String evaluate) {
+        this.evaluate = evaluate;
+    }
+}

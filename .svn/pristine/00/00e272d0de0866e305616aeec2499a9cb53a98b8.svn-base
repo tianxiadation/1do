@@ -1,0 +1,26 @@
+package com.demo.timer;
+
+import com.demo.service.BoardService;
+import com.demo.service.BoardTaskService;
+import com.jfinal.kit.LogKit;
+
+import java.util.TimerTask;
+
+/**
+ * @ClassName LogTask
+ * @Description
+ * @auther Sherry
+ * @date 2019/8/22 10:26 AM
+ */
+public class LogTask extends TimerTask {
+    @Override
+    public void run() {
+        try {
+            BoardTaskService.getLogNew();
+        } catch (Exception e) {
+            e.printStackTrace();
+            LogKit.error(e.getMessage());
+        }
+
+    }
+}

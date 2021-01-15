@@ -1,0 +1,51 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="1do:Web exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/1do_Web_exploded</output-path>
+    <root id="root">
+      <element id="javaee-facet-resources" facet="1do/web/Web" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="1do" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="module" name="fastjson-1.2.47.jar" module-name="1do" />
+          <element id="library" level="module" name="cos-2017.5.jar" module-name="1do" />
+          <element id="library" level="module" name="httpclient-4.5.2.jar" module-name="1do" />
+          <element id="library" level="module" name="httpcore-4.4.4.jar" module-name="1do" />
+          <element id="library" level="module" name="commons-logging.jar" module-name="1do" />
+          <element id="library" level="module" name="commons-fileupload-1.3.3.jar" module-name="1do" />
+          <element id="library" level="module" name="commons-io-2.2.jar" module-name="1do" />
+          <element id="library" level="module" name="jdbc-sqlserver2008-1.0.jar" module-name="1do" />
+          <element id="library" level="module" name="cxy-diary-kafka-jar-with-dependencies(1).jar" module-name="1do" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/el-api.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/jasper.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/jsp-api.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/catalina.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/jasper-el.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/ecj-4.7.3a.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/jaspic-api.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/tomcat-api.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/tomcat-jni.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/catalina-ha.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/servlet-api.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/tomcat-dbcp.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/tomcat-jdbc.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/tomcat-util.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/catalina-ant.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/tomcat-coyote.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/websocket-api.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/tomcat-i18n-es.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/tomcat-i18n-fr.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/tomcat-i18n-ja.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/tomcat-i18n-ru.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/annotations-api.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/catalina-tribes.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/tomcat-util-scan.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/tomcat-websocket.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../java/apache-tomcat-9.0.12/lib/catalina-storeconfig.jar" />
+          <element id="library" level="project" name="lib" />
+        </element>
+      </element>
+    </root>
+  </artifact>
+</component>

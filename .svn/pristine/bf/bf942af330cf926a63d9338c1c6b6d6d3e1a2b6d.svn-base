@@ -1,0 +1,40 @@
+#database config
+dbType=mysql
+#正式1do数据库
+jdbcUrl1=jdbc:mysql://59.202.68.48:3306/do?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false
+user1=root
+password1=jiaojun
+
+#jdbcUrl1=jdbc:mysql://172.16.9.122:3306/do?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false
+#user1=yhq
+#password1=Yhq_1qxt@123
+devMode =true
+#日志系统数据库
+jdbcUrl2 = jdbc:sqlserver://172.16.10.102:1433;DatabaseName=dev_XcqTask
+driver = com.microsoft.sqlserver.jdbc.SQLServerDriver
+user2 = sa
+password2 =XcqTask88888888
+showSql =true
+#综合信息平台数据库，四个平台对应统一用户
+jdbcUrl3 = jdbc:mysql://172.16.9.136:3306/apphub?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false
+user3 = 4pingtai
+password3 =P@ssw0rd4
+
+#短信地址
+shortMessage=http://172.16.9.128:8080
+#电话地址
+call=http://gbhy.junlongtech.com:8082/TTSSend
+
+#测试1do数据库
+jdbcUrl4=jdbc:mysql://172.16.8.11:3306/do?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false
+user4=whfw
+password4=whfw_1qxt@123
+#jdbcUrl4=jdbc:mysql://localhost:3306/do?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false
+#user4=root
+#password4=123
+#日志系统地址
+logUrl=http://59.202.68.45:8080/LogManagerSystem
+#logUrl=http://59.202.68.43:8080/LogManagerSystem
+#logUrl=http://192.168.2.2:8080/LogManagerSystem
+
+test=sssaaaaa111

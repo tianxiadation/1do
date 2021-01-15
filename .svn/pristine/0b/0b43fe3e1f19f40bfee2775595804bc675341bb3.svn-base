@@ -1,0 +1,48 @@
+package com.demo.timer;
+
+import com.alibaba.fastjson.JSONObject;
+import com.demo.common.model.Notice;
+import com.demo.common.model.T1doBase;
+import com.demo.util.HttpUtil;
+import com.demo.util.UrlUtil;
+/**
+ * 
+ * @author 39805
+ *	云上城管
+ */
+public class YscgTask implements Runnable {
+	private T1doBase t;
+
+	private int type;//1新建2办结
+
+	@Override
+	public void run() {
+		JSONObject json=new JSONObject();
+		json.put("eventId", t.getShowId());//工单id
+		if(type==1) {
+		json.put("workOrderContent", t.getODescribe());//工单内容 必填
+		json.put("createdBy", t.getCreateUserName());//创建人 必填
+		json.put("createdDate", t.getOCreateTime());//创建时间
+		//json.put("receiver", t.getOExecutorName());//受理人
+		//json.put("copyTo","" );//抄送人
+		//json.put("fileUrl", "附件");// 附件
+		//json.put("plannedStartTime", t.getOStartTime());//计划开始时间
+		//json.put("plannedEndTime", t.getOFinishTime());//计划结束时间
+		//json.put("status", "状态");//社区 必填
+		}
+		new Notice().setTest(json.toString()).save();
+		String result=HttpUtil.doPost1(type==1?UrlUtil.yscg:UrlUtil.yscg_update, json.toString());
+		new Notice().setTest(result).save();
+	}
+
+	public YscgTask(T1doBase t, int type) {
+		super();
+		this.t = t;
+		this.type = type;
+	}
+
+
+
+	
+	
+}

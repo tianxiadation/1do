@@ -1,0 +1,240 @@
+package com.demo.controller;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+
+import com.demo.common.model.T1doBase;
+import com.demo.common.model.T1doLabel;
+import com.demo.common.model.T1doLabelFeedback;
+import com.demo.common.model.T1doRelation;
+import com.demo.util.HttpUtil;
+import com.demo.util.MsgUtil;
+import com.jfinal.core.Controller;
+
+public class TestController extends Controller{
+	/*
+	 2019年3月20日 coco 注解：
+	*/
+	public void action() {
+        Map<String, String[]> requestParams = getRequest().getParameterMap();
+		renderJson();
+	}
+	/*
+	 2019年2月12日 coco 注解：给所有1do打上标签
+	*/
+	public void addLabel() {
+		List<T1doBase> list=T1doBase.dao.find("select * from t_1do_base ");
+		list.forEach(t->{
+			//new Thread(new AddLabel(t.getODescribe(),t.getShowId())).start(); 
+			T1doLabel.saveList(HttpUtil.getlabel(t.getODescribe()),t.getShowId());
+		});
+		renderJson(1);
+	}
+	/*
+	 2019年2月12日 coco 注解：//计算关联1do
+	*/
+	public void relation() {
+		List<T1doBase> base=T1doBase.dao.find("select * from t_1do_base  ");
+		base.forEach(t->{
+			List<T1doLabel> list=T1doLabel.dao.find("select * from t_1do_label where SHOW_ID=?",t.getShowId());
+			List<T1doBase> base1=T1doBase.dao.find("select * from t_1do_base where ID>? ",t.getID());
+			base1.forEach(t1->{
+				List<T1doLabel> list1=T1doLabel.dao.find("select * from t_1do_label where SHOW_ID=?",t1.getShowId());
+				int result=getHashSet(list, list1);
+				int i=list.size()>list1.size()?list.size():list1.size();
+				int a=(int) ((double)(list.size()+list1.size()-result)/i*100);
+				T1doRelation.saveRelation(t.getShowId(), t1.getShowId(), a,t1.getOStatus());
+				T1doRelation.saveRelation(t1.getShowId(), t.getShowId(), a,t.getOStatus());
+				
+			});
+		});
+		renderJson(1);
+	}
+	/*
+	 2019年2月12日 coco 注解：
+	*/
+	public static int getHashSet(List<T1doLabel> list,List<T1doLabel> list1) {
+		HashSet<String> hs = new HashSet<String>();
+		list.forEach(t->{
+			hs.add(t.getLABEL());
+		});
+		list1.forEach(t->{
+			hs.add(t.getLABEL());
+		});
+		return hs.size();
+		
+	}
+	/*
+	 2019年2月12日 coco 注解：
+	 */
+	public static int getHashSet1(HashSet<String> hs1,List<T1doLabel> list) {
+		HashSet<String> hs = new HashSet<String>();
+		list.forEach(t->{
+			hs.add(t.getLABEL());
+		});
+		hs1.forEach(t->{
+			hs.add(t);
+		});
+		return hs.size();
+		
+	}
+	/*
+	 2019年2月12日 coco 注解：
+	 */
+	public static int getHashSet2(List<T1doLabelFeedback> list1,List<T1doLabel> list) {
+		HashSet<String> hs = new HashSet<String>();
+		list.forEach(t->{
+			hs.add(t.getLABEL());
+		});
+		list1.forEach(t->{
+			hs.add(t.getLABEL());
+		});
+		return hs.size();
+		
+	}
+	public static void main(String[] args) {
+		String content="发起人在内容中@或者“请余年牵头”字样，xxx为受理人，如果内容中无受理人，则受理人默认为第一个参与人；"
+				+ "如有其他参与者，且只有一个受理人，删除受理人时，默认顺位第一人为受理人请方升群牵头";
+		/*HashSet<String> list=StrUtil.getQTR(content,"[\"6ZYbRyY7mDivQ5e7@焦俊\",\"v65VKKvaaZT0dZAJ@陆芸\"]");
+		list.forEach(t->{
+			System.out.println(t);
+		});*/
+	}
+	/**   
+	　* 描述：   
+	　* 创建人：coco   
+	　* 创建时间：2019年10月14日 下午3:38:36         
+	*/
+	public void download() {
+		HttpServletResponse response=getResponse();
+		Map<String,String> map = new HashMap<String,String>();
+		  map.put("loanid", "11");
+		  Map<String, String> urlByLoanid= new HashMap<String,String>();
+		 // Map<String, String> urlByLoanid = zcmQueryInfoService.queryUrlByLoanid(map);
+		  try {
+		   if(urlByLoanid!=null){
+		    //String wjurl="http://10.0.15.11:8080/gateway//nfs/marvel-core-admin/2017/10/11/compact_seal_17101119371231615_7.pdf";
+		    String wjurl="http://59.202.68.43:8080/1do/upload/184476961043644416.doc";
+		    //String wjurl = urlByLoanid.get("url");
+		    int i = wjurl.lastIndexOf("/");
+		    String fileName = wjurl.substring(i+1);
+		    
+		   URL url = new URL(wjurl); 
+		   HttpURLConnection conn = (HttpURLConnection)url.openConnection(); 
+		   //设置超时间为3秒 
+		   conn.setConnectTimeout(3*1000); 
+		   //防止屏蔽程序抓取而返回403错误 
+		   conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)"); 
+		   //得到输入流 
+		   InputStream inputStream = conn.getInputStream(); 
+		   //获取自己数组 
+		   byte[] bs = readInputStream(inputStream);
+		   File file = new File("d:/work/184476961043644416.doc");
+		   write(file,bs);
+		   response.setContentType("application/octet-stream;charset=ISO8859-1");
+		    BufferedOutputStream output = null;
+		    BufferedInputStream input = null;
+		     try {
+		      output = new BufferedOutputStream(response.getOutputStream());
+
+		      // 中文文件名必须转码为 ISO8859-1,否则为乱码
+		      String fileNameDown = new String(fileName.getBytes(), "ISO8859-1");
+		      // 作为附件下载
+		      response.setHeader("Content-Disposition", "attachment;filename=" + fileNameDown);
+		  
+		      output.write(bs);
+		     // response.flushBuffer();
+		     } catch (Exception e) {
+		    	 e.printStackTrace();
+		    	 System.out.println("Download log file error");
+		      //log.error("Download log file error", e);
+		     } // 用户可能取消了下载
+		     finally {
+		      if (input != null)
+		       try {
+		        input.close();
+		       } catch (IOException e) {
+		        e.printStackTrace();
+		       }
+		      if (output != null)
+		       try {
+		        output.close();
+		       } catch (IOException e) {
+		        e.printStackTrace();
+		       }
+		     }
+		   }
+		  } catch (Exception e) {
+		   e.printStackTrace();
+		  }
+
+		renderJson(MsgUtil.successMsg(1));
+	}
+	/**
+	 * 从输入流中获取字节数组
+	 * @param inputStream
+	 * @return
+	 * @throws IOException
+	 */ 
+	 public static byte[] readInputStream(InputStream inputStream) throws IOException { 
+	 byte[] buffer = new byte[1024]; 
+	 int len = 0; 
+	 ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
+	 while((len = inputStream.read(buffer)) != -1) { 
+	 bos.write(buffer, 0, len); 
+	 } 
+	 bos.close(); 
+	 return bos.toByteArray(); 
+	 }
+	 /**   
+	　* 描述：   
+	　* 创建人：coco   
+	　* 创建时间：2019年10月14日 下午4:50:03         
+	*/
+	//写文件
+		public static void write(File file,byte[] bs) throws Exception{
+			//1.创建字节缓冲流输出流
+			BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+			
+			//2.写数据
+			//写单个字节
+			//bos.write(100);
+			//写一个字节数组
+			bos.write(bs);     //getBytes():返回字节数组
+			
+			//3.刷新并关闭流
+			bos.flush();
+			bos.close();
+			
+		}
+	public static String getString11111() {
+		return null;
+		/* File f = new File("d:/work/184476961043644416.doc"); 
+
+		    if (!f.exists()) { 
+		    System.out.println("creat " + f.toString()); 
+
+		      f.createNewFile(); 
+		     }
+
+		    FileOutputStream fos = new FileOutputStream(f);//InputStream和OutputStream 一般辩证的来看，一个读，一个写，两者差不多的用法。
+
+		  fos.write(buffer, 0, len); 
+		  fos.flush();
+		  fos.close(); */
+	}
+}

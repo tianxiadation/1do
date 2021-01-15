@@ -1,0 +1,52 @@
+package com.demo.util;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.jfinal.core.Controller;
+
+//测试工具
+public class TestUtil extends Controller{
+	/*
+	 2019年3月4日 coco 注解：
+	*/
+	public void action() {
+		
+		renderJson(MsgUtil.successMsg("方法中拦截返回"));
+		return ;
+	}
+	public static void main(String[] args) {
+		List<String> list=new ArrayList<String>();
+		//list.add("fangshengqun");
+		//list.add("yuwei");
+		//list.add("wangshuaishuai");
+		String str="aaaaaaaaaabbbbbbbbbbccccccccccee";
+		System.out.println(str.length());
+	}
+	
+  
+	/*
+	 * public static void main(String[] args) throws Exception { String
+	 * str="http://www.4btbtt.com/attach-download-fid-8-aid-28937.htm"; URL url =
+	 * new URL(str); HttpURLConnection conn=(HttpURLConnection)url.openConnection();
+	 * conn.getResponseCode(); String realUrl=conn.getURL().toString();
+	 * conn.disconnect(); System.out.println("真实URL:"+realUrl); }
+	 */
+	/*
+	 * public static void main(String[] args) {
+	 * 
+	 * String[] str= {"ssss","aaaa","sssss"}; StringBuffer s=new StringBuffer(); for
+	 * (String string : str) { s.append("'").append(string).append("',"); }
+	 * System.out.println(s.deleteCharAt(s.length()-1));
+	 * 
+	 * }
+	 */
+/**   
+　* 描述：   
+　* 创建人：coco   
+　* 创建时间：2019年9月3日 上午11:26:50         
+*/
+
+	
+
+}

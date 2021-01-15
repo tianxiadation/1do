@@ -1,0 +1,46 @@
+package com.demo.controller;
+
+import com.alibaba.fastjson.JSONObject;
+import com.demo.common.model.T1doBase;
+import com.demo.util.JsonUtil;
+import com.demo.util.MsgUtil;
+import com.demo.util.StrUtil;
+import com.jfinal.core.Controller;
+import com.jfinal.plugin.activerecord.Page;
+
+
+/**
+* @author coco 红旗班
+* @date 2020年7月31日 上午10:42:24
+* 
+*/
+public class CommonController extends Controller {
+	/**   
+	　* 描述：   
+	　* 创建人：coco   
+	　* 创建时间：2020年7月31日 上午10:42:41         
+	*/
+	public void getDataList() {
+		JSONObject json=JsonUtil.getJSONObject(getRequest());
+		JSONObject user=getSessionAttr("user");
+		String loginName=user==null?json.getString("loginName"):user.getString("loginName");
+		int type=json.getIntValue("status");
+		String sql="and o_status!=6 ";			
+		if(type!=0){
+			sql="and o_status="+type;
+		} 
+		sql+=" and (O_EXECUTOR like CONCAT('%','"+loginName+"','%') or O_CUSTOMER like CONCAT('%','"+loginName+"','%') )";
+		if(json.getIntValue("O_TYPE_ID")!=0) {
+			sql+="and O_TYPE_ID="+json.getIntValue("O_TYPE_ID");
+		}
+		if(StrUtil.isNotEmpty(json.getString("content"))){
+				sql+=" and O_DESCRIBE like CONCAT('%','"+json.getString("content")+"','%')";
+		}
+		//int pageNumber=getParaToInt("pageNumber");
+    	//Boolean isDeleted=getParaToBoolean("is_deleted",false);
+    	Page<T1doBase> page  =T1doBase.dao.paginate(json.getIntValue("pageNumber"), json.getIntValue("pageSize"), false,  "select SHOW_ID,O_DESCRIBE,O_CUSTOMER,O_CUSTOMER_NAME,O_CREATE_TIME"
+    			+ ",O_FINISH_TIME,REAL_FINISH_TIME,SOURCE,O_STATUS,O_EXECUTOR,O_EXECUTOR_NAME,O_TYPE_ID",
+    			"from t_1do_base where SOURCE=? "+sql+" ORDER BY id desc",json.getIntValue("SOURCE"));
+		renderJson(MsgUtil.successMsg(page));
+	}
+}

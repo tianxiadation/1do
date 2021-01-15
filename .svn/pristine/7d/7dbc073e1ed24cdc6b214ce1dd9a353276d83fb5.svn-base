@@ -1,0 +1,173 @@
+package com.demo.util;
+
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.log4j.Logger;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.jfinal.kit.HttpKit;
+import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.Record;
+
+public class JsonUtil {
+	private static Logger log=Logger.getLogger(JsonUtil.class);
+
+	/*
+	 2018年6月21日 方升群
+	*/
+	public static JSONObject getJSONObject(HttpServletRequest request) {
+		String meg=HttpKit.readData(request);
+		JSONObject json=JSON.parseObject(meg);
+		log.error(json);	
+		return json;
+	}
+	public static LinkedHashMap<String, Object> getMap(int code,String message){
+		LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();
+		 map.put("code", code);
+		 map.put("message", message);
+		 log.error(map);
+		 return map;
+	}
+	public static LinkedHashMap<String, Object> getMap(int code,boolean message){
+		LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();  
+		map.put("code", code);
+		map.put("message", message);
+		return map;
+	}
+	public static LinkedHashMap<String, Object> getMap(int code,int message){
+		LinkedHashMap<String, Object> map = new LinkedHashMap<String, Object>();  
+		map.put("code", code);
+		map.put("message", message);
+		return map;
+	}
+	/*
+	 2019年4月28日 coco 注解：
+	*/
+	public static String getJsonString(String value) {
+		JSONObject json=new JSONObject();
+		json.put("text", value);
+		return json.toString();
+	}
+	/*
+	 2019年4月28日 APP看板搜索
+	*/
+	public  static JSONObject getAppSearchResult(JSONObject json1,String loginName ){
+		String O_DESCRIBE="a.O_TITLE O_DESCRIBE";//卡片看板等等，用标题展示
+		String sql="(O_EXECUTOR like CONCAT('%','"+loginName+"','%') or O_CUSTOMER like CONCAT('%','"+loginName+"','%') )";			
+		if(json1.getString("method").equals("medo")){
+			sql="O_EXECUTOR like CONCAT('%','"+loginName+"','%')" ;				
+		}else if(json1.getString("method").equals("hedo")){
+			sql="O_CUSTOMER like CONCAT('%','"+loginName+"','%')";		
+			//督查搜索
+		}else if(json1.getString("method").equals("all")&&StrUtil.isNotEmpty(json1.getString("source"))&&!json1.getString("source").equals("app")&&json1.getIntValue("source")==10){
+			sql=" SOURCE="+json1.getIntValue("source");
+			if(StrUtil.isNotEmpty(json1.getString("oTypeId"))&&!json1.getString("oTypeId").equals("0")) {
+				sql+=" and O_TYPE_ID="+json1.getString("oTypeId");
+			}
+			if(StrUtil.isNotEmpty(json1.getString("base"))){
+				sql+=" and ( O_DESCRIBE like CONCAT('%','"+json1.getString("base")+"','%')  "
+						+ "or O_CUSTOMER_NAME like CONCAT('%','"+json1.getString("base")+"','%') or"
+								+ " O_EXECUTOR_NAME like CONCAT('%','"+json1.getString("base")+"','%') )";
+			}
+			//督查用内容展示
+			O_DESCRIBE="a.O_DESCRIBE";
+		}  
+		
+		if(StrUtil.isNotEmpty(json1.getString("relate"))){
+			sql+=" and (O_EXECUTOR like CONCAT('%','"+json1.getString("relate")+"','%') or O_CUSTOMER like CONCAT('%','"+json1.getString("relate")+"','%') )";
+		}
+		int type=json1.getIntValue("type");
+		if(type==7){
+			sql+=" and (a.o_status=3 or a.o_status=4) and LIGHTNING>0";
+		}else if(type==8){
+			sql=" o_status<5";
+		}else if(type!=0){
+			sql+=" and a.o_status="+type;
+		}else{
+			sql+=" and a.o_status!=6";
+		}
+		int isLook=json1.getIntValue("isLook");
+		String look=isLook!=0?" and isRead="+isLook:"";
+		   String from1=StrUtil.isNotEmpty(json1.getString("source"))? " ORDER BY O_CREATE_TIME desc LIMIT ?,? ) g ":" ORDER BY O_CREATE_TIME desc LIMIT ?,? ) g ORDER BY O_CREATE_TIME ";			
+			if(type==7||isLook==2||type==3||type==4)
+			 from1=StrUtil.isNotEmpty(json1.getString("source"))?" ORDER BY SEND_TIME desc LIMIT ?,? ) g ":" ORDER BY SEND_TIME desc LIMIT ?,? ) g ORDER BY SEND_TIME ";
+		boolean flag=true;
+		if(StrUtil.isNotEmpty(json1.getString("keyword"))){
+			if(json1.getString("keyword").equals("最新回复")){					
+				//sql+=" and SEND_TIME =(select MAX(SEND_TIME) from t_1do_base)";
+				from1=" ORDER BY SEND_TIME desc LIMIT ?,? ) g limit 1";
+				flag=false;
+			}else if(json1.getString("keyword").equals("查看最近一个月的任务")){
+				sql+=" and date_sub(curdate(), interval 30 day) <= date(O_CREATE_TIME)";					
+			}else{
+				
+				sql+=StrUtil.appendSql(json1.getString("keyword"));
+			}
+		}
+		String from2="select %s";
+		String from =" from t_1do_base a LEFT JOIN (select * from t_1do_pstatus where USER_TYPE!=2 " +look+" "
+					+ "and isDelete=1 and O_USER='"+loginName+"' GROUP BY SHOW_ID)f on a.SHOW_ID=f.SHOW_ID "
+					+"where "+sql+look;
+		String value="a.SHOW_ID,a.SOURCE,a.O_TYPE_ID,"+O_DESCRIBE+",a.O_CUSTOMER_NAME,a.O_CUSTOMER,a.AT,a.O_EXECUTOR,"
+				    +"a.O_EXECUTOR_NAME,a.SEND_TIME,unix_timestamp(a.O_CREATE_TIME)*1000 O_CREATE_TIME,"
+                    +"unix_timestamp(a.O_FINISH_TIME)*1000 O_FINISH_TIME,unix_timestamp(a.Real_FINISH_TIME)*1000 Real_FINISH_TIME"
+                    +",unix_timestamp(a.DELETE_TIME)*1000 DELETE_TIME,a.O_IS_DELETED ,"
+                    +" a.LIGHTNING,a.LOOKNUM,a.FBNUM,f.USER_TYPE,f.isRead ISLOOK,f.STATUS O_STATUS";
+		List<Record> r3=Db.find("select * from ("+String.format(from2, value)+from+from1,json1.getIntValue("pageNumber"),json1.getIntValue("onePageNumber"));
+		Integer ret = Db.queryInt(String.format(from2, "count(*)")+from);
+		JSONObject json=new JSONObject();
+		json.put("base", r3);
+		json.put("allPage", flag?ret:1);
+		return json;
+	}
+	public static void main(String[] args) {
+		String[] name={"a","b","c"};
+		String[] age={"1","2","3"};
+		System.out.println(Arrays.deepToString(name));
+	}
+	/**   
+	　* 描述：   打标签接口参数
+	　* 创建人：coco   
+	　* 创建时间：2019年9月26日 下午4:56:00         
+	*/
+	public static JSONObject getSegwordParameter(String content) {
+		String label=HttpUtil.doPost(UrlUtil.segword_api+"/Aot/getToken", getTokenParameter().toString());		
+		 JSONObject json=JSON.parseObject(label);
+		 String authtoken="";
+			if(json.getInteger("code")==2000) {
+				JSONObject json1=json.getJSONObject("data");
+				JSONObject arr=json1.getJSONObject("result");
+				
+				authtoken= arr.getString("authtoken");
+			}		
+		JSONObject paramJson=new JSONObject();
+		paramJson.put("client", 0);
+		paramJson.put("validate", 0);
+		paramJson.put("authtoken", authtoken);
+		JSONObject paramJson1=new JSONObject();
+		paramJson1.put("text", content);
+		paramJson1.put("businessId", null);
+		paramJson1.put("organizationId", null);
+		paramJson.put("params", paramJson1);
+		return paramJson;
+	}
+	/**   
+	 * 描述：   打标签接口参数
+	 * 创建人：coco   
+	 * 创建时间：2019年9月26日 下午4:56:00         
+	 */
+	public static JSONObject getTokenParameter() {
+		JSONObject paramJson=new JSONObject();
+		
+		paramJson.put("userName", "fangshengqun");
+		paramJson.put("source", "1do");
+		return paramJson;
+	}
+	
+}

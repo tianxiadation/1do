@@ -1,0 +1,85 @@
+#database config
+dbType=mysql
+devMode =true
+showSql =true
+#下城正式1do数据库
+jdbcUrl_prod_xc=jdbc:mysql://10.18.44.239:3306/do?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false
+user_prod_xc=do
+password_prod_xc=do_1234%
+
+#下城正式日志系统数据库
+jdbcUrl_record_prod_xc = jdbc:sqlserver://172.16.10.102:1433;DatabaseName=dev_XcqTask
+driver_record_prod_xc = com.microsoft.sqlserver.jdbc.SQLServerDriver
+user_record_prod_xc = sa
+password_record_prod_xc =XcqTask88888888
+logUrl_prod_xc=http://59.202.68.45:8080/LogManagerSystem
+
+#下城正式综合信息平台数据库，四个平台对应统一用户
+jdbcUrl_zh_prod_xc = jdbc:mysql://172.16.9.136:3306/apphub?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false
+user_zh_prod_xc = 4pingtai
+password_zh_prod_xc =P@ssw0rd4
+
+#################################################################
+
+#下城测试1do数据库
+jdbcUrl_dev=jdbc:mysql://172.16.8.11:3306/do?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false
+user_dev=whfw
+password_dev=whfw_1qxt@123
+
+#下城测试日志系统数据库
+jdbcUrl_record_dev = jdbc:sqlserver://172.16.8.10:1433;DatabaseName=dev_XcqTask
+driver_record_dev = com.microsoft.sqlserver.jdbc.SQLServerDriver
+user_record_dev = sa
+password_record_dev =XcqTask88888888
+logUrl_dev=http://59.202.68.43:8080/LogManagerSystem
+
+#下城测试综合信息平台数据库，四个平台对应统一用户
+jdbcUrl_zh_dev = jdbc:mysql://172.16.9.136:3306/apphub?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false
+user_zh_dev =4pingtai
+password_zh_dev =P@ssw0rd4
+
+#################################################################
+
+#下城云服务1do数据库
+jdbcUrl_prod_xc_yun=jdbc:mysql://rm-bp1yel54mzevhrtl1wo.mysql.rds.aliyuncs.com:3306/1do?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false
+user_prod_xc_yun=do
+password_prod_xc_yun=1do@1qaz@WSX
+
+#下城云服务日志系统数据库
+jdbcUrl_record_prod_xc_yun = jdbc:sqlserver://47.114.174.69:1433;DatabaseName=dev_XcqTask
+driver_record_prod_xc_yun = com.microsoft.sqlserver.jdbc.SQLServerDriver
+user_record_prod_xc_yun = sa
+password_record_prod_xc_yun =XcqTask88888888
+logUrl_prod_xc_yun=http://47.114.174.69:8080/LogManagerSystem
+
+#下城云服务综合信息平台数据库，四个平台对应统一用户
+jdbcUrl_zh_prod_xc_yun = jdbc:mysql://172.16.9.136:3306/apphub?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false
+user_zh_prod_prod_xc_yun = 4pingtai
+password_zh_prod_xc_yun =P@ssw0rd4
+
+#################################################################
+#裕华1do数据库
+jdbcUrl_prod_yuhua=jdbc:mysql://193.168.57.11:3306/do?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false
+user_prod_yuhua=root
+password_prod_yuhua=Yhq_yhyd@sjglSys
+
+#裕华日志系统数据库
+jdbcUrl_prod_yuhua = jdbc:sqlserver://193.168.57.13:1433;DatabaseName=dev_XcqTask
+driver_prod_yuhua = com.microsoft.sqlserver.jdbc.SQLServerDriver
+user2_prod_yuhua = sa
+password_prod_yuhua =LQtech2020
+logUrl_prod_yuhua=http://193.168.57.13:8080/LogManagerSystem
+
+#裕华综合信息平台数据库，四个平台对应统一用户
+jdbcUrl_zh_prod_xc_yun = jdbc:mysql://172.16.9.136:3306/apphub?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false
+user_zh_prod_prod_xc_yun = 4pingtai
+password_zh_prod_xc_yun =P@ssw0rd4
+
+#################################################################
+
+#短信地址
+shortMessage=http://172.16.9.128:8080
+#电话地址
+call=http://gbhy.junlongtech.com:8082/TTSSend
+
+test=sssaaaaa111

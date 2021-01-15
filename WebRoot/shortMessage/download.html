@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>download.html</title>
+	
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+    
+    <!--<link rel="stylesheet" type="text/css" href="./styles.css">-->
+<script type="text/javascript">    function downloadImg(){
+        var img = document.getElementById('girlImg'); // 获取要下载的图片
+        var url = img.src;                            // 获取图片地址
+        var a = document.createElement('a');          // 创建一个a节点插入的document
+        var event = new MouseEvent('click')           // 模拟鼠标click点击事件
+        a.download = 'beautifulGirl'                  // 设置a节点的download属性值
+        a.href = url;                                 // 将图片的src赋值给a节点的href
+        a.dispatchEvent(event)                        // 触发鼠标点击事件
+     }
+     function downloadFile(fileName, blob) {
+       const anchor = document.getElementById("a")
+       // 创建指向blob对象地址
+       const src = URL.createObjectURL(blob)
+       anchor.download = fileName
+       anchor.href = src
+}
+   function download() {
+        //name = name || url
+       var name="https://1do.hzxc.gov.cn:8443/1do/upload/264231190825795584.jpg";
+       var url="https://1do.hzxc.gov.cn:8443/1do/upload/264231190825795584.jpg";
+        // fetch抓取图片数据;
+        fetch(url).then(response=> {
+            if( response.status == 200 )
+                // 返回的.blob()为promise，然后生成了blob对象，此方法获得的blob对象包含了数据类型，十分方便
+                return response.blob()
+            throw new Error(`status: ${response.status}.`)
+        }).then(blob=> {
+            // 获取到blob对象
+            downloadFile(name, blob)
+        }).catch(error=> {
+            console.log("failed. cause:", error)
+        })
+    }
+
+
+     
+     
+     </script>
+  </head>
+  
+  <body>
+    
+    <img id="girlImg" src="https://1do.hzxc.gov.cn:8443/1do/upload/264231190825795584.jpg" alt="">
+    <button class="downloadBtn" type="button" onclick="download()">download1</button>
+  </body>
+</html>

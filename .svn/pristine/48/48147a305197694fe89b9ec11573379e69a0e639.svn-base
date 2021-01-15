@@ -1,0 +1,11 @@
+package com.demo.util.node;
+
+import java.util.Comparator;
+
+public class NodeOrderComparator  implements Comparator<Node> {
+    // 按照节点排序值进行排序
+    public int compare(Node n1, Node n2) {
+        return (n1.getId() < n2.getId() ? -1 : (n1.getId() == n2.getId() ? 0 : 1));
+    }
+
+}

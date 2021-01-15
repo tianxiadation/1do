@@ -1,0 +1,538 @@
+# 1do接口文档  （POST默认请求）
+
+## 正式 https://1do.hzxc.gov.cn:8443 
+
+## 测试 http://59.202.68.43:8080
+
+[TOC]
+
+------
+
+### 1 功能 ：获得1do列表数据
+
+#### 请求方法： /1do/common/getDataList
+
+####  参数说明：支持格式 JSON
+
+| 字段       | 类型   | 是否必填 | 描述及要求                                                   |
+| ---------- | ------ | -------- | ------------------------------------------------------------ |
+| pageNumber | int    | 必填     | 当前页数                                                     |
+| pageSize   | int    | 必填     | 每页显示多少条                                               |
+| content    | String | 必填     | 默认“”，模糊搜索关键词                                       |
+| status     | int    | 必填     | 处理状态：3.待接单 4.处理中 5.已完成  0.全部                 |
+| SOURCE     | int    | 必填     | 来源 0、全部  1、call 或者oa 2、主动办 3、三实库 4、其他 5、领导批示6.城市大脑,7综合信息系统，8、1call办9、城市大脑综合指挥平台 10、督查指挥，11云上城管，12百姓爆料，13红旗班 |
+| O_TYPE_ID  | int    | 必填     | 事件类型/项目类型,默认0查询全部，事件类型/项目id：如1.aaa 2.bbb |
+| loginName  | String | 选填     | 未登入用户可以填用户的showid                                 |
+
+```json
+{
+    "pageNumber": 1,
+    "pageSize":3,
+    "status": 0,
+    "content": "",
+    "SOURCE": 1,
+    "O_TYPE_ID": 1,
+    "loginName": "WeKJDWROnaHQn6Yq"
+}
+```
+
+####  Output
+
+| 字段             | 字段名           | 类型   | 描述及要求                                                   |
+| ---------------- | ---------------- | ------ | ------------------------------------------------------------ |
+| SHOW_ID          | 1do工单编号      | String | 1do工单编号                                                  |
+| O_DESCRIBE       | 内容             | String | 内容                                                         |
+| O_EXECUTOR_NAME  | 参与人姓名       | String | 多个参与人以“;”隔开，如："方升群;谢洁"                       |
+| O_EXECUTOR       | 参与人姓名showid | String | 多个参与人以“;”隔开，如：“XzaqamVZPDtAR3WP;297NKDKkDzHZe2da" |
+| SOURCE           | 来源             | int    | 来源 0、全部  1、call 或者oa 2、主动办 3、三实库 4、其他 5、领导批示6.城市大脑,7综合信息系统，8、1call办9、城市大脑综合指挥平台 10、督查指挥，11云上城管，12百姓爆料，13红旗班 |
+| O_TYPE_ID        | 事件类型         | String | 目前默认：0；；来源为1call办时（1、城管执法，2、民政，3、环卫，4、住建，5、人社）后续增加另行通知 |
+| O_CREATE_TIME    | 创建时间         | String | 创建时间                                                     |
+| O_CUSTOMER_NAME  | 发起人姓名       | String | 多个发起人以“;”隔开，如："方升群;谢洁"                       |
+| O_CUSTOMER       | 发起人姓名showid | String | 多个发起人以“;”隔开，如："XzaqamVZPDtAR3WP;297NKDKkDzHZe2da" |
+| REAL_FINISH_TIME | 办结时间         | String | 办结时间                                                     |
+| O_FINISH_TIME    | 完成时间         | String | 拟完成时间                                                   |
+| O_STATUS         | 工单状态         | int    | 处理状态 3.待接单 4.处理中 5.已完成  0.全部                  |
+
+**Success**
+
+```json
+{
+    "code": 200,
+    "data": {
+        "totalRow": 24,
+        "pageNumber": 1,
+        "lastPage": false,
+        "firstPage": true,
+        "totalPage": 8,
+        "pageSize": 3,
+        "list": [
+            {
+                "O_CUSTOMER_NAME": "刘韬",
+                "O_FINISH_TIME": null,
+                "O_TYPE_ID": "1",
+                "O_EXECUTOR_NAME": "谢洁;刘佳民;王帅帅",
+                "REAL_FINISH_TIME": null,
+                "O_CREATE_TIME": "2019-09-27 15:34:57",
+                "O_CUSTOMER": "Np1ZK5KO3ZcXx1NJ",
+                "SOURCE": 1,
+                "O_EXECUTOR": "XzaqamVZPDtAR3WP;297NKDKkDzHZe2da;WeKJDWROnaHQn6Yq",
+                "SHOW_ID": "207287937304363008",
+                "O_DESCRIBE": "新建一个测试一下分词系统打标签的效果",
+                "O_STATUS": 3
+            },
+            {
+                "O_CUSTOMER_NAME": "刘韬",
+                "O_FINISH_TIME": null,
+                "O_TYPE_ID": "1",
+                "O_EXECUTOR_NAME": "谢洁;刘佳民;王帅帅",
+                "REAL_FINISH_TIME": null,
+                "O_CREATE_TIME": "2019-09-27 09:35:20",
+                "O_CUSTOMER": "Np1ZK5KO3ZcXx1NJ",
+                "SOURCE": 1,
+                "O_EXECUTOR": "XzaqamVZPDtAR3WP;297NKDKkDzHZe2da;WeKJDWROnaHQn6Yq",
+                "SHOW_ID": "207197436492382208",
+                "O_DESCRIBE": "测试服务器测试新建1do推送到指挥平台",
+                "O_STATUS": 3
+            },
+            {
+                "O_CUSTOMER_NAME": "刘韬",
+                "O_FINISH_TIME": null,
+                "O_TYPE_ID": "1",
+                "O_EXECUTOR_NAME": "谢洁;刘佳民;王帅帅",
+                "REAL_FINISH_TIME": null,
+                "O_CREATE_TIME": "2019-09-27 09:34:05",
+                "O_CUSTOMER": "Np1ZK5KO3ZcXx1NJ",
+                "SOURCE": 1,
+                "O_EXECUTOR": "XzaqamVZPDtAR3WP;297NKDKkDzHZe2da;WeKJDWROnaHQn6Yq",
+                "SHOW_ID": "207197121554677760",
+                "O_DESCRIBE": "测试服务器测试新建1do推送到指挥平台",
+                "O_STATUS": 3
+            }
+        ]
+    },
+    "message": "Success"
+}
+```
+
+### 2.第三方开的回调接口设置
+
+开发的接口支持需使用HTTPS或http协议、JSON数据格式、UTF8编码，POST请求请在HTTP Header中设置 Content-Type:application/json。
+
+目前支持的字段（后续增加另行通知）用以下字段开发接口，比如新增接口，1do这边创建了回调你们接口，你们需要用到这些参数，
+
+比如修改状态可以只用到SHOW_ID和O_STATUS两个。
+
+| 字段             | 字段名           | 类型   | 描述及要求                                                   |
+| ---------------- | ---------------- | ------ | ------------------------------------------------------------ |
+| SHOW_ID          | 1do工单编号      | String | 1do工单编号，新建接口保存下来。                              |
+| O_TITLE          | 标题             | String | 标题                                                         |
+| O_DESCRIBE       | 内容             | String | 内容                                                         |
+| O_CUSTOMER_NAME  | 发起人姓名       | String | 多个发起人以“;”隔开，如："方升群;谢洁"                       |
+| O_CUSTOMER       | 发起人姓名showid | String | 多个发起人以“;”隔开，如："XzaqamVZPDtAR3WP;297NKDKkDzHZe2da" |
+| CREATE_USER      | 创建人           | String | 创建人，如："方升群"                                         |
+| CREATE_USER_NAME | 创建人showid     | String | 创建人，如："XzaqamVZPDtAR3WP"                               |
+| O_EXECUTOR_NAME  | 参与人姓名       | String | 多个参与人以“;”隔开，如："方升群;谢洁"                       |
+| O_EXECUTOR       | 参与人姓名showid | String | 多个参与人以“;”隔开，如：“XzaqamVZPDtAR3WP;297NKDKkDzHZe2da" |
+| SOURCE           | 来源             | int    | 来源 0、全部  1、call 或者oa 2、主动办 3、三实库 4、其他 5、领导批示6.城市大脑,7综合信息系统，8、1call办9、城市大脑综合指挥平台 10、督查指挥，11云上城管，12百姓爆料，13红旗班，后续增加和开发人员商量 |
+| O_TYPE_ID        | 事件类型         | String | 目前默认：0；；来源为1call办时（1、城管执法，2、民政，3、环卫，4、住建，5、人社）后续增加另行通知 |
+| O_STATUS         | 工单状态         | int    | 处理状态 3.待接单 4.处理中 5.已完成 6已删除                  |
+
+### 3 功能 ：创建保存1do（1call转1do时）
+
+####  请求方法：  /1do/do/createIdo
+
+####  参数说明：
+
+| 字段             | 字段名              | 类型   | 是否必填 | 描述及要求                                                   |
+| ---------------- | ------------------- | ------ | -------- | ------------------------------------------------------------ |
+| BASE             |                     |        |          |                                                              |
+| O_TITLE          | 标题                | String | 选填     | 如：“20180621-方升群/谢洁需求”，                             |
+| O_DESCRIBE       | 内容                | String | 必填     | 内容（1call办等存储json字符串）                              |
+| O_CUSTOMER       | 发起人show_id       | String | 必填     | 多个发起人以“;”隔开，如： “PQV8oo3jeeiDkLbY;XzaqamVZPDtAR3WP” |
+| O_CUSTOMER_NAME  | 发起人姓名          | String | 必填     | 多个发起人以“;”隔开，如："方升群;谢洁"                       |
+| O_START_TIME     | 发起时间            | String | 选填     | 拟开始时间                                                   |
+| O_FINISH_TIME    | 完成时间            | String | 选填     | 拟完成时间                                                   |
+| O_EXECUTOR       | 参与人show_id       | String | 选填     | 多个参与人以“;”隔开，如：                                                                                                  “8BmEYpm9kQUlNN7m; 297NKDKkDzHZe2da” |
+| O_EXECUTOR_NAME  | 参与人姓名          | String | 选填     | 多个参与人以“;”隔开，如：“张城;刘佳民”                       |
+| CREATE_USER      | 创建人show_id       | String | 必填     | 创建人show_id如:V267EnA0yEUjXZ5N                             |
+| CREATE_USER_NAME | 创建人姓名          | String | 必填     | 创建人姓名如:顾清清                                          |
+| SOURCE           | 来源                | int    | 必填     | 来源 0、全部  1、call 或者oa 2、主动办 3、三实库 4、其他 5、领导批示6.城市大脑,7综合信息系统，8、1call办9、城市大脑综合指挥平台 10、督查指挥，11云上城管，12百姓爆料，13红旗班 |
+| O_TYPE_ID        | 工单分类（1do分类） | String | 选填     | 目前默认：0；；来源为1call办的填（1、城管执法，2、民政，3、环卫，4、住建，5、人社）后续增加另行通知，来源为综合指挥平台，1、zdfw-主动服务，2、yj-预警，3、1do-转1do 4、 yjzh-一键指挥。来源为10督查指挥（1、做地出让,2、民生实事,3、基础建设,4、地铁建设,5、区国企自营项目,6、地产项目,7、绿化建设,8、规划编制,9、生态治理）13红旗班（1、待定，后续增加自行填写） |
+| ATTR             |                     |        |          |                                                              |
+| UPLOAD_TIME      | 上传时间            | String | 选填     | 附件上传时间（发送到消息群的时间）                           |
+| ATTR_NAME        | 文件名称            | String | 选填     | 附件名                                                       |
+| ATTR_PATH        | 文件云存储路径      | String | 选填     | 路径                                                         |
+| UPLOAD_USER      | 上传人员show_id     | String | 选填     | 附件上传人员show_id（发送附件到消息群的人员show_id）         |
+| UPLOAD_USER_NAME | 上传人员姓名        | String | 选填     | 附件上传人员姓名（发送附件到消息群的人员姓名）               |
+
+```json
+{
+        "BASE":{
+            "O_TITLE": "20180621-方升群/谢洁需求",
+            "O_DESCRIBE": "1.请张城参与关于1call头脑风暴2.请刘佳民整理文件、邮件、报纸、杂志",
+            "O_CUSTOMER":"PQV8oo3jeeiDkLbY;XzaqamVZPDtAR3WP",
+            "O_CUSTOMER_NAME":"方升群;谢洁",
+            "O_START_TIME":"2018-06-21 12:01:28",
+            "O_FINISH_TIME":"2018-06-30 24:00:00",
+            "O_EXECUTOR":"8BmEYpm9kQUlNN7m;297NKDKkDzHZe2da",
+            "O_EXECUTOR_NAME":"张城;刘佳民",
+            "O_TYPE_ID":"39509142708158464",
+            "MESSAGE_ID":"1508983949422;1508983949423;1508983949424;1508983949424",
+            "GROUPID":"1100@ChatRoom",
+            "CREATE_USER":"V267EnA0yEUjXZ5N",
+            "CREATE_USER_NAME":"顾清清",
+        },
+		"ATTR": [{
+			"UPLOAD_TIME": "2018-06-21 13:01:28",
+			"ATTR_NAME": "陈小雄-1525325288-180503-132749.mp4",
+			"ATTR_PATH": "http://172.16.9.102:8080/img/陈小雄-1525325288-180503-132749.mp4",
+			"UPLOAD_USER": "PQV8oo3jeeiDkLbY",
+           "UPLOAD_USER_NAME":"方升群"
+		},{
+			"UPLOAD_TIME": "2018-06-21 13:03:28",
+			"ATTR_NAME":  "语音12",
+			"ATTR_PATH": "http://172.16.9.102:8080/upload/语音12.mp3",
+			"UPLOAD_USER":"XzaqamVZPDtAR3WP",
+           "UPLOAD_USER_NAME":"谢洁"
+		}]
+		
+	
+}
+```
+
+#### Output
+
+| 字段    | 字段名   | 类型   | 是否必要 | 描述及要求                  |
+| ------- | -------- | ------ | -------- | --------------------------- |
+| code    | 返回状态 | int    | 必要     | 状态值200/400               |
+| message | 消息     | String | 必要     | 200创建1do成功！400错误消息 |
+
+**Success**
+
+```json
+{
+    "code": 200,
+    "message": "创建1do成功！"
+}
+```
+
+###  4 功能 ：1do详情
+
+#### 请求方法：  /1do/do/getIdoMessage
+
+#### 参数说明：
+
+| 字段      | 字段名      | 类型   | 是否必填 | 描述及要求                     |
+| --------- | ----------- | ------ | -------- | ------------------------------ |
+| SHOW_ID   | 1do工单编号 | String | 必填     | 1do工单编号                    |
+| loginName | 1call字段   | String | 选填     | 人员showid（账号未登入时填写） |
+
+```json
+{"SHOW_ID":"41068020382040064"，"loginName":"Np1ZK5KO3ZcXx1NJ"}
+```
+
+#### Output
+
+| 字段                    | 字段名              | 类型    | 描述及要求                                                   |
+| ----------------------- | ------------------- | ------- | ------------------------------------------------------------ |
+| BASE                    | 主项                |         |                                                              |
+| SHOW_ID                 | 1do工单编号         | String  | 1do工单编号                                                  |
+| O_TITLE                 | 标题                | String  | 标题                                                         |
+| O_DESCRIBE              | 内容                | String  | 内容                                                         |
+| O_CUSTOMER              | 发起人show_id       | String  | 多个发起人以“;”隔开，如：“ PQV8oo3jeeiDkLbY;XzaqamVZPDtAR3WP” |
+| O_CUSTOMER_NAME         | 发起人姓名          | String  | 多个发起人以“;”隔开，如："方升群;谢洁"                       |
+| O_START_TIME            | 发起时间            | String  | 最早发起时间                                                 |
+| O_FINISH_TIME           | 完成时间            | String  | 完成时间（多以当月月末为主）                                 |
+| Real_FINISH_TIME        | 办结时间            | String  | 办结时间                                                     |
+| DELETE_TIME             | 删除时间            | String  | 删除时间                                                     |
+| O_CREATE_TIME           | 创建时间            | String  | 创建时间                                                     |
+| O_EXECUTOR              | 参与人show_id       | String  | 多个参与人以“;”隔开，如： “8BmEYpm9kQUlNN7m; 297NKDKkDzHZe2da” |
+| O_EXECUTOR_NAME         | 参与人姓名          | String  | 多个参与人以“;”隔开，如：“张城;刘佳民”                       |
+| EVENT_TYPE              | 通知设置            | String  | 通知设置按1;2;3;4;5;6此格式（1.送达2.查看3.反馈4.催办5.办结6.评价7.删除 ）默认： 1;4;5;6;7 ） |
+| LIGHTNING               | 催办数（闪电）      | int     | 催办数（闪电）                                               |
+| O_STATUS                | 处理状态            | int     | 处理状态3.待处理4.处理中5.已完成                             |
+| SONBASE                 | 子项                |         |                                                              |
+| O_TITLE                 | 标题                | String  | 标题                                                         |
+| POWER                   | 权限                | int     | 1整理层2领导4项目干系人3普通用户                             |
+| ATTR                    | 附件                |         |                                                              |
+| ATTR_NAME               | 附件名              | String  | 附件名                                                       |
+| ATTR_PATH               | 附件路径            | String  | 附件路径                                                     |
+| ID                      | id                  | int     | id（排序作用）                                               |
+| AT                      | 内容中@相关人员信息 | String  | 内容中@相关人员信息如：["V267EnA0yEUjXZ5N@顾清清","DlrD1jVjadcbLaVD@胡滨"] |
+| O_LABEL                 | 标签集合            | list    | 标签集合                                                     |
+| LABEL                   | 标签                | String  | 标签                                                         |
+| ID                      | ID                  | string  | 删除的时候用到。                                             |
+| ccp                     | 抄送人              | list    | 抄送人                                                       |
+| executor                | 处理人              | list    | 处理人                                                       |
+| CUSTOMER_LIST           | 发起人集合          | list    | 发起人集合                                                   |
+| EXECUTOR_LIST           | 参与人集合          | list    | 参与人集合                                                   |
+| POWER                   | 权限                | int     | 1整理层2领导3普通人4项目干系人                               |
+|                         |                     |         |                                                              |
+| ITEM                    | 所属项目            | list    | 所属项目                                                     |
+| children                |                     | List    | 子节点                                                       |
+| parent_id               |                     | long    | 父节点id                                                     |
+| item_name               |                     | stirng  | 节点名称                                                     |
+| type                    |                     | int     | 节点类型2子节点3项目节点                                     |
+| id                      |                     | long    | 节点id                                                       |
+| IS_BINDING_WECHAT_GROUP | 是否绑定微信群      | boolean | 是true否false                                                |
+| WECHAT_GROUP_NAME       | 微信群名            | String  | 微信群名                                                     |
+| WECHAT_GROUP_ID         | 微信群id            | String  | 微信群id（解绑的时候用）                                     |
+
+Success**
+
+```json
+{
+    "BASE": {
+        "O_FINISH_TIME": null,
+        "O_START_TIME": null,
+        "O_IS_DELETED": 1,
+        "IS_BINDING_WECHAT_GROUP": false,
+        "LOOKNUM": 7,
+        "WECHAT_GROUP_NAME": null,
+        "O_CREATE_TIME": "2020-01-16 13:51:45",
+        "WECHAT_GROUP_ID": null,
+        "Real_FINISH_TIME": null,
+        "ccp": [],
+        "O_LABEL": [],
+        "LOOK_USER": "PQV8oo3jeeiDkLbY,ZXV1lyA6boHYqR0y",
+        "executor": [
+            {
+                "O_USER_NAME": "余威",
+                "O_USER": "KKma938N6DhVJK8x"
+            }
+        ],
+        "O_CUSTOMER": "KKma938N6DhVJK8x",
+        "SHOW_ID": "247487019045879808",
+        "DELETE_TIME": null,
+        "ID": 2831,
+        "O_DESCRIBE": "1111",
+        "O_CUSTOMER_NAME": "余威",
+        "O_TITLE": "1111",
+        "CUSTOMER_LIST": [
+            {
+                "O_USER_NAME": "余威",
+                "O_USER": "KKma938N6DhVJK8x"
+            }
+        ],
+        "POWER": 1,
+        "O_STATUS": 3,
+        "O_TYPE_ID": "39509142708158460",
+        "O_EXECUTOR_NAME": "余威",
+        "ITEM": [
+            {
+                "children": [],
+                "parent_id": 1631,
+                "item_name": "测试",
+                "id": 1375,
+                "type": 3
+            }
+        ],
+        "AT": "[]",
+        "O_EXECUTOR": "KKma938N6DhVJK8x",
+        "SOURCE": 1,
+        "EXECUTOR_LIST": [
+            {
+                "O_USER_NAME": "余威",
+                "O_USER": "KKma938N6DhVJK8x"
+            }
+        ]
+    },
+    "code": 200
+}
+```
+
+### 6 功能 ：获得反馈消息
+
+#### 请求方法：  /1do/do/getFeedback
+
+#### 参数说明：
+
+| 字段    | 类型   | 是否必填 | 描述及要求                                                   |
+| ------- | ------ | -------- | ------------------------------------------------------------ |
+| SHOW_ID | String | 必填     | 1do工单编号                                                  |
+| num     | int    | 必填     | 查询条数，比如10，查询十条                                   |
+| id      | int    | 必填     | 查询起始数，比如id:0,num:10 ,//检索记录行1-10 .比如id:5,num:10  //检索记录行6-15 |
+| type    | int    | 必填     | 类型，全部填1，评论填2，附件填3                              |
+
+```json
+{"SHOW_ID":"41068020382040064","num":10,"id":0,"type":1}
+```
+
+#### Output
+
+| 字段         | 字段名              | 类型   | 是否必填 | 描述及要求                                                   |
+| ------------ | ------------------- | ------ | -------- | ------------------------------------------------------------ |
+| O_USER       | 反馈人员show_id     | String | 必填     | 反馈人员show_id                                              |
+| O_USER_NAME  | 反馈人员show_id名字 | String | 必填     | 反馈人员show_id名字                                          |
+| FB_TIME      | 反馈时间            | String | 必填     | 反馈时间                                                     |
+| FBCONTENT    | 反馈内容            | String | 必填     | 反馈内容根据反馈类型而定                                     |
+| FB_TYPE      | 反馈类型            | int    | 必填     | 反馈类型标签1，正常反馈；2，回复反馈；3，附件反馈  4，催办反馈，5，办结反馈；6，评价反馈，7,删除反馈，【8删除反馈时加1条数据】9.语音反馈 |
+| FB_USER_NAME | 对应用户show_id名字 | String | 必填     | 反馈时相应的show_id名字（如回复、催办反馈 回复、催办谁的show_id名字） |
+| ATTR_PATH    | 附件路径            | String | 必填     | 附件路径                                                     |
+| star         | 评星                | int    | 必填     | 评价的星星。                                                 |
+| AT           | @人相关信息         | String | 必填     | @人相关信息如：["V267EnA0yEUjXZ5N@顾清清","DlrD1jVjadcbLaVD@胡滨"] |
+| ID           | 编号                | int    | 必填     | 编号                                                         |
+
+**Success**
+
+```json
+[
+    {
+        "FB_USER_NAME": "",
+        "O_USER_NAME": "方升群",
+        "FB_TIME": "2018-07-20 23:33:40",
+        "FB_USER": "",
+        "ATTR_PATH": null,
+        "O_USER": "PQV8oo3jeeiDkLbY",
+        "ID": 193,
+        "FBCONTENT": "测试轮询",
+        "FB_TYPE": 1
+    },
+    {
+        "FB_USER_NAME": null,
+        "O_USER_NAME": "方升群",
+        "FB_TIME": "2018-07-26 11:37:58",
+        "FB_USER": null,
+        "ATTR_PATH": null,
+        "O_USER": "PQV8oo3jeeiDkLbY",
+        "ID": 206,
+        "FBCONTENT": "上传 省交换项目接口文档.docx ",
+        "FB_TYPE": 3
+    },
+    {
+        "FB_USER_NAME": null,
+        "O_USER_NAME": "蒋娅楠",
+        "FB_TIME": "2018-07-26 13:58:15",
+        "FB_USER": null,
+        "ATTR_PATH": "bundle.js ",
+        "O_USER": "3LBYkvlD7rHmLn72",
+        "ID": 207,
+        "FBCONTENT": "上传 bundle.js ",
+        "FB_TYPE": 3
+    },
+    {
+        "FB_USER_NAME": null,
+        "O_USER_NAME": "蒋娅楠",
+        "FB_TIME": "2018-07-26 14:07:45",
+        "FB_USER": null,
+        "ATTR_PATH": "/1do/upload/52163984484204544.js ",
+        "O_USER": "3LBYkvlD7rHmLn72",
+        "ID": 208,
+        "FBCONTENT": "上传 bundle.js ",
+        "FB_TYPE": 3
+    }
+]
+```
+
+### 7功能 ：1do登入（1cll调1do设置session）
+
+#### 请求方法：  /1do/do/login1do
+
+#### 参数说明：
+
+| 字段        | 类型   | 是否必填 | 描述及要求 |
+| ----------- | ------ | -------- | ---------- |
+| useraccount | String | 必填     | 账号       |
+
+```json
+{
+    "useraccount": "fangshengqun",
+    
+}
+```
+
+####  Output
+
+| 字段        | 字段名       | 类型    | 描述及要求                                                   |
+| ----------- | ------------ | ------- | ------------------------------------------------------------ |
+| D_NAME      | 1call字段    | int     | 我的部门名                                                   |
+| U_DEPT_ID   | 1call字段    | list    | 我的部门id                                                   |
+| cShowId     | 1call字段    | lsit    | 部门根id                                                     |
+| isfw        | 1do字段      | boolean | 是否是整理层false否，true是                                  |
+| loginName   | 1call字段    | String  | showid                                                       |
+| LoginToken  | 1call字段    | String  | token                                                        |
+| useraccount | 1call字段    | String  | 账号                                                         |
+| username    | 1call字段    | String  | 姓名                                                         |
+| POWER       | 权限         | int     | 权限表（1整理层2领导3普通用户4项目干系人）项目干系人只在特殊接口里才出现，这里不设置 |
+| YSCG_POWER  | 云上城管权限 | int     | 云上城管权限，默认0、无权限，1、街道账号，2、整治小组账号，3、专班账号、4、事件发起账号 |
+
+**Success**
+
+```json
+{
+    "cShowId": "b5WJZ1bRLDCb7x2B",
+    "code": 200,
+    "LAST_UPDATE_TIME": "2019-08-16 12:30:45",
+    "POWER": 1,
+    "isfw": true,
+    "message": "Success",
+    "D_NAME": [
+        "技术组"
+    ],
+    "YSCG_POWER": 0,
+    "U_DEPT_ID": [
+        "20181106114714565-8405-D3D01C822"
+    ],
+    "loginName": "PQV8oo3jeeiDkLbY",
+    "LoginToken": "oLq4XeIfm+tNSTxfW8cicbbFPWs=",
+    "useraccount": "fangshengqun",
+    "username": "方升群"
+}
+```
+
+### 
+
+### 8 功能 ：获得操作日志
+
+#### 请求方法：  /1do/do/getLog
+
+#### 参数说明：
+
+| 字段    | 字段名      | 类型   | 是否必填 | 描述及要求  |
+| ------- | ----------- | ------ | -------- | ----------- |
+| SHOW_ID | 1do工单编号 | String | 必填     | 1do工单编号 |
+
+```json
+{"SHOW_ID":"41068020382040064"}
+```
+
+#### Output
+
+| 字段        | 字段名       | 类型   | 是否必填 | 描述及要求                                                   |
+| ----------- | ------------ | ------ | -------- | ------------------------------------------------------------ |
+| log_type    | 操作类型     | String | 必填     | 操作类型日志状态（1.创建2.查看3.上传4.催办5.确认办结6.评价7.拆项8.移除人9.邀请.10.反馈11.删除反馈,12.删除1do,13.恢复1do,14.修改15.重做1do16.新建子1do17.下载） |
+| O_USER_NAME | 操作人员名字 | String | 必填     | 操作人员名字                                                 |
+| op_time     | 操作时间     | String | 必填     | 操作时间                                                     |
+| log         | 日志内容     | String | 必填     | 日志内容                                                     |
+| content     | 其他参数     | String | 必填     | 其他参数（如附件名称，移除或邀请人员名称）log_type为14时：before_modification表示内容修改前，after_modification表示修改后。 |
+
+**Success**
+
+```json
+[
+    {
+        "log_type": 1,
+        "log": "方升群创建了此1do",
+        "O_USER_NAME": "方升群",
+        "op_time": "2019-02-12 11:02:28",
+        "content": null
+    },
+    ...
+    {
+        "log_type": 14,
+        "log": "方升群修改此1do",
+        "O_USER_NAME": "方升群",
+        "op_time": "2019-02-19 11:07:47",
+        "content": "{\"before_modification\":\"测试标签：1.用户甚至整理层，一段时间内确实有可能不知道应找谁来处理，因此墙裂要求受理人可以为空、抄送人为空。不能为空的必须给出默认值（如信息中心客服）。777778\\n2.特别是新用户，只知道有啥问题，根本不知道该找谁，我们1do应该给他这个吐槽的通道，如果一定要让他选受理人，会是一种折磨。sds\",\"after_modification\":\"测试标签：1.用户甚至整理层，一段时间内确实有可能不知道应找谁来处理，因此墙裂要求受理人可以为空、抄送人为空。不能为空的必须给出默认值（如信息中心客服）。777778\\n2.特别是新用户，只知道有啥问题，根本不知道该找谁，我们1do应该给他这个吐槽的通道，如果一定要让他选受理人，会是一种折磨。sds222\"}"
+    }
+]
+```
+
+### 
+
+
+
+
+
+
+
